@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Star, ShieldCheck, Lock, CameraOff, EyeOff, UserRound, type LucideIcon } from "lucide-react";
+import { Star, ShieldCheck, Lock, CameraOff, EyeOff, UserRound, Sparkles, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { byId, formatSAR, type Salon } from "@/data/mock";
 import type { PrivacyPrefs } from "@/lib/store";
