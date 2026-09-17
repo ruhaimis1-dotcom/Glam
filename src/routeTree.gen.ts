@@ -10,7 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BookingsRouteImport } from './routes/bookings'
+import { Route as BusinessRouteImport } from './routes/business'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
+import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
+import { Route as AdminSalonsRouteImport } from './routes/admin.salons'
+import { Route as BusinessScheduleRouteImport } from './routes/business.schedule'
+import { Route as BusinessServicesRouteImport } from './routes/business.services'
+import { Route as BusinessStaffRouteImport } from './routes/business.staff'
 import { Route as SalonSalonIdRouteImport } from './routes/salon.$salonId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,10 +27,55 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BookingsRoute = BookingsRouteImport.update({
   id: '/bookings',
   path: '/bookings',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessRoute = BusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDisputesRoute = AdminDisputesRouteImport.update({
+  id: '/disputes',
+  path: '/disputes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSalonsRoute = AdminSalonsRouteImport.update({
+  id: '/salons',
+  path: '/salons',
+  getParentRoute: () => AdminRoute,
+} as any)
+const BusinessScheduleRoute = BusinessScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => BusinessRoute,
+} as any)
+const BusinessServicesRoute = BusinessServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => BusinessRoute,
+} as any)
+const BusinessStaffRoute = BusinessStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => BusinessRoute,
 } as any)
 const SalonSalonIdRoute = SalonSalonIdRouteImport.update({
   id: '/salon/$salonId',
@@ -31,31 +85,98 @@ const SalonSalonIdRoute = SalonSalonIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bookings': typeof BookingsRoute
+  '/business': typeof BusinessRouteWithChildren
+  '/profile': typeof ProfileRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/salons': typeof AdminSalonsRoute
+  '/business/schedule': typeof BusinessScheduleRoute
+  '/business/services': typeof BusinessServicesRoute
+  '/business/staff': typeof BusinessStaffRoute
   '/salon/$salonId': typeof SalonSalonIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bookings': typeof BookingsRoute
+  '/business': typeof BusinessRouteWithChildren
+  '/profile': typeof ProfileRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/salons': typeof AdminSalonsRoute
+  '/business/schedule': typeof BusinessScheduleRoute
+  '/business/services': typeof BusinessServicesRoute
+  '/business/staff': typeof BusinessStaffRoute
   '/salon/$salonId': typeof SalonSalonIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bookings': typeof BookingsRoute
+  '/business': typeof BusinessRouteWithChildren
+  '/profile': typeof ProfileRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/salons': typeof AdminSalonsRoute
+  '/business/schedule': typeof BusinessScheduleRoute
+  '/business/services': typeof BusinessServicesRoute
+  '/business/staff': typeof BusinessStaffRoute
   '/salon/$salonId': typeof SalonSalonIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/bookings' | '/salon/$salonId'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/bookings'
+    | '/business'
+    | '/profile'
+    | '/admin/bookings'
+    | '/admin/disputes'
+    | '/admin/salons'
+    | '/business/schedule'
+    | '/business/services'
+    | '/business/staff'
+    | '/salon/$salonId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/bookings' | '/salon/$salonId'
-  id: '__root__' | '/' | '/bookings' | '/salon/$salonId'
+  to:
+    | '/'
+    | '/admin'
+    | '/bookings'
+    | '/business'
+    | '/profile'
+    | '/admin/bookings'
+    | '/admin/disputes'
+    | '/admin/salons'
+    | '/business/schedule'
+    | '/business/services'
+    | '/business/staff'
+    | '/salon/$salonId'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/bookings'
+    | '/business'
+    | '/profile'
+    | '/admin/bookings'
+    | '/admin/disputes'
+    | '/admin/salons'
+    | '/business/schedule'
+    | '/business/services'
+    | '/business/staff'
+    | '/salon/$salonId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BookingsRoute: typeof BookingsRoute
+  BusinessRoute: typeof BusinessRouteWithChildren
+  ProfileRoute: typeof ProfileRoute
   SalonSalonIdRoute: typeof SalonSalonIdRoute
 }
 
@@ -68,12 +189,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bookings': {
       id: '/bookings'
       path: '/bookings'
       fullPath: '/bookings'
       preLoaderRoute: typeof BookingsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/business': {
+      id: '/business'
+      path: '/business'
+      fullPath: '/business'
+      preLoaderRoute: typeof BusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/disputes': {
+      id: '/admin/disputes'
+      path: '/disputes'
+      fullPath: '/admin/disputes'
+      preLoaderRoute: typeof AdminDisputesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/salons': {
+      id: '/admin/salons'
+      path: '/salons'
+      fullPath: '/admin/salons'
+      preLoaderRoute: typeof AdminSalonsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/business/schedule': {
+      id: '/business/schedule'
+      path: '/schedule'
+      fullPath: '/business/schedule'
+      preLoaderRoute: typeof BusinessScheduleRouteImport
+      parentRoute: typeof BusinessRoute
+    }
+    '/business/services': {
+      id: '/business/services'
+      path: '/services'
+      fullPath: '/business/services'
+      preLoaderRoute: typeof BusinessServicesRouteImport
+      parentRoute: typeof BusinessRoute
+    }
+    '/business/staff': {
+      id: '/business/staff'
+      path: '/staff'
+      fullPath: '/business/staff'
+      preLoaderRoute: typeof BusinessStaffRouteImport
+      parentRoute: typeof BusinessRoute
     }
     '/salon/$salonId': {
       id: '/salon/$salonId'
@@ -85,9 +269,42 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminBookingsRoute: typeof AdminBookingsRoute
+  AdminDisputesRoute: typeof AdminDisputesRoute
+  AdminSalonsRoute: typeof AdminSalonsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminBookingsRoute: AdminBookingsRoute,
+  AdminDisputesRoute: AdminDisputesRoute,
+  AdminSalonsRoute: AdminSalonsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface BusinessRouteChildren {
+  BusinessScheduleRoute: typeof BusinessScheduleRoute
+  BusinessServicesRoute: typeof BusinessServicesRoute
+  BusinessStaffRoute: typeof BusinessStaffRoute
+}
+
+const BusinessRouteChildren: BusinessRouteChildren = {
+  BusinessScheduleRoute: BusinessScheduleRoute,
+  BusinessServicesRoute: BusinessServicesRoute,
+  BusinessStaffRoute: BusinessStaffRoute,
+}
+
+const BusinessRouteWithChildren = BusinessRoute._addFileChildren(
+  BusinessRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   BookingsRoute: BookingsRoute,
+  BusinessRoute: BusinessRouteWithChildren,
+  ProfileRoute: ProfileRoute,
   SalonSalonIdRoute: SalonSalonIdRoute,
 }
 export const routeTree = rootRouteImport
