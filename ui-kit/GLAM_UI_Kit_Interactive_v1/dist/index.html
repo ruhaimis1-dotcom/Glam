@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="مرجع Glam التفاعلي الكامل: تجربة العميلة، تشغيل الصالون، وإدارة المنصة بهوية Glam المعتمدة.">
+  <title>Glam — Complete Product Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%235A1835'/%3E%3Cpath d='M32 12l3.8 14.2L50 30l-14.2 3.8L32 48l-3.8-14.2L14 30l14.2-3.8L32 12z' fill='%23FFFCF8'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Glam home">
+      <img class="brand-logo brand-logo-berry" src="assets/glam-wordmark-berry.png" alt="Glam">
+    </a>
+    <div class="topbar-meta">
+      <span class="status"><i></i><span data-ar="الهوية مثبتة" data-en="Identity locked">الهوية مثبتة</span></span>
+      <span class="version">v1.0</span>
+      <button class="icon-button locale-toggle" type="button" aria-label="تغيير اللغة">EN</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="sidebar" aria-label="أقسام المرجع">
+      <div>
+        <p class="eyebrow" data-ar="مرجع التنفيذ" data-en="Implementation reference">مرجع التنفيذ</p>
+        <h1 data-ar="نظام واجهات Glam" data-en="Glam interface system">نظام واجهات Glam</h1>
+        <p class="sidebar-copy" data-ar="النسخة التي توحّد التصميم والكود قبل استكمال جميع الصفحات." data-en="The shared source for design and code before completing every screen.">النسخة التي توحّد التصميم والكود قبل استكمال جميع الصفحات.</p>
+      </div>
+
+      <nav class="view-nav" aria-label="اختيار المعاينة">
+        <button class="nav-item active" type="button" data-view="identity" aria-selected="true">
+          <span class="nav-index">01</span><span data-ar="الهوية" data-en="Identity">الهوية</span>
+        </button>
+        <button class="nav-item" type="button" data-view="components" aria-selected="false">
+          <span class="nav-index">02</span><span data-ar="المكوّنات" data-en="Components">المكوّنات</span>
+        </button>
+        <button class="nav-item" type="button" data-view="customer" aria-selected="false">
+          <span class="nav-index">03</span><span data-ar="تطبيق العميلة" data-en="Customer app">تطبيق العميلة</span>
+        </button>
+        <button class="nav-item" type="button" data-view="salon" aria-selected="false">
+          <span class="nav-index">04</span><span data-ar="رحلة الصالون" data-en="Salon flow">رحلة الصالون</span>
+        </button>
+        <button class="nav-item" type="button" data-view="complete" aria-selected="false">
+          <span class="nav-index">05</span><span data-ar="كل الصفحات" data-en="All pages">كل الصفحات</span>
+        </button>
+        <button class="nav-item" type="button" data-view="operations" aria-selected="false">
+          <span class="nav-index">06</span><span data-ar="لوحة الصالون" data-en="Salon workspace">لوحة الصالون</span>
+        </button>
+        <button class="nav-item" type="button" data-view="platform" aria-selected="false">
+          <span class="nav-index">07</span><span data-ar="إدارة Glam" data-en="Glam admin">إدارة Glam</span>
+        </button>
+      </nav>
+
+      <div class="scope-card">
+        <span class="scope-kicker" data-ar="هذه الدفعة" data-en="This release">هذه الدفعة</span>
+        <strong data-ar="الحزمة الكاملة · Glam" data-en="Complete Glam product">الحزمة الكاملة · Glam</strong>
+        <span data-ar="تطبيق العميلة، رحلة الصالون، التشغيل وإدارة المنصة." data-en="Customer app, salon flow, operations and platform admin.">تطبيق العميلة، رحلة الصالون، التشغيل وإدارة المنصة.</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="view active" id="view-identity" data-view-panel="identity">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-ar="Identity Lock v1" data-en="Identity Lock v1">Identity Lock v1</p>
+            <h2 data-ar="هوية دافئة، راقية، وتقنية بهدوء." data-en="Warm, refined, quietly technical.">هوية دافئة، راقية، وتقنية بهدوء.</h2>
+          </div>
+          <span class="approved-badge" data-ar="معتمد" data-en="Approved">معتمد</span>
+        </div>
+
+        <div class="identity-hero">
+          <div class="identity-mark">
+            <img class="identity-wordmark identity-wordmark-white" src="assets/glam-wordmark-white.png" alt="Glam">
+          </div>
+          <div class="identity-note">
+            <span data-ar="الشعار المعتمد · Mulberry" data-en="Approved mark · Mulberry">الشعار المعتمد · Mulberry</span>
+            <strong data-ar="العناية الشخصية تبدأ من فهم التفاصيل." data-en="Personal care starts with understanding the details.">العناية الشخصية تبدأ من فهم التفاصيل.</strong>
+          </div>
+        </div>
+
+        <div class="token-grid">
+          <article class="panel color-panel">
+            <div class="panel-head"><h3 data-ar="لوحة الألوان" data-en="Color system">لوحة الألوان</h3><span>16 tokens</span></div>
+            <div class="swatches">
+              <div class="swatch primary"><b>#5A1835</b><span>Brand / Primary</span></div>
+              <div class="swatch dark"><b>#3D0F26</b><span>Brand / Dark</span></div>
+              <div class="swatch rose"><b>#B98676</b><span>Rose Gold</span></div>
+              <div class="swatch blush"><b>#E8CCD1</b><span>Blush</span></div>
+              <div class="swatch canvas"><b>#F7F1EA</b><span>Canvas</span></div>
+              <div class="swatch ink"><b>#21181C</b><span>Text</span></div>
+            </div>
+          </article>
+
+          <article class="panel type-panel">
+            <div class="panel-head"><h3 data-ar="الخط" data-en="Typography">الخط</h3><span>Readex Pro · UI</span></div>
+            <div class="type-display">Glam <span>قلام</span></div>
+            <p class="type-note" data-ar="شكل حروف الشعار مأخوذ من مرجع كلمة Glam اللافندر؛ اللافندر مرجع شكلي فقط وليس لونًا للهوية." data-en="The logo lettering follows the lavender Glam reference; lavender is a form reference, not a brand color.">شكل حروف الشعار مأخوذ من مرجع كلمة Glam اللافندر؛ اللافندر مرجع شكلي فقط وليس لونًا للهوية.</p>
+            <div class="type-row"><strong>32 / 40</strong><span data-ar="عنوان رئيسي واضح ومطمئن" data-en="A clear and reassuring headline">عنوان رئيسي واضح ومطمئن</span></div>
+            <div class="type-row"><strong>16 / 26</strong><span data-ar="نص مريح للقراءة في العربية والإنجليزية." data-en="Comfortable reading in Arabic and English.">نص مريح للقراءة في العربية والإنجليزية.</span></div>
+            <div class="weight-row"><span>400</span><span>500</span><span>600</span><span>700</span></div>
+          </article>
+
+          <article class="panel scale-panel">
+            <div class="panel-head"><h3 data-ar="المسافات والزوايا" data-en="Spacing & radius">المسافات والزوايا</h3><span>4px grid</span></div>
+            <div class="space-demo"><i style="--w:4px"></i><span>4</span><i style="--w:8px"></i><span>8</span><i style="--w:16px"></i><span>16</span><i style="--w:24px"></i><span>24</span><i style="--w:32px"></i><span>32</span></div>
+            <div class="radius-demo"><span class="r12">12</span><span class="r16">16</span><span class="r24">24</span><span class="rpill">Pill</span></div>
+          </article>
+
+          <article class="panel rule-panel">
+            <div class="panel-head"><h3 data-ar="قواعد الاستخدام" data-en="Usage rules">قواعد الاستخدام</h3><span>RTL first</span></div>
+            <ul>
+              <li data-ar="التوتي للإجراءات الأساسية، لا كخلفية طاغية." data-en="Berry is for primary actions, not dominant backgrounds.">التوتي للإجراءات الأساسية، لا كخلفية طاغية.</li>
+              <li data-ar="الروز غولد للتفاصيل الهادئة فقط." data-en="Rose gold is reserved for quiet accents.">الروز غولد للتفاصيل الهادئة فقط.</li>
+              <li data-ar="الصور دافئة وطبيعية وغير مصطنعة." data-en="Imagery stays warm, natural and credible.">الصور دافئة وطبيعية وغير مصطنعة.</li>
+              <li data-ar="كل قرار حساس أو مالي يحتاج اعتمادًا بشريًا." data-en="Sensitive and financial decisions require human approval.">كل قرار حساس أو مالي يحتاج اعتمادًا بشريًا.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-components" data-view-panel="components" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow" data-ar="Core Components" data-en="Core Components">Core Components</p><h2 data-ar="مكوّنات عملية بحالات واضحة." data-en="Practical components with clear states.">مكوّنات عملية بحالات واضحة.</h2></div>
+          <span class="approved-badge" data-ar="جاهز للتوسع" data-en="Ready to scale">جاهز للتوسع</span>
+        </div>
+
+        <div class="component-grid">
+          <article class="panel component-block wide">
+            <div class="panel-head"><h3 data-ar="الأزرار" data-en="Buttons">الأزرار</h3><span>44px minimum</span></div>
+            <div class="component-row wrap">
+              <button class="btn primary-btn" type="button" data-ar="احجزي الآن" data-en="Book now">احجزي الآن</button>
+              <button class="btn secondary-btn" type="button" data-ar="عرض التفاصيل" data-en="View details">عرض التفاصيل</button>
+              <button class="btn ghost-btn" type="button" data-ar="إجراء ثانوي" data-en="Secondary action">إجراء ثانوي</button>
+              <button class="btn primary-btn" type="button" disabled data-ar="غير متاح" data-en="Unavailable">غير متاح</button>
+              <button class="square-action" type="button" aria-label="المفضلة">♡</button>
+            </div>
+          </article>
+
+          <article class="panel component-block">
+            <div class="panel-head"><h3 data-ar="الحقول" data-en="Inputs">الحقول</h3><span>RTL / LTR</span></div>
+            <label class="field"><span data-ar="ابحثي عن خدمة أو صالون" data-en="Search service or salon">ابحثي عن خدمة أو صالون</span><input type="search" placeholder="قص شعر، مناكير..." data-placeholder-ar="قص شعر، مناكير..." data-placeholder-en="Haircut, manicure..."></label>
+            <label class="field"><span data-ar="الفرع" data-en="Branch">الفرع</span><select><option data-ar="الرياض — العليا" data-en="Riyadh — Olaya">الرياض — العليا</option></select></label>
+          </article>
+
+          <article class="panel component-block">
+            <div class="panel-head"><h3 data-ar="الحالات" data-en="Statuses">الحالات</h3><span>Semantic</span></div>
+            <div class="status-list">
+              <span class="chip success" data-ar="مؤكد" data-en="Confirmed">مؤكد</span>
+              <span class="chip warning" data-ar="بانتظار الدفع" data-en="Payment pending">بانتظار الدفع</span>
+              <span class="chip error" data-ar="تعذر الدفع" data-en="Payment failed">تعذر الدفع</span>
+              <span class="chip info" data-ar="قيد المراجعة" data-en="In review">قيد المراجعة</span>
+            </div>
+            <div class="notice"><span aria-hidden="true">✦</span><p><strong data-ar="خصوصيتك أولًا" data-en="Privacy first">خصوصيتك أولًا</strong><small data-ar="لن تُشارك تفضيلاتك إلا عند الحاجة وبموافقتك." data-en="Preferences are shared only when needed and with consent.">لن تُشارك تفضيلاتك إلا عند الحاجة وبموافقتك.</small></p></div>
+          </article>
+
+          <article class="panel component-block wide">
+            <div class="panel-head"><h3 data-ar="بطاقة الخدمة" data-en="Service card">بطاقة الخدمة</h3><span>Reusable</span></div>
+            <div class="service-card-sample">
+              <div class="service-icon">✦</div>
+              <div class="service-info"><strong data-ar="تصفيف شعر للمناسبات" data-en="Occasion hairstyling">تصفيف شعر للمناسبات</strong><span data-ar="60 دقيقة · يبدأ من 220 ر.س" data-en="60 min · from SAR 220">60 دقيقة · يبدأ من 220 ر.س</span></div>
+              <button class="btn secondary-btn compact" type="button" data-ar="اختيار" data-en="Select">اختيار</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-customer" data-view-panel="customer" hidden>
+        <div class="preview-toolbar">
+          <div><p class="eyebrow customer-eyebrow" data-ar="Customer App · C-01" data-en="Customer App · C-01">Customer App · C-01</p><h2 class="customer-title" data-ar="الرئيسية والاكتشاف" data-en="Home & discovery">الرئيسية والاكتشاف</h2></div>
+          <div class="customer-screen-tabs" role="tablist" aria-label="شاشات تطبيق العميلة">
+            <button class="customer-screen-tab active" type="button" role="tab" aria-selected="true" data-customer-screen="home" data-ar="الرئيسية C-01" data-en="Home C-01">الرئيسية C-01</button>
+            <button class="customer-screen-tab" type="button" role="tab" aria-selected="false" data-customer-screen="discovery" data-ar="الاكتشاف C-02" data-en="Discovery C-02">الاكتشاف C-02</button>
+            <button class="customer-screen-tab" type="button" role="tab" aria-selected="false" data-customer-screen="salon" data-ar="صفحة الصالون C-03" data-en="Salon C-03">صفحة الصالون C-03</button>
+          </div>
+          <div class="segmented" aria-label="حجم المعاينة">
+            <button class="segment active" type="button" data-device="desktop" aria-pressed="true" data-ar="سطح المكتب" data-en="Desktop">سطح المكتب</button>
+            <button class="segment" type="button" data-device="mobile" aria-pressed="false" data-ar="الجوال" data-en="Mobile">الجوال</button>
+          </div>
+        </div>
+
+        <div class="device-stage">
+          <div class="customer-app" id="customer-app">
+            <header class="app-header">
+              <img class="app-brand app-logo-berry" src="assets/glam-wordmark-berry.png" alt="Glam">
+              <nav><a href="#categories" data-ar="الخدمات" data-en="Services">الخدمات</a><a href="#screen-discovery" data-customer-screen="discovery" data-ar="الصالونات" data-en="Salons">الصالونات</a><a href="#offers" data-ar="العروض" data-en="Offers">العروض</a></nav>
+              <div class="app-actions"><button class="mini-icon favorite-trigger" type="button" aria-label="المفضلة">♡</button><button class="avatar" type="button" aria-label="الملف الشخصي">س</button></div>
+            </header>
+
+            <div class="app-body">
+              <section class="customer-screen is-active" id="screen-home" data-customer-screen-panel="home">
+              <section class="booking-hero">
+                <img src="assets/glam-salon-hero.png" alt="تجربة عناية داخل صالون عصري في الرياض">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                  <span class="hero-kicker" data-ar="جمالك، على وقتك" data-en="Beauty, on your time">جمالك، على وقتك</span>
+                  <h3 data-ar="اختاري التجربة التي تشبهك." data-en="Choose the experience that feels like you.">اختاري التجربة التي تشبهك.</h3>
+                  <p data-ar="صالونات وخبيرات موثوقات، ومواعيد حقيقية بالقرب منك." data-en="Trusted salons and experts, with real availability near you.">صالونات وخبيرات موثوقات، ومواعيد حقيقية بالقرب منك.</p>
+                  <div class="search-shell">
+                    <label><span data-ar="ماذا تريدين؟" data-en="What do you need?">ماذا تريدين؟</span><input type="search" placeholder="خدمة، صالون أو خبيرة" data-placeholder-ar="خدمة، صالون أو خبيرة" data-placeholder-en="Service, salon or expert"></label>
+                    <label><span data-ar="الموقع" data-en="Location">الموقع</span><button type="button" data-ar="الرياض، العليا" data-en="Riyadh, Olaya">الرياض، العليا</button></label>
+                    <button class="search-button" type="button" data-ar="بحث" data-en="Search">بحث</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="home-section" id="categories">
+                <div class="home-heading"><div><span data-ar="اكتشفي" data-en="Discover">اكتشفي</span><h4 data-ar="حسب احتياجك اليوم" data-en="By what you need today">حسب احتياجك اليوم</h4></div><button type="button" data-ar="عرض الكل" data-en="View all">عرض الكل</button></div>
+                <div class="category-grid">
+                  <button type="button"><i>✦</i><strong data-ar="عناية بالشعر" data-en="Hair care">عناية بالشعر</strong><span data-ar="120+ موعد" data-en="120+ slots">120+ موعد</span></button>
+                  <button type="button"><i>◌</i><strong data-ar="أظافر" data-en="Nails">أظافر</strong><span data-ar="85+ موعد" data-en="85+ slots">85+ موعد</span></button>
+                  <button type="button"><i>◇</i><strong data-ar="بشرة" data-en="Skin">بشرة</strong><span data-ar="64+ موعد" data-en="64+ slots">64+ موعد</span></button>
+                  <button type="button"><i>✧</i><strong data-ar="مناسبات" data-en="Occasions">مناسبات</strong><span data-ar="42+ موعد" data-en="42+ slots">42+ موعد</span></button>
+                </div>
+              </section>
+
+              <section class="offer-card" id="offers">
+                <div class="offer-mark" aria-hidden="true">✦</div>
+                <div>
+                  <span data-ar="تجربة Glam المنزلية" data-en="Glam at home">تجربة Glam المنزلية</span>
+                  <strong data-ar="خصم 20% على أول حجز منزلي" data-en="20% off your first home booking">خصم 20% على أول حجز منزلي</strong>
+                  <small data-ar="تطبق الشروط · يظهر السعر النهائي قبل الدفع" data-en="Terms apply · final price appears before payment">تطبق الشروط · يظهر السعر النهائي قبل الدفع</small>
+                </div>
+                <button class="btn secondary-btn compact" type="button" data-ar="اكتشفي الخدمات" data-en="Explore services">اكتشفي الخدمات</button>
+              </section>
+
+              <section class="home-section" id="salons">
+                <div class="home-heading"><div><span data-ar="قريب منك" data-en="Near you">قريب منك</span><h4 data-ar="أماكن نعتقد أنها ستعجبك" data-en="Places we think you’ll love">أماكن نعتقد أنها ستعجبك</h4></div><button type="button" data-customer-screen="discovery" data-ar="الخريطة" data-en="Map">الخريطة</button></div>
+                <div class="salon-grid">
+                  <article class="salon-card featured"><div class="salon-visual"><span class="distance" data-ar="1.2 كم" data-en="1.2 km">1.2 كم</span><button class="heart favorite-trigger" type="button" aria-label="إضافة إلى المفضلة">♡</button></div><div class="salon-copy"><div><strong data-ar="دار لمسة" data-en="Dar Lamsa">دار لمسة</strong><span data-ar="العليا · شعر وأظافر" data-en="Olaya · Hair & nails">العليا · شعر وأظافر</span></div><b>4.9 ★</b></div><div class="slots"><span data-ar="اليوم" data-en="Today">اليوم</span><button type="button">6:30</button><button type="button">7:15</button><button type="button">8:00</button></div></article>
+                  <article class="salon-card"><div class="salon-visual second"><span class="distance" data-ar="2.8 كم" data-en="2.8 km">2.8 كم</span><button class="heart favorite-trigger" type="button" aria-label="إضافة إلى المفضلة">♡</button></div><div class="salon-copy"><div><strong data-ar="موج بيوتي" data-en="Mouj Beauty">موج بيوتي</strong><span data-ar="الورود · بشرة ومكياج" data-en="Al Woroud · Skin & makeup">الورود · بشرة ومكياج</span></div><b>4.8 ★</b></div><div class="slots"><span data-ar="غدًا" data-en="Tomorrow">غدًا</span><button type="button">4:00</button><button type="button">5:30</button><button type="button">7:45</button></div></article>
+                </div>
+              </section>
+
+              <section class="upcoming-card">
+                <div class="upcoming-date"><strong>18</strong><span data-ar="سبتمبر" data-en="September">سبتمبر</span></div>
+                <div><span data-ar="موعدك القادم" data-en="Your next appointment">موعدك القادم</span><strong data-ar="تنظيف بشرة · دار لمسة" data-en="Facial · Dar Lamsa">تنظيف بشرة · دار لمسة</strong><small data-ar="الخميس، 6:30 مساءً" data-en="Thursday, 6:30 PM">الخميس، 6:30 مساءً</small></div>
+                <button class="btn primary-btn compact booking-confirm" type="button" data-ar="عرض الحجز" data-en="View booking">عرض الحجز</button>
+              </section>
+              </section>
+
+              <section class="customer-screen" id="screen-discovery" data-customer-screen-panel="discovery" hidden>
+                <div class="screen-heading-row">
+                  <div><span class="hero-kicker" data-ar="Style discovery" data-en="Style discovery">Style discovery</span><h3 data-ar="اكتشفي الصالون الأقرب لذوقك." data-en="Discover a salon that fits your style.">اكتشفي الصالون الأقرب لذوقك.</h3><p data-ar="قارني الأعمال الحقيقية، التقييمات، الأسعار والمواعيد المتاحة في مكان واحد." data-en="Compare real work, ratings, prices and live availability in one place.">قارني الأعمال الحقيقية، التقييمات، الأسعار والمواعيد المتاحة في مكان واحد.</p></div>
+                  <button class="btn secondary-btn compact" type="button" data-ar="حفظ البحث" data-en="Save search">حفظ البحث</button>
+                </div>
+                <div class="discovery-tools">
+                  <label class="discovery-search"><span aria-hidden="true">⌕</span><input type="search" placeholder="ابحثي عن صالون، خدمة أو خبيرة" data-placeholder-ar="ابحثي عن صالون، خدمة أو خبيرة" data-placeholder-en="Search salon, service or expert"><button class="search-button" type="button" data-ar="بحث" data-en="Search">بحث</button></label>
+                  <div class="filter-chips" role="group" aria-label="تصفية النتائج">
+                    <button class="filter-chip active" type="button" data-filter="all" data-ar="الكل" data-en="All">الكل</button>
+                    <button class="filter-chip" type="button" data-filter="hair" data-ar="شعر" data-en="Hair">شعر</button>
+                    <button class="filter-chip" type="button" data-filter="skin" data-ar="بشرة" data-en="Skin">بشرة</button>
+                    <button class="filter-chip" type="button" data-filter="nails" data-ar="أظافر" data-en="Nails">أظافر</button>
+                    <button class="filter-chip" type="button" data-filter="home" data-ar="خدمة منزلية" data-en="At home">خدمة منزلية</button>
+                  </div>
+                </div>
+                <div class="discovery-layout">
+                  <div class="discovery-results">
+                    <div class="results-meta"><strong data-ar="صالونات مناسبة لك" data-en="Salons matched to you">صالونات مناسبة لك</strong><span data-ar="24 نتيجة · الرياض" data-en="24 results · Riyadh">24 نتيجة · الرياض</span></div>
+                    <article class="result-card" data-tags="hair,nails" data-open-salon="true">
+                      <div class="result-visual result-visual-one"><span class="distance" data-ar="1.2 كم" data-en="1.2 km">1.2 كم</span><button class="heart favorite-trigger" type="button" aria-label="إضافة إلى المفضلة">♡</button></div>
+                      <div class="result-main"><div class="result-title"><strong data-ar="دار لمسة بيوتي" data-en="Dar Lamsa Beauty">دار لمسة بيوتي</strong><b>4.9 ★ <small>(328)</small></b></div><span data-ar="العليا، الرياض · شعر وأظافر" data-en="Olaya, Riyadh · Hair & nails">العليا، الرياض · شعر وأظافر</span><div class="result-tags"><em data-ar="صالون مميز" data-en="Featured salon">صالون مميز</em><em class="available" data-ar="متاح اليوم" data-en="Available today">متاح اليوم</em></div><div class="result-footer"><span data-ar="يبدأ من 150 ر.س" data-en="From SAR 150">يبدأ من 150 ر.س</span><button class="btn primary-btn compact" type="button" data-customer-screen="salon" data-ar="عرض الصالون" data-en="View salon">عرض الصالون</button></div></div>
+                    </article>
+                    <article class="result-card" data-tags="skin,home" data-open-salon="true">
+                      <div class="result-visual result-visual-two"><span class="distance" data-ar="2.4 كم" data-en="2.4 km">2.4 كم</span><button class="heart favorite-trigger" type="button" aria-label="إضافة إلى المفضلة">♡</button></div>
+                      <div class="result-main"><div class="result-title"><strong data-ar="موج بيوتي" data-en="Mouj Beauty">موج بيوتي</strong><b>4.8 ★ <small>(214)</small></b></div><span data-ar="الورود، الرياض · بشرة ومكياج" data-en="Al Woroud, Riyadh · Skin & makeup">الورود، الرياض · بشرة ومكياج</span><div class="result-tags"><em data-ar="تجربة هادئة" data-en="Quiet experience">تجربة هادئة</em><em class="available" data-ar="متاح غدًا" data-en="Available tomorrow">متاح غدًا</em></div><div class="result-footer"><span data-ar="يبدأ من 199 ر.س" data-en="From SAR 199">يبدأ من 199 ر.س</span><button class="btn primary-btn compact" type="button" data-customer-screen="salon" data-ar="عرض الصالون" data-en="View salon">عرض الصالون</button></div></div>
+                    </article>
+                    <article class="result-card" data-tags="nails" data-open-salon="true">
+                      <div class="result-visual result-visual-three"><span class="distance" data-ar="3.1 كم" data-en="3.1 km">3.1 كم</span><button class="heart favorite-trigger" type="button" aria-label="إضافة إلى المفضلة">♡</button></div>
+                      <div class="result-main"><div class="result-title"><strong data-ar="نوف ستوديو" data-en="Nouf Studio">نوف ستوديو</strong><b>4.7 ★ <small>(146)</small></b></div><span data-ar="الملقا، الرياض · أظافر" data-en="Al Malqa, Riyadh · Nails">الملقا، الرياض · أظافر</span><div class="result-tags"><em data-ar="خبيرات معتمدات" data-en="Certified experts">خبيرات معتمدات</em><em class="available" data-ar="متاح الآن" data-en="Available now">متاح الآن</em></div><div class="result-footer"><span data-ar="يبدأ من 120 ر.س" data-en="From SAR 120">يبدأ من 120 ر.س</span><button class="btn primary-btn compact" type="button" data-customer-screen="salon" data-ar="عرض الصالون" data-en="View salon">عرض الصالون</button></div></div>
+                    </article>
+                  </div>
+                  <aside class="map-panel" aria-label="خريطة الصالونات">
+                    <div class="map-toolbar"><span data-ar="الرياض" data-en="Riyadh">الرياض</span><button type="button" aria-label="توسيط الخريطة">⌖</button></div>
+                    <div class="map-canvas"><span class="map-road road-one"></span><span class="map-road road-two"></span><span class="map-road road-three"></span><span class="map-pin pin-one">✦</span><span class="map-pin pin-two">✦</span><span class="map-pin pin-three">✦</span><div class="map-callout"><strong data-ar="دار لمسة" data-en="Dar Lamsa">دار لمسة</strong><span>4.9 ★ · 1.2 كم</span></div><span class="map-label" data-ar="العليا" data-en="Olaya">العليا</span><span class="map-label label-two" data-ar="الورود" data-en="Al Woroud">الورود</span></div>
+                    <button class="btn primary-btn map-cta" type="button" data-ar="عرض الصالونات في هذه المنطقة" data-en="Show salons in this area">عرض الصالونات في هذه المنطقة</button>
+                  </aside>
+                </div>
+              </section>
+
+              <section class="customer-screen" id="screen-salon" data-customer-screen-panel="salon" hidden>
+                <div class="salon-detail-top"><button class="back-button" type="button" data-customer-screen="discovery" aria-label="العودة">‹</button><div class="salon-detail-actions"><button class="mini-icon favorite-trigger" type="button" aria-label="إضافة إلى المفضلة">♡</button><button class="mini-icon" type="button" aria-label="مشاركة">↗</button></div></div>
+                <div class="salon-detail-hero"><img src="assets/glam-salon-hero.png" alt="صالون دار لمسة بيوتي"><div class="salon-detail-overlay"></div><div class="salon-detail-label"><span data-ar="صالون مميز" data-en="Featured salon">صالون مميز</span><strong data-ar="دار لمسة بيوتي" data-en="Dar Lamsa Beauty">دار لمسة بيوتي</strong><small data-ar="العليا، الرياض" data-en="Olaya, Riyadh">العليا، الرياض</small></div></div>
+                <div class="salon-detail-summary"><div><strong>4.9</strong><span>★ 328 <span data-ar="تقييم" data-en="reviews">تقييم</span></span></div><div><strong data-ar="مفتوح" data-en="Open">مفتوح</strong><span data-ar="حتى 11:00 م" data-en="Until 11:00 PM">حتى 11:00 م</span></div><div><strong>1.2 <span data-ar="كم" data-en="km">كم</span></strong><span data-ar="من موقعك" data-en="from you">من موقعك</span></div></div>
+                <div class="salon-tabs" role="tablist"><button class="active" type="button" data-ar="الخدمات" data-en="Services">الخدمات</button><button type="button" data-ar="التقييمات" data-en="Reviews">التقييمات</button><button type="button" data-ar="عن الصالون" data-en="About">عن الصالون</button></div>
+                <div class="salon-detail-body"><div class="salon-detail-heading"><div><span data-ar="الأكثر حجزًا" data-en="Most booked">الأكثر حجزًا</span><h3 data-ar="خدمات تناسبك" data-en="Services for you">خدمات تناسبك</h3></div><button type="button" data-ar="عرض الكل" data-en="View all">عرض الكل</button></div><div class="service-list"><article class="service-row"><div class="service-thumb service-thumb-hair"></div><div><strong data-ar="تصفيف شعر للمناسبات" data-en="Occasion hairstyling">تصفيف شعر للمناسبات</strong><span data-ar="60 دقيقة · عناية شخصية" data-en="60 min · Personal care">60 دقيقة · Personal care</span></div><b>250 <small data-ar="ر.س" data-en="SAR">ر.س</small></b><button class="btn secondary-btn compact booking-confirm" type="button" data-ar="اختيار" data-en="Select">اختيار</button></article><article class="service-row"><div class="service-thumb service-thumb-skin"></div><div><strong data-ar="تنظيف بشرة عميق" data-en="Deep facial">تنظيف بشرة عميق</strong><span data-ar="60 دقيقة · منتجات مختارة" data-en="60 min · Curated products">60 دقيقة · منتجات مختارة</span></div><b>299 <small data-ar="ر.س" data-en="SAR">ر.س</small></b><button class="btn secondary-btn compact booking-confirm" type="button" data-ar="اختيار" data-en="Select">اختيار</button></article><article class="service-row"><div class="service-thumb service-thumb-nails"></div><div><strong data-ar="مناكير وبديكير" data-en="Manicure & pedicure">مناكير وبديكير</strong><span data-ar="75 دقيقة · خبيرة ريم" data-en="75 min · Expert Reem">75 دقيقة · خبيرة ريم</span></div><b>220 <small data-ar="ر.س" data-en="SAR">ر.س</small></b><button class="btn secondary-btn compact booking-confirm" type="button" data-ar="اختيار" data-en="Select">اختيار</button></article></div><div class="salon-detail-note"><span>✦</span><p><strong data-ar="تجربة مصممة لك" data-en="Designed for you">تجربة مصممة لك</strong><small data-ar="يمكنك مشاركة تفضيلات الهدوء والموسيقى والمشروب قبل الحجز." data-en="Share your preferences for quiet, music and drinks before booking.">يمكنك مشاركة تفضيلات الهدوء والموسيقى والمشروب قبل الحجز.</small></p></div><button class="btn primary-btn salon-booking-cta booking-confirm" type="button" data-ar="احجزي موعدك الآن" data-en="Book your appointment">احجزي موعدك الآن</button></div>
+              </section>
+              <section class="customer-screen" id="screen-booking" data-customer-screen-panel="booking" hidden>
+                <div class="booking-screen-top"><button class="back-button" type="button" data-customer-screen="salon" aria-label="العودة">‹</button><div><span class="hero-kicker" data-ar="حجز أسهل" data-en="A simpler booking">حجز أسهل</span><h3 data-ar="اختاري يومك، ونقترح لك أفضل الأوقات." data-en="Choose a day, and we’ll suggest the best times.">اختاري يومك، ونقترح لك أفضل الأوقات.</h3></div></div>
+                <div class="booking-choice panel">
+                  <div class="booking-choice-head"><div><span data-ar="تصفيف شعر للمناسبات · 60 دقيقة" data-en="Occasion hairstyling · 60 min">تصفيف شعر للمناسبات · 60 دقيقة</span><strong data-ar="دار لمسة بيوتي · خبيرة ريم" data-en="Dar Lamsa Beauty · Expert Reem">دار لمسة بيوتي · خبيرة ريم</strong></div><span class="booking-live-chip" data-ar="متاح الآن" data-en="Available now">متاح الآن</span></div>
+                  <div class="booking-step-label"><span class="step-number">1</span><div><strong data-ar="اختاري اليوم" data-en="Choose a day">اختاري اليوم</strong><small data-ar="نعرض لك الأيام القريبة أولًا بدل قائمة طويلة." data-en="Nearby dates come first instead of a long list.">نعرض لك الأيام القريبة أولًا بدل قائمة طويلة.</small></div></div>
+                  <div class="booking-date-rail" role="tablist" aria-label="الأيام المتاحة">
+                    <button class="booking-date-card active" type="button" data-booking-date data-date-label="اليوم · 18 سبتمبر" data-ar-label="اليوم · 18 سبتمبر" data-en-label="Today · Sep 18"><span data-ar="اليوم" data-en="Today">اليوم</span><strong>18</strong><small data-ar="سبتمبر" data-en="September">سبتمبر</small><em data-ar="6 أوقات" data-en="6 slots">6 أوقات</em></button>
+                    <button class="booking-date-card" type="button" data-booking-date data-date-label="غدًا · 19 سبتمبر" data-ar-label="غدًا · 19 سبتمبر" data-en-label="Tomorrow · Sep 19"><span data-ar="غدًا" data-en="Tomorrow">غدًا</span><strong>19</strong><small data-ar="سبتمبر" data-en="September">سبتمبر</small><em data-ar="4 أوقات" data-en="4 slots">4 أوقات</em></button>
+                    <button class="booking-date-card" type="button" data-booking-date data-date-label="الأحد · 20 سبتمبر" data-ar-label="الأحد · 20 سبتمبر" data-en-label="Sun · Sep 20"><span data-ar="الأحد" data-en="Sun">الأحد</span><strong>20</strong><small data-ar="سبتمبر" data-en="September">سبتمبر</small><em data-ar="8 أوقات" data-en="8 slots">8 أوقات</em></button>
+                    <button class="booking-date-card" type="button" data-booking-date data-date-label="الاثنين · 21 سبتمبر" data-ar-label="الاثنين · 21 سبتمبر" data-en-label="Mon · Sep 21"><span data-ar="الاثنين" data-en="Mon">الاثنين</span><strong>21</strong><small data-ar="سبتمبر" data-en="September">سبتمبر</small><em data-ar="3 أوقات" data-en="3 slots">3 أوقات</em></button>
+                    <button class="booking-date-card" type="button" data-booking-date data-date-label="الثلاثاء · 22 سبتمبر" data-ar-label="الثلاثاء · 22 سبتمبر" data-en-label="Tue · Sep 22"><span data-ar="الثلاثاء" data-en="Tue">الثلاثاء</span><strong>22</strong><small data-ar="سبتمبر" data-en="September">سبتمبر</small><em data-ar="5 أوقات" data-en="5 slots">5 أوقات</em></button>
+                  </div>
+                  <div class="booking-step-label"><span class="step-number">2</span><div><strong data-ar="اختاري الوقت المناسب لك" data-en="Choose a time that fits">اختاري الوقت المناسب لك</strong><small data-ar="نرتب الأقرب أولًا، ويمكنك فتح بقية الأوقات عند الحاجة." data-en="Closest times come first; open all times only if needed.">نرتب الأقرب أولًا، ويمكنك فتح بقية الأوقات عند الحاجة.</small></div></div>
+                  <div class="booking-time-toolbar"><div><span data-ar="الأوقات المقترحة" data-en="Suggested times">الأوقات المقترحة</span><strong class="booking-selected-date" data-ar="اليوم · 18 سبتمبر" data-en="Today · Sep 18">اليوم · 18 سبتمبر</strong></div><span class="booking-available-count" data-ar="6 مواعيد متاحة" data-en="6 slots available">6 مواعيد متاحة</span></div>
+                  <div class="booking-periods" role="group" aria-label="تصفية الأوقات"><button class="booking-period active" type="button" data-booking-period="recommended" data-ar="الأقرب لك" data-en="Closest to you">الأقرب لك</button><button class="booking-period" type="button" data-booking-period="morning" data-ar="صباحًا" data-en="Morning">صباحًا</button><button class="booking-period" type="button" data-booking-period="evening" data-ar="مساءً" data-en="Evening">مساءً</button></div>
+                  <div class="booking-time-grid" data-period="recommended">
+                    <button class="booking-time-card active" type="button" data-booking-time="18:30" data-time-period="evening"><strong>6:30</strong><span data-ar="الأقرب · 60 دقيقة" data-en="Closest · 60 min">الأقرب · 60 دقيقة</span></button>
+                    <button class="booking-time-card" type="button" data-booking-time="19:15" data-time-period="evening"><strong>7:15</strong><span data-ar="متاح · 60 دقيقة" data-en="Available · 60 min">متاح · 60 دقيقة</span></button>
+                    <button class="booking-time-card" type="button" data-booking-time="20:00" data-time-period="evening"><strong>8:00</strong><span data-ar="متاح · 60 دقيقة" data-en="Available · 60 min">متاح · 60 دقيقة</span></button>
+                    <button class="booking-time-card is-extra" type="button" data-booking-time="20:45" data-time-period="evening"><strong>8:45</strong><span data-ar="متاح · 60 دقيقة" data-en="Available · 60 min">متاح · 60 دقيقة</span></button>
+                    <button class="booking-time-card is-extra" type="button" data-booking-time="21:30" data-time-period="evening"><strong>9:30</strong><span data-ar="متاح · 60 دقيقة" data-en="Available · 60 min">متاح · 60 دقيقة</span></button>
+                    <button class="booking-time-card is-extra" type="button" data-booking-time="22:15" data-time-period="evening"><strong>10:15</strong><span data-ar="متاح · 60 دقيقة" data-en="Available · 60 min">متاح · 60 دقيقة</span></button>
+                    <button class="booking-time-card is-extra" type="button" data-booking-time="09:00" data-time-period="morning"><strong>9:00</strong><span data-ar="صباحي · 60 دقيقة" data-en="Morning · 60 min">صباحي · 60 دقيقة</span></button>
+                    <button class="booking-time-card is-extra" type="button" data-booking-time="10:30" data-time-period="morning"><strong>10:30</strong><span data-ar="صباحي · 60 دقيقة" data-en="Morning · 60 min">صباحي · 60 دقيقة</span></button>
+                    <button class="booking-time-card is-extra" type="button" data-booking-time="11:15" data-time-period="morning"><strong>11:15</strong><span data-ar="صباحي · 60 دقيقة" data-en="Morning · 60 min">صباحي · 60 دقيقة</span></button>
+                  </div>
+                  <button class="booking-more-times" type="button" data-ar="عرض كل الأوقات (6)" data-en="Show all times (6)">عرض كل الأوقات (6)</button>
+                  <div class="booking-selection-summary"><span>✓</span><p><strong data-ar="موعدك المختار" data-en="Your selected slot">موعدك المختار</strong><small><b class="booking-summary-date">اليوم · 18 سبتمبر</b> · <b class="booking-summary-time">6:30 مساءً</b> · السعر يظهر قبل التأكيد</small></p></div>
+                  <button class="btn primary-btn booking-finalize" type="button" data-ar="متابعة ملخص الحجز" data-en="Continue to booking summary">متابعة ملخص الحجز</button>
+                </div>
+              </section>
+            </div>
+
+            <nav class="mobile-nav" aria-label="التنقل السفلي">
+              <button class="active" type="button" data-customer-screen="home"><span>⌂</span><small data-ar="الرئيسية" data-en="Home">الرئيسية</small></button>
+              <button type="button" data-customer-screen="discovery"><span>⌕</span><small data-ar="بحث" data-en="Search">بحث</small></button>
+              <button type="button"><span>◫</span><small data-ar="حجوزاتي" data-en="Bookings">حجوزاتي</small></button>
+              <button type="button"><span>♡</span><small data-ar="المفضلة" data-en="Saved">المفضلة</small></button>
+            </nav>
+            <div class="toast" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-salon" data-view-panel="salon" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-ar="Salon workspace · S-01" data-en="Salon workspace · S-01">Salon workspace · S-01</p>
+            <h2 data-ar="رحلة انضمام الصالون تبدأ بخطوة واضحة." data-en="A clear first step for every salon.">رحلة انضمام الصالون تبدأ بخطوة واضحة.</h2>
+          </div>
+          <span class="approved-badge" data-ar="قيد البناء" data-en="In progress">قيد البناء</span>
+        </div>
+
+        <div class="salon-flow-shell">
+          <div class="salon-flow-steps" role="tablist" aria-label="مراحل انضمام الصالون">
+            <button class="salon-flow-step active" type="button" role="tab" aria-selected="true" data-salon-step="owner">
+              <span class="step-number">01</span><span data-ar="بيانات المنشأة" data-en="Business details">بيانات المنشأة</span><small data-ar="المالكة" data-en="Owner">المالكة</small>
+            </button>
+            <button class="salon-flow-step" type="button" role="tab" aria-selected="false" data-salon-step="review">
+              <span class="step-number">02</span><span data-ar="الاعتماد" data-en="Review">الاعتماد</span><small data-ar="المراجعة" data-en="Verification">المراجعة</small>
+            </button>
+            <button class="salon-flow-step is-locked" type="button" role="tab" aria-selected="false" data-salon-step="expert" disabled>
+              <span class="step-number">03</span><span data-ar="الخبيرة" data-en="Expert">الخبيرة</span><small data-ar="التالي" data-en="Next">التالي</small>
+            </button>
+            <button class="salon-flow-step is-locked" type="button" role="tab" aria-selected="false" data-salon-step="schedule" disabled>
+              <span class="step-number">04</span><span data-ar="الخدمة والدوام" data-en="Service & hours">الخدمة والدوام</span><small data-ar="التالي" data-en="Next">التالي</small>
+            </button>
+            <button class="salon-flow-step is-locked" type="button" role="tab" aria-selected="false" data-salon-step="link" disabled>
+              <span class="step-number">05</span><span data-ar="رابط الحجز" data-en="Booking link">رابط الحجز</span><small data-ar="التالي" data-en="Next">التالي</small>
+            </button>
+          </div>
+
+          <div class="salon-flow-body">
+            <section class="salon-step-panel is-active" data-salon-step-panel="owner">
+              <div class="salon-step-header">
+                <div><span class="hero-kicker" data-ar="الخطوة الأولى" data-en="First step">الخطوة الأولى</span><h3 data-ar="عرّفي منشأتك مرة واحدة." data-en="Tell us about your business once.">عرّفي منشأتك مرة واحدة.</h3><p data-ar="نستخدم هذه البيانات لتجهيز ملف الصالون وإرساله للمراجعة قبل ظهوره للعميلات." data-en="We use these details to prepare your salon profile before it is reviewed and published.">نستخدم هذه البيانات لتجهيز ملف الصالون وإرساله للمراجعة قبل ظهوره للعميلات.</p></div>
+                <span class="step-progress" data-ar="1 من 5" data-en="1 of 5">1 من 5</span>
+              </div>
+
+              <div class="salon-form-grid">
+                <label class="field"><span data-ar="اسم المنشأة" data-en="Business name">اسم المنشأة</span><input type="text" value="دار لمسة بيوتي" data-placeholder-ar="مثال: دار لمسة بيوتي" data-placeholder-en="e.g. Dar Lamsa Beauty"></label>
+                <label class="field"><span data-ar="رقم جوال المالكة" data-en="Owner mobile number">رقم جوال المالكة</span><input type="tel" value="05 1234 6789" dir="ltr"></label>
+                <label class="field"><span data-ar="المدينة" data-en="City">المدينة</span><select><option data-ar="الرياض" data-en="Riyadh">الرياض</option><option data-ar="جدة" data-en="Jeddah">جدة</option></select></label>
+                <label class="field"><span data-ar="نوع المنشأة" data-en="Business type">نوع المنشأة</span><select><option data-ar="صالون نسائي" data-en="Women’s salon">صالون نسائي</option><option data-ar="استوديو متخصص" data-en="Specialist studio">استوديو متخصص</option><option data-ar="خدمة منزلية" data-en="Home service">خدمة منزلية</option></select></label>
+              </div>
+
+              <div class="salon-upload-grid">
+                <div class="salon-upload-card"><span class="upload-icon" aria-hidden="true">▧</span><div><strong data-ar="السجل التجاري" data-en="Commercial registration">السجل التجاري</strong><small data-ar="PDF أو صورة واضحة · اختياري الآن" data-en="PDF or clear image · optional for now">PDF أو صورة واضحة · اختياري الآن</small></div><button class="btn secondary-btn compact salon-upload-trigger" type="button" data-ar="إرفاق" data-en="Attach">إرفاق</button></div>
+                <div class="salon-upload-card"><span class="upload-icon" aria-hidden="true">▤</span><div><strong data-ar="هوية المالكة" data-en="Owner identity">هوية المالكة</strong><small data-ar="تُستخدم للتحقق فقط ولا تظهر للعميلات" data-en="Used for verification only, never shown publicly">تُستخدم للتحقق فقط ولا تظهر للعميلات</small></div><button class="btn secondary-btn compact salon-upload-trigger" type="button" data-ar="إرفاق" data-en="Attach">إرفاق</button></div>
+              </div>
+
+              <label class="salon-consent"><input type="checkbox" checked><span data-ar="أوافق على استخدام البيانات والوثائق لأغراض التحقق وإدارة الحساب." data-en="I agree to use these details and documents for verification and account management.">أوافق على استخدام البيانات والوثائق لأغراض التحقق وإدارة الحساب.</span></label>
+              <div class="salon-step-actions"><button class="btn ghost-btn" type="button" data-salon-next="review" data-ar="حفظ كمسودة" data-en="Save draft">حفظ كمسودة</button><button class="btn primary-btn" type="button" data-salon-next="review" data-ar="حفظ ومتابعة" data-en="Save & continue">حفظ ومتابعة</button></div>
+            </section>
+
+            <section class="salon-step-panel" data-salon-step-panel="review" hidden>
+              <div class="salon-step-header">
+                <div><span class="hero-kicker" data-ar="الخطوة الثانية" data-en="Second step">الخطوة الثانية</span><h3 data-ar="مراجعة هادئة قبل النشر." data-en="A calm review before publishing.">مراجعة هادئة قبل النشر.</h3><p data-ar="راجعي بيانات المنشأة. لن تظهر الصفحة للعميلات قبل اعتمادها من فريق Glam." data-en="Review the business details. Your public profile stays hidden until Glam approves it.">راجعي بيانات المنشأة. لن تظهر الصفحة للعميلات قبل اعتمادها من فريق Glam.</p></div>
+                <span class="step-progress" data-ar="2 من 5" data-en="2 of 5">2 من 5</span>
+              </div>
+
+              <div class="review-summary-grid">
+                <div class="review-summary-card"><span data-ar="المنشأة" data-en="Business">المنشأة</span><strong data-ar="دار لمسة بيوتي" data-en="Dar Lamsa Beauty">دار لمسة بيوتي</strong><small data-ar="صالون نسائي · الرياض" data-en="Women’s salon · Riyadh">صالون نسائي · الرياض</small></div>
+                <div class="review-summary-card"><span data-ar="جهة التواصل" data-en="Contact">جهة التواصل</span><strong dir="ltr">05 1234 6789</strong><small data-ar="المالكة" data-en="Owner">المالكة</small></div>
+                <div class="review-summary-card"><span data-ar="الخصوصية" data-en="Privacy">الخصوصية</span><strong data-ar="محمي" data-en="Protected">محمي</strong><small data-ar="الوثائق لا تظهر للعميلات" data-en="Documents stay private">الوثائق لا تظهر للعميلات</small></div>
+              </div>
+
+              <div class="review-checklist"><div class="review-checklist-head"><span class="notice-mark" aria-hidden="true">✦</span><div><strong data-ar="جاهز للإرسال" data-en="Ready to submit">جاهز للإرسال</strong><p data-ar="بعد الإرسال، يراجع الفريق البيانات عادةً خلال يوم عمل واحد." data-en="After submission, the team usually reviews the details within one business day.">بعد الإرسال، يراجع الفريق البيانات عادةً خلال يوم عمل واحد.</p></div><span class="chip info" data-ar="قيد المراجعة" data-en="In review">قيد المراجعة</span></div><ul><li data-ar="البيانات الأساسية مكتملة" data-en="Core details are complete">البيانات الأساسية مكتملة</li><li data-ar="يمكن إضافة الوثائق الآن أو لاحقًا" data-en="Documents can be added now or later">يمكن إضافة الوثائق الآن أو لاحقًا</li><li data-ar="الصفحة العامة لا تُنشر قبل الاعتماد" data-en="The public profile stays hidden until approval">الصفحة العامة لا تُنشر قبل الاعتماد</li></ul></div>
+              <div class="salon-step-actions"><button class="btn secondary-btn" type="button" data-salon-next="owner" data-ar="تعديل البيانات" data-en="Edit details">تعديل البيانات</button><button class="btn primary-btn" type="button" data-salon-submit="true" data-ar="إرسال للمراجعة" data-en="Submit for review">إرسال للمراجعة</button></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-operations" data-view-panel="operations" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow" data-ar="Salon operations · O-01" data-en="Salon operations · O-01">Salon operations · O-01</p><h2 data-ar="كل ما يحتاجه الصالون في لوحة واحدة." data-en="Everything the salon needs in one workspace.">كل ما يحتاجه الصالون في لوحة واحدة.</h2></div>
+          <span class="approved-badge" data-ar="تشغيلي" data-en="Operational">تشغيلي</span>
+        </div>
+
+        <div class="ops-toolbar panel"><label class="ops-select"><span data-ar="الفرع" data-en="Branch">الفرع</span><select><option data-ar="دار لمسة · العليا" data-en="Dar Lamsa · Olaya">دار لمسة · العليا</option><option data-ar="دار لمسة · النخيل" data-en="Dar Lamsa · Nakheel">دار لمسة · النخيل</option></select></label><div class="ops-toolbar-date"><span data-ar="اليوم" data-en="Today">اليوم</span><strong>18 سبتمبر 2026</strong></div><button class="btn primary-btn compact ops-action" type="button" data-ar="إضافة حجز" data-en="Add booking">إضافة حجز</button></div>
+
+        <div class="ops-tabs" role="tablist" aria-label="وحدات لوحة الصالون">
+          <button class="ops-tab active" type="button" data-ops-tab="dashboard" data-ar="النظرة العامة" data-en="Overview">النظرة العامة</button>
+          <button class="ops-tab" type="button" data-ops-tab="calendar" data-ar="التقويم والحجوزات" data-en="Calendar & bookings">التقويم والحجوزات</button>
+          <button class="ops-tab" type="button" data-ops-tab="clients" data-ar="العميلات" data-en="Clients">العميلات</button>
+          <button class="ops-tab" type="button" data-ops-tab="services" data-ar="الخدمات والعروض" data-en="Services & offers">الخدمات والعروض</button>
+          <button class="ops-tab" type="button" data-ops-tab="team" data-ar="الفريق والدوام" data-en="Team & schedules">الفريق والدوام</button>
+          <button class="ops-tab" type="button" data-ops-tab="inventory" data-ar="المخزون" data-en="Inventory">المخزون</button>
+          <button class="ops-tab" type="button" data-ops-tab="finance" data-ar="المالية" data-en="Finance">المالية</button>
+          <button class="ops-tab" type="button" data-ops-tab="reports" data-ar="التقارير" data-en="Reports">التقارير</button>
+          <button class="ops-tab" type="button" data-ops-tab="marketing" data-ar="التسويق والمحتوى" data-en="Marketing & content">التسويق والمحتوى</button>
+          <button class="ops-tab" type="button" data-ops-tab="reviews" data-ar="التقييمات والشكاوى" data-en="Reviews & cases">التقييمات والشكاوى</button>
+          <button class="ops-tab" type="button" data-ops-tab="settings" data-ar="الإعدادات والتكاملات" data-en="Settings & integrations">الإعدادات والتكاملات</button>
+          <button class="ops-tab" type="button" data-ops-tab="subscriptions" data-ar="الاشتراك" data-en="Subscription">الاشتراك</button>
+        </div>
+
+        <div class="ops-pages">
+          <section class="ops-page is-active" data-ops-panel="dashboard">
+            <div class="ops-metrics"><article class="ops-metric"><span data-ar="حجوزات اليوم" data-en="Today’s bookings">حجوزات اليوم</span><strong>38</strong><small class="positive" data-ar="+12% عن الأسبوع الماضي" data-en="+12% vs last week">+12% عن الأسبوع الماضي</small></article><article class="ops-metric"><span data-ar="المبيعات المحصلة" data-en="Collected sales">المبيعات المحصلة</span><strong>12,480 <small>ر.س</small></strong><small class="positive" data-ar="قبل التسوية اليومية" data-en="Before daily close">قبل التسوية اليومية</small></article><article class="ops-metric"><span data-ar="نسبة الإشغال" data-en="Occupancy">نسبة الإشغال</span><strong>78%</strong><small data-ar="أفضل فترة 6–9 مساءً" data-en="Peak window 6–9 PM">أفضل فترة 6–9 مساءً</small></article><article class="ops-metric"><span data-ar="متوسط التقييم" data-en="Average rating">متوسط التقييم</span><strong>4.9 <small>★</small></strong><small data-ar="من 328 تقييمًا" data-en="From 328 reviews">من 328 تقييمًا</small></article></div>
+            <div class="ops-grid-two"><article class="ops-card"><div class="ops-card-head"><div><span class="ops-kicker" data-ar="اليوم" data-en="Today">اليوم</span><h3 data-ar="الجدول القادم" data-en="Upcoming schedule">الجدول القادم</h3></div><button class="btn ghost-btn compact" type="button" data-ops-tab="calendar" data-ar="فتح التقويم" data-en="Open calendar">فتح التقويم</button></div><div class="ops-booking-list"><div class="ops-booking-row"><b>05:30</b><div><strong data-ar="تنظيف بشرة عميق · سارة" data-en="Deep facial · Sara">تنظيف بشرة عميق · سارة</strong><small data-ar="خبيرة ريم · غرفة 2" data-en="Expert Reem · Room 2">خبيرة ريم · غرفة 2</small></div><span class="chip success" data-ar="مؤكد" data-en="Confirmed">مؤكد</span></div><div class="ops-booking-row"><b>06:30</b><div><strong data-ar="تصفيف شعر للمناسبات · نورة" data-en="Occasion styling · Nora">تصفيف شعر للمناسبات · نورة</strong><small data-ar="خبيرة لينا · غرفة 1" data-en="Expert Lina · Room 1">خبيرة لينا · غرفة 1</small></div><span class="chip warning" data-ar="بانتظار الوصول" data-en="Awaiting arrival">بانتظار الوصول</span></div><div class="ops-booking-row"><b>07:15</b><div><strong data-ar="مناكير وبديكير · جود" data-en="Manicure & pedicure · Joud">مناكير وبديكير · جود</strong><small data-ar="خبيرة ريم · غرفة 3" data-en="Expert Reem · Room 3">خبيرة ريم · غرفة 3</small></div><span class="chip info" data-ar="عربون مدفوع" data-en="Deposit paid">عربون مدفوع</span></div></div></article><article class="ops-card"><div class="ops-card-head"><div><span class="ops-kicker" data-ar="يحتاج إجراء" data-en="Needs attention">يحتاج إجراء</span><h3 data-ar="تنبيهات اليوم" data-en="Today’s alerts">تنبيهات اليوم</h3></div><span class="ops-count">4</span></div><div class="ops-alert-list"><button type="button" class="ops-alert" data-ops-tab="inventory"><span>!</span><div><strong data-ar="3 أصناف ستنفد خلال 7 أيام" data-en="3 items run out within 7 days">3 أصناف ستنفد خلال 7 أيام</strong><small data-ar="افتحي المخزون لطلب التوريد" data-en="Open inventory to reorder">افتحي المخزون لطلب التوريد</small></div><b>‹</b></button><button type="button" class="ops-alert" data-ops-tab="reviews"><span>✦</span><div><strong data-ar="شكوى تحتاج مسؤولاً" data-en="One complaint needs an owner">شكوى تحتاج مسؤولاً</strong><small data-ar="الرد خلال 4 ساعات" data-en="Reply within 4 hours">الرد خلال 4 ساعات</small></div><b>‹</b></button><button type="button" class="ops-alert" data-ops-tab="finance"><span>↗</span><div><strong data-ar="إغلاق يوم أمس لم يعتمد" data-en="Yesterday’s close is pending">إغلاق يوم أمس لم يعتمد</strong><small data-ar="مطابقة المدفوعات قبل الترحيل" data-en="Reconcile payments before posting">مطابقة المدفوعات قبل الترحيل</small></div><b>‹</b></button></div></article></div>
+          </section>
+
+          <section class="ops-page" data-ops-panel="calendar" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="جدول الفرع" data-en="Branch schedule">جدول الفرع</span><h3 data-ar="التقويم والحجوزات" data-en="Calendar & bookings">التقويم والحجوزات</h3><p data-ar="وزّعي المواعيد على الخبيرات والغرف، واكتشفي التعارض قبل تأكيد الحجز." data-en="Assign bookings to experts and rooms, and catch conflicts before confirmation.">وزّعي المواعيد على الخبيرات والغرف، واكتشفي التعارض قبل تأكيد الحجز.</p></div><div class="ops-actions"><button class="btn secondary-btn compact" type="button" data-ar="أسبوعي" data-en="Week">أسبوعي</button><button class="btn primary-btn compact ops-action" type="button" data-ar="حجز سريع" data-en="Quick booking">حجز سريع</button></div></div><div class="ops-calendar"><div class="ops-calendar-head"><span data-ar="الخبيرة / الغرفة" data-en="Expert / room">الخبيرة / الغرفة</span><b>09:00</b><b>11:00</b><b>13:00</b><b>15:00</b><b>17:00</b><b>19:00</b></div><div class="ops-calendar-row"><strong data-ar="ريم · غرفة 2" data-en="Reem · Room 2">ريم · غرفة 2</strong><i class="cal-booking berry" style="--start:1;--span:2"><b>تنظيف بشرة</b><small>سارة · مؤكد</small></i><i class="cal-booking blush" style="--start:4;--span:2"><b>مناكير</b><small>جود · عربون</small></i></div><div class="ops-calendar-row"><strong data-ar="لينا · غرفة 1" data-en="Lina · Room 1">لينا · غرفة 1</strong><i class="cal-booking rose" style="--start:2;--span:3"><b>تصفيف مناسبة</b><small>نورة · قيد الوصول</small></i></div><div class="ops-calendar-row"><strong data-ar="هند · غرفة 3" data-en="Hind · Room 3">هند · Room 3</strong><i class="cal-empty" style="--start:1;--span:5" data-ar="متاح للحجز" data-en="Available">متاح للحجز</i></div></div><div class="ops-conflict"><span>!</span><div><strong data-ar="تنبيه تعارض محتمل" data-en="Potential conflict">تنبيه تعارض محتمل</strong><p data-ar="الخدمة المنزلية الساعة 18:30 تحتاج 90 دقيقة تنقل. اقترحي 20:00 أو خبيرة بديلة قبل التأكيد." data-en="The 18:30 home service needs 90 minutes of travel. Suggest 20:00 or another expert before confirming.">الخدمة المنزلية الساعة 18:30 تحتاج 90 دقيقة تنقل. اقترحي 20:00 أو خبيرة بديلة قبل التأكيد.</p></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="اقتراح بديل" data-en="Suggest alternative">اقتراح بديل</button></div></section>
+
+          <section class="ops-page" data-ops-panel="clients" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="علاقة طويلة" data-en="Long-term care">علاقة طويلة</span><h3 data-ar="العميلات وتفضيلات الزيارة" data-en="Clients & visit preferences">العميلات وتفضيلات الزيارة</h3><p data-ar="ملف واحد يجمع الزيارات والملاحظات والتفضيلات، مع تنبيه الحساسية قبل الحجز." data-en="One profile for visits, notes and preferences, with allergy alerts before booking.">ملف واحد يجمع الزيارات والملاحظات والتفضيلات، مع تنبيه الحساسية قبل الحجز.</p></div><button class="btn primary-btn compact ops-action" type="button" data-ar="إضافة عميلة" data-en="Add client">إضافة عميلة</button></div><div class="ops-client-layout"><div class="ops-client-list"><label class="ops-search"><span>⌕</span><input type="search" placeholder="ابحثي بالاسم أو الجوال" data-placeholder-ar="ابحثي بالاسم أو الجوال" data-placeholder-en="Search by name or mobile"></label><button class="ops-client-item active" type="button"><span>س</span><div><strong>سارة العتيبي</strong><small>آخر زيارة قبل 21 يومًا</small></div><b>VIP</b></button><button class="ops-client-item" type="button"><span>ن</span><div><strong>نورة السالم</strong><small>موعد قادم اليوم</small></div><b>3</b></button><button class="ops-client-item" type="button"><span>ج</span><div><strong>جود القحطاني</strong><small>عميلة جديدة</small></div><b>1</b></button></div><div class="ops-client-profile"><div class="ops-profile-head"><span class="ops-avatar">س</span><div><h4>سارة العتيبي</h4><p>عضوية ذهبية · 18 زيارة · إنفاق 4,860 ر.س</p></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="التواصل" data-en="Contact">التواصل</button></div><div class="ops-preference-grid"><div><span data-ar="الخدمات المفضلة" data-en="Preferred services">الخدمات المفضلة</span><strong>تنظيف البشرة · عناية الشعر</strong></div><div><span data-ar="اللون المفضل" data-en="Preferred color">اللون المفضل</span><strong>درجات وردية هادئة</strong></div><div><span data-ar="المشروب" data-en="Drink">المشروب</span><strong>لاتيه بدون سكر</strong></div><div><span data-ar="أجواء الزيارة" data-en="Visit mood">أجواء الزيارة</span><strong>هدوء · موسيقى خفيفة</strong></div><div><span data-ar="الخبيرة والوقت" data-en="Expert & time">الخبيرة والوقت</span><strong>ريم · بعد 6 مساءً</strong></div><div><span data-ar="الخصوصية" data-en="Privacy">الخصوصية</span><strong>بدون تصوير أو مشاركة</strong></div></div><div class="ops-allergy"><span>!</span><div><strong data-ar="تنبيه حساسية" data-en="Allergy alert">تنبيه حساسية</strong><p data-ar="تتحسس من العطور القوية. يظهر التنبيه للفريق عند تجهيز الخدمة فقط." data-en="Sensitive to strong fragrances. The alert is visible to the team only when preparing the service.">تتحسس من العطور القوية. يظهر التنبيه للفريق عند تجهيز الخدمة فقط.</p></div></div></div></div></section>
+
+          <section class="ops-page" data-ops-panel="services" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="العرض والربحية" data-en="Offer & margin">العرض والربحية</span><h3 data-ar="الخدمات والباقات والعروض" data-en="Services, packages & offers">الخدمات والباقات والعروض</h3><p data-ar="عدّلي السعر والمدة والتوفر حسب الفرع والخبيرة، وجدولي العرض قبل ظهوره للعميلات." data-en="Edit price, duration and availability by branch and expert, then schedule offers before publishing.">عدّلي السعر والمدة والتوفر حسب الفرع والخبيرة، وجدولي العرض قبل ظهوره للعميلات.</p></div><button class="btn primary-btn compact ops-action" type="button" data-ar="إضافة خدمة" data-en="Add service">إضافة خدمة</button></div><div class="ops-table"><div class="ops-table-head"><span data-ar="الخدمة" data-en="Service">الخدمة</span><span data-ar="المدة" data-en="Duration">المدة</span><span data-ar="السعر" data-en="Price">السعر</span><span data-ar="الحالة" data-en="Status">الحالة</span><span></span></div><div class="ops-table-row"><strong>تصفيف شعر للمناسبات</strong><span>60 دقيقة</span><b>250 ر.س</b><span class="chip success">نشطة</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="تعديل" data-en="Edit">تعديل</button></div><div class="ops-table-row"><strong>تنظيف بشرة عميق</strong><span>60 دقيقة</span><b>299 ر.س</b><span class="chip success">نشطة</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="تعديل" data-en="Edit">تعديل</button></div><div class="ops-table-row"><strong>باقة العروس الهادئة</strong><span>180 دقيقة</span><b>780 ر.س</b><span class="chip info">مجدولة</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="عرض" data-en="View">عرض</button></div></div><div class="ops-offer-banner"><div><span class="ops-kicker" data-ar="عرض مؤقت" data-en="Limited offer">عرض مؤقت</span><strong data-ar="خصم 15% على الحجوزات الصباحية" data-en="15% off morning bookings">خصم 15% على الحجوزات الصباحية</strong><small data-ar="من 20 إلى 30 سبتمبر · الفرع: العليا" data-en="20–30 September · Olaya branch">من 20 إلى 30 سبتمبر · الفرع: العليا</small></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="مراجعة العرض" data-en="Review offer">مراجعة العرض</button></div></section>
+
+          <section class="ops-page" data-ops-panel="team" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="الفريق" data-en="Team">الفريق</span><h3 data-ar="الخبيرات والدوام والصلاحيات" data-en="Experts, schedules & permissions">الخبيرات والدوام والصلاحيات</h3><p data-ar="كل خبيرة ترى ما تحتاجه فقط، وتُحسب العمولة من الخدمة المكتملة." data-en="Each expert sees only what she needs, with commission calculated from completed services.">كل خبيرة ترى ما تحتاجه فقط، وتُحسب العمولة من الخدمة المكتملة.</p></div><button class="btn primary-btn compact ops-action" type="button" data-ar="إضافة خبيرة" data-en="Add expert">إضافة خبيرة</button></div><div class="ops-team-grid"><article class="ops-team-card"><div class="ops-profile-head"><span class="ops-avatar rose">ر</span><div><h4>ريم الحربي</h4><p>بشرة · 82% إشغال</p></div><span class="chip success">متاحة</span></div><div class="ops-team-meta"><span>الدوام <b>10:00–18:00</b></span><span>العمولة <b>12%</b></span><span>الصلاحية <b>خبيرة</b></span></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="إدارة الجدول" data-en="Manage schedule">إدارة الجدول</button></article><article class="ops-team-card"><div class="ops-profile-head"><span class="ops-avatar blush">ل</span><div><h4>لينا الشمري</h4><p>شعر ومناسبات · 76% إشغال</p></div><span class="chip warning">استراحة</span></div><div class="ops-team-meta"><span>الدوام <b>12:00–20:00</b></span><span>العمولة <b>10%</b></span><span>الصلاحية <b>مديرة فرع</b></span></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="إدارة الجدول" data-en="Manage schedule">إدارة الجدول</button></article><article class="ops-team-card"><div class="ops-profile-head"><span class="ops-avatar dark">ه</span><div><h4>هند المطيري</h4><p>أظافر · 68% إشغال</p></div><span class="chip success">متاحة</span></div><div class="ops-team-meta"><span>الدوام <b>09:00–17:00</b></span><span>العمولة <b>11%</b></span><span>الصلاحية <b>خبيرة</b></span></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="إدارة الجدول" data-en="Manage schedule">إدارة الجدول</button></article></div></section>
+
+          <section class="ops-page" data-ops-panel="inventory" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="المواد والاستهلاك" data-en="Supplies & usage">المواد والاستهلاك</span><h3 data-ar="المنتجات والمخزون والموردون" data-en="Products, inventory & suppliers">المنتجات والمخزون والموردون</h3><p data-ar="يُخصم الاستهلاك من الخدمة تلقائيًا، وتظهر تنبيهات النقص والصلاحية قبل تأثيرها على التشغيل." data-en="Service consumption is deducted automatically, with low-stock and expiry alerts before operations are affected.">يُخصم الاستهلاك من الخدمة تلقائيًا، وتظهر تنبيهات النقص والصلاحية قبل تأثيرها على التشغيل.</p></div><button class="btn primary-btn compact ops-action" type="button" data-ar="أمر شراء" data-en="Purchase order">أمر شراء</button></div><div class="ops-inventory-alerts"><div><strong>3</strong><span data-ar="أصناف منخفضة" data-en="Low-stock items">أصناف منخفضة</span></div><div><strong>2</strong><span data-ar="تنتهي خلال 30 يومًا" data-en="Expire within 30 days">تنتهي خلال 30 يومًا</span></div><div><strong>14</strong><span data-ar="حركة اليوم" data-en="Movements today">حركة اليوم</span></div></div><div class="ops-table"><div class="ops-table-head"><span data-ar="الصنف" data-en="Item">الصنف</span><span data-ar="الفرع" data-en="Branch">الفرع</span><span data-ar="المتاح" data-en="Available">المتاح</span><span data-ar="الحالة" data-en="Status">الحالة</span><span></span></div><div class="ops-table-row"><strong>ماسك ترطيب مميز</strong><span>العليا</span><b>4 / 20</b><span class="chip error">منخفض</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="طلب" data-en="Order">طلب</button></div><div class="ops-table-row"><strong>صبغة بني دافئ</strong><span>العليا</span><b>18 / 24</b><span class="chip success">جيد</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="الحركة" data-en="History">الحركة</button></div><div class="ops-table-row"><strong>سيروم عناية</strong><span>النخيل</span><b>6 / 12</b><span class="chip warning">قرب الانتهاء</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="النقل" data-en="Transfer">النقل</button></div></div></section>
+
+          <section class="ops-page" data-ops-panel="finance" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="وضوح يومي" data-en="Daily clarity">وضوح يومي</span><h3 data-ar="المدفوعات والفواتير والمصروفات" data-en="Payments, invoices & expenses">المدفوعات والفواتير والمصروفات</h3><p data-ar="واجهة تشغيلية قبل النظام المحاسبي الكامل، مع مطابقة طرق الدفع والإغلاق اليومي وسجل التدقيق." data-en="An operational layer before full accounting, with payment reconciliation, daily close and audit trail.">واجهة تشغيلية قبل النظام المحاسبي الكامل، مع مطابقة طرق الدفع والإغلاق اليومي وسجل التدقيق.</p></div><button class="btn primary-btn compact ops-action" type="button" data-ar="إضافة مصروف" data-en="Add expense">إضافة مصروف</button></div><div class="ops-metrics compact-metrics"><article class="ops-metric"><span data-ar="محصل" data-en="Collected">محصل</span><strong>12,480 <small>ر.س</small></strong><small>Apple Pay · مدى · نقدي</small></article><article class="ops-metric"><span data-ar="معلّق" data-en="Pending">معلّق</span><strong>1,260 <small>ر.س</small></strong><small>3 حجوزات</small></article><article class="ops-metric"><span data-ar="مسترد" data-en="Refunded">مسترد</span><strong>420 <small>ر.س</small></strong><small>معتمد إداريًا</small></article><article class="ops-metric"><span data-ar="عمولات الفريق" data-en="Team commissions">عمولات الفريق</span><strong>1,860 <small>ر.س</small></strong><small>بعد إتمام الخدمات</small></article></div><div class="ops-finance-grid"><article class="ops-card"><div class="ops-card-head"><h3 data-ar="مطابقة الإغلاق اليومي" data-en="Daily close reconciliation">مطابقة الإغلاق اليومي</h3><span class="chip warning">قيد المراجعة</span></div><div class="finance-line"><span>مدى</span><b>5,430 ر.س</b><i>متطابق</i></div><div class="finance-line"><span>Apple Pay</span><b>4,210 ر.س</b><i>متطابق</i></div><div class="finance-line"><span>نقدي</span><b>2,840 ر.س</b><i class="needs">فرق 120 ر.س</i></div><button class="btn primary-btn compact ops-action" type="button" data-ar="مراجعة وإغلاق" data-en="Review & close">مراجعة وإغلاق</button></article><article class="ops-card"><div class="ops-card-head"><h3 data-ar="آخر المصروفات" data-en="Recent expenses">آخر المصروفات</h3><button class="btn ghost-btn compact" type="button" data-ar="كل المصروفات" data-en="All expenses">كل المصروفات</button></div><div class="finance-line"><span>توريد منتجات</span><b>1,280 ر.س</b><i>أمس</i></div><div class="finance-line"><span>صيانة غرفة 2</span><b>340 ر.س</b><i>12 سبتمبر</i></div><div class="finance-line"><span>مواد ضيافة</span><b>180 ر.س</b><i>10 سبتمبر</i></div></article></div></section>
+
+          <section class="ops-page" data-ops-panel="reports" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="قرارات أفضل" data-en="Better decisions">قرارات أفضل</span><h3 data-ar="التقارير والتحليلات الذكية" data-en="Reports & smart analytics">التقارير والتحليلات الذكية</h3><p data-ar="قارني الفروع والخدمات والخبيرات، ثم راجعي التوصية قبل تنفيذ أي تغيير." data-en="Compare branches, services and experts, then review recommendations before any change.">قارني الفروع والخدمات والخبيرات، ثم راجعي التوصية قبل تنفيذ أي تغيير.</p></div><div class="ops-actions"><button class="btn secondary-btn compact ops-action" type="button" data-ar="تصدير" data-en="Export">تصدير</button><button class="btn primary-btn compact ops-action" type="button" data-ar="جدولة التقرير" data-en="Schedule report">جدولة التقرير</button></div></div><div class="ops-report-grid"><article class="ops-card"><div class="ops-card-head"><h3 data-ar="الإيرادات خلال الأسبوع" data-en="Weekly revenue">الإيرادات خلال الأسبوع</h3><span class="positive">+18%</span></div><div class="ops-bars"><i style="--h:44%"><small>س</small></i><i style="--h:58%"><small>ح</small></i><i style="--h:52%"><small>ن</small></i><i style="--h:76%"><small>ث</small></i><i style="--h:68%"><small>ر</small></i><i style="--h:88%"><small>خ</small></i><i style="--h:94%"><small>ج</small></i></div></article><article class="ops-card"><div class="ops-card-head"><h3 data-ar="توصية تحتاج اعتمادًا" data-en="Recommendation needs approval">توصية تحتاج اعتمادًا</h3><span class="chip info">ذكية</span></div><strong data-ar="مددي خدمة المساء لخبيرة ريم يوم الخميس." data-en="Extend Reem’s evening availability on Thursday.">مددي خدمة المساء لخبيرة ريم يوم الخميس.</strong><p data-ar="البيانات: طلب أعلى 26% بين 18:00 و21:00، مع 7 عميلات في قائمة الانتظار." data-en="Evidence: demand is 26% higher between 18:00 and 21:00, with 7 clients on the waitlist.">البيانات: طلب أعلى 26% بين 18:00 و21:00، مع 7 عميلات في قائمة الانتظار.</p><button class="btn secondary-btn compact ops-action" type="button" data-ar="مراجعة التوصية" data-en="Review recommendation">مراجعة التوصية</button></article></div></section>
+
+          <section class="ops-page" data-ops-panel="marketing" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="لوحة المحتوى" data-en="Content workspace">لوحة المحتوى</span><h3 data-ar="التسويق والحملات والرسائل الآلية" data-en="Marketing, campaigns & automation">التسويق والحملات والرسائل الآلية</h3><p data-ar="هذه اللوحة للصالون نفسه: تربط حساباته الاجتماعية بعد موافقته، وتجهز المحتوى والجدولة. لا يتم النشر تلقائيًا قبل اعتماد الصالون." data-en="This workspace belongs to the salon: connect its social accounts with consent, prepare and schedule content. Nothing publishes before salon approval.">هذه اللوحة للصالون نفسه: تربط حساباته الاجتماعية بعد موافقته، وتجهز المحتوى والجدولة. لا يتم النشر تلقائيًا قبل اعتماد الصالون.</p></div><button class="btn primary-btn compact ops-action" type="button" data-ar="إنشاء حملة" data-en="Create campaign">إنشاء حملة</button></div><div class="ops-social-connect"><div><strong data-ar="الحسابات المرتبطة" data-en="Connected accounts">الحسابات المرتبطة</strong><span data-ar="تُستخدم للحسابات التي يملكها الصالون فقط" data-en="Only accounts owned by the salon">تُستخدم للحسابات التي يملكها الصالون فقط</span></div><div class="social-chips"><button class="chip success ops-action" type="button" data-ar="Instagram · مرتبط" data-en="Instagram · Connected">Instagram · مرتبط</button><button class="chip ops-action" type="button" data-ar="WhatsApp · مرتبط" data-en="WhatsApp · Connected">WhatsApp · مرتبط</button><button class="chip ops-action" type="button" data-ar="ربط TikTok" data-en="Connect TikTok">ربط TikTok</button></div></div><div class="ops-campaign-grid"><article class="ops-campaign-card"><span class="chip info">مسودة</span><h4 data-ar="أجواء الخريف الهادئة" data-en="Quiet autumn mood">أجواء الخريف الهادئة</h4><p data-ar="3 منشورات · 2 قصة · عرض صباحي" data-en="3 posts · 2 stories · morning offer">3 منشورات · 2 قصة · عرض صباحي</p><div><small data-ar="الموافقة مطلوبة قبل الجدولة" data-en="Approval required before scheduling">الموافقة مطلوبة قبل الجدولة</small><button class="btn secondary-btn compact ops-action" type="button" data-ar="مراجعة" data-en="Review">مراجعة</button></div></article><article class="ops-campaign-card"><span class="chip success">مجدولة</span><h4 data-ar="عودة العميلات غير النشطات" data-en="Win back inactive clients">عودة العميلات غير النشطات</h4><p data-ar="رسالة WhatsApp · 42 عميلة موافقة" data-en="WhatsApp message · 42 opted-in clients">رسالة WhatsApp · 42 عميلة موافقة</p><div><small>20 سبتمبر · 11:00</small><button class="btn secondary-btn compact ops-action" type="button" data-ar="التفاصيل" data-en="Details">التفاصيل</button></div></article></div></section>
+
+          <section class="ops-page" data-ops-panel="reviews" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="تجربة العميلة" data-en="Client experience">تجربة العميلة</span><h3 data-ar="التقييمات والسمعة والشكاوى" data-en="Reviews, reputation & cases">التقييمات والسمعة والشكاوى</h3><p data-ar="التقييم العام يُجاب عليه باحتراف، والشكوى الخاصة تتحول إلى حالة بمسؤول ومدة معالجة." data-en="Public reviews get a professional reply; private complaints become cases with owners and due times.">التقييم العام يُجاب عليه باحتراف، والشكوى الخاصة تتحول إلى حالة بمسؤول ومدة معالجة.</p></div><span class="chip warning">حالتان تحتاجان إجراء</span></div><div class="ops-review-summary"><div><strong>4.9</strong><span>★ متوسط التقييم</span></div><div><strong>96%</strong><span>نسبة الرد</span></div><div><strong>2س</strong><span>متوسط الاستجابة</span></div><div><strong>88%</strong><span>رضا بعد الإغلاق</span></div></div><div class="ops-case-list"><article class="ops-case"><div><span class="chip error">شكوى خاصة</span><h4>تأخر موعد · سارة العتيبي</h4><p>الفرع: العليا · الخدمة: تنظيف بشرة · الأولوية: عالية</p></div><div><small>المسؤول: مديرة الفرع</small><button class="btn primary-btn compact ops-action" type="button" data-ar="فتح الحالة" data-en="Open case">فتح الحالة</button></div></article><article class="ops-case"><div><span class="chip info">تقييم عام</span><h4>«تجربة هادئة واهتمام بالتفاصيل»</h4><p>نورة السالم · 5 نجوم · قبل 3 ساعات</p></div><div><small>رد مقترح جاهز</small><button class="btn secondary-btn compact ops-action" type="button" data-ar="مراجعة الرد" data-en="Review reply">مراجعة الرد</button></div></article></div></section>
+
+          <section class="ops-page" data-ops-panel="settings" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="التحكم والخصوصية" data-en="Control & privacy">التحكم والخصوصية</span><h3 data-ar="إعدادات المنشأة والتكاملات" data-en="Business settings & integrations">إعدادات المنشأة والتكاملات</h3><p data-ar="السياسات، الفروع، الأذونات، الإشعارات، رابط الحجز، والتكامل المحاسبي في مكان واحد." data-en="Policies, branches, permissions, notifications, booking link and accounting integration in one place.">السياسات، الفروع، الأذونات، الإشعارات، رابط الحجز، والتكامل المحاسبي في مكان واحد.</p></div><button class="btn primary-btn compact ops-action" type="button" data-ar="حفظ التغييرات" data-en="Save changes">حفظ التغييرات</button></div><div class="ops-settings-grid"><button class="ops-setting-card ops-action" type="button"><span>⌂</span><div><strong data-ar="الفروع وأوقات العمل" data-en="Branches & hours">الفروع وأوقات العمل</strong><small>2 فروع · 09:00–23:00</small></div><b>‹</b></button><button class="ops-setting-card ops-action" type="button"><span>◈</span><div><strong data-ar="السياسات والعربون" data-en="Policies & deposits">السياسات والعربون</strong><small data-ar="إلغاء قبل 6 ساعات · عربون 20%" data-en="Cancel 6 hours before · 20% deposit">إلغاء قبل 6 ساعات · عربون 20%</small></div><b>‹</b></button><button class="ops-setting-card ops-action" type="button"><span>◌</span><div><strong data-ar="التكامل المحاسبي" data-en="Accounting integration">التكامل المحاسبي</strong><small data-ar="جاهز للربط مع برنامج معتمد لاحقًا" data-en="Ready to connect to an approved system later">جاهز للربط مع برنامج معتمد لاحقًا</small></div><b>‹</b></button><button class="ops-setting-card ops-action" type="button"><span>⌁</span><div><strong data-ar="الأمان وسجل النشاط" data-en="Security & audit log">الأمان وسجل النشاط</strong><small data-ar="المصادقة الثنائية مفعلة · 12 إجراء اليوم" data-en="2FA enabled · 12 actions today">المصادقة الثنائية مفعلة · 12 إجراء اليوم</small></div><b>‹</b></button></div><div class="ops-link-card"><div><span class="ops-kicker" data-ar="رابط الحجز المباشر" data-en="Direct booking link">رابط الحجز المباشر</span><strong>glam.sa/dar-lamsa</strong><small data-ar="يمكن مشاركته أو تحويله إلى QR مع معاينة الصفحة قبل النشر." data-en="Share it or turn it into a QR code, with a preview before publishing.">يمكن مشاركته أو تحويله إلى QR مع معاينة الصفحة قبل النشر.</small></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="نسخ الرابط" data-en="Copy link">نسخ الرابط</button></div></section>
+
+          <section class="ops-page" data-ops-panel="subscriptions" hidden><div class="ops-page-head"><div><span class="ops-kicker" data-ar="نمو قابل للوضوح" data-en="Clear growth">نمو قابل للوضوح</span><h3 data-ar="اشتراك Glam للصالون" data-en="Glam salon subscription">اشتراك Glam للصالون</h3><p data-ar="الخطط قابلة للتعديل لاحقًا، وتظهر الفاتورة والاستخدام والصلاحيات بوضوح قبل الاعتماد." data-en="Plans can evolve later, with billing, usage and permissions shown clearly before approval.">الخطط قابلة للتعديل لاحقًا، وتظهر الفاتورة والاستخدام والصلاحيات بوضوح قبل الاعتماد.</p></div><span class="chip success">نشط</span></div><div class="ops-plan-current"><div><span data-ar="الخطة الحالية" data-en="Current plan">الخطة الحالية</span><strong>Glam Growth</strong><small data-ar="حتى 3 فروع · حجوزات غير محدودة · تقارير وتسويق" data-en="Up to 3 branches · unlimited bookings · reports and marketing">حتى 3 فروع · حجوزات غير محدودة · تقارير وتسويق</small></div><div><b>699 ر.س</b><small data-ar="شهريًا قبل الضريبة" data-en="per month before tax">شهريًا قبل الضريبة</small></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="إدارة الاشتراك" data-en="Manage plan">إدارة الاشتراك</button></div><div class="ops-plan-grid"><article class="ops-plan"><span data-ar="Starter" data-en="Starter">Starter</span><strong>299 ر.س</strong><small data-ar="فرع واحد · 80 حجزًا" data-en="1 branch · 80 bookings">فرع واحد · 80 حجزًا</small><button class="btn secondary-btn compact ops-action" type="button" data-ar="عرض الخطة" data-en="View plan">عرض الخطة</button></article><article class="ops-plan featured"><span data-ar="Growth" data-en="Growth">Growth</span><strong>699 ر.س</strong><small data-ar="3 فروع · التشغيل الكامل" data-en="3 branches · full operations">3 فروع · التشغيل الكامل</small><button class="btn primary-btn compact ops-action" type="button" data-ar="الخطة الحالية" data-en="Current plan">الخطة الحالية</button></article><article class="ops-plan"><span data-ar="Scale" data-en="Scale">Scale</span><strong>حسب الحاجة</strong><small data-ar="فروع متعددة · تكاملات متقدمة" data-en="Multiple branches · advanced integrations">فروع متعددة · تكاملات متقدمة</small><button class="btn secondary-btn compact ops-action" type="button" data-ar="طلب عرض" data-en="Request quote">طلب عرض</button></article></div></section>
+        </div>
+      </section>
+
+      <section class="view" id="view-platform" data-view-panel="platform" hidden>
+        <div class="section-heading"><div><p class="eyebrow" data-ar="Glam central · P-01" data-en="Glam central · P-01">Glam central · P-01</p><h2 data-ar="إدارة المنصة مع اعتماد بشري واضح." data-en="Central administration with clear human approval.">إدارة المنصة مع اعتماد بشري واضح.</h2></div><span class="approved-badge" data-ar="للاستخدام الداخلي" data-en="Internal only">للاستخدام الداخلي</span></div>
+        <div class="platform-metrics"><article class="ops-metric"><span data-ar="صالونات نشطة" data-en="Active salons">صالونات نشطة</span><strong>248</strong><small class="positive">+14 هذا الشهر</small></article><article class="ops-metric"><span data-ar="طلبات اعتماد" data-en="Approval queue">طلبات اعتماد</span><strong>17</strong><small data-ar="5 عالية الأولوية" data-en="5 high priority">5 عالية الأولوية</small></article><article class="ops-metric"><span data-ar="حجوزات اليوم" data-en="Today’s bookings">حجوزات اليوم</span><strong>1,824</strong><small data-ar="من كل الفروع" data-en="Across all branches">من كل الفروع</small></article><article class="ops-metric"><span data-ar="سلامة النظام" data-en="System health">سلامة النظام</span><strong>99.9%</strong><small class="positive">مستقر</small></article></div>
+        <div class="platform-grid"><article class="ops-card"><div class="ops-card-head"><div><span class="ops-kicker" data-ar="الاعتماد" data-en="Approvals">الاعتماد</span><h3 data-ar="طلبات انضمام تحتاج مراجعة" data-en="Onboarding requests to review">طلبات انضمام تحتاج مراجعة</h3></div><button class="btn secondary-btn compact ops-action" type="button" data-ar="كل الطلبات" data-en="All requests">كل الطلبات</button></div><div class="platform-request"><div><strong>نوف بيوتي</strong><small>الرياض · صالون نسائي · منذ 18 دقيقة</small></div><span class="chip warning">وثيقة ناقصة</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="فتح" data-en="Open">فتح</button></div><div class="platform-request"><div><strong>استوديو لمار</strong><small>جدة · استوديو متخصص · منذ ساعة</small></div><span class="chip info">مكتمل</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="فتح" data-en="Open">فتح</button></div><div class="platform-request"><div><strong>بيت العناية</strong><small>الرياض · خدمة منزلية · منذ ساعتين</small></div><span class="chip success">مقبول مبدئيًا</span><button class="btn ghost-btn compact ops-action" type="button" data-ar="فتح" data-en="Open">فتح</button></div></article><article class="ops-card"><div class="ops-card-head"><div><span class="ops-kicker" data-ar="المراجعة" data-en="Audit">المراجعة</span><h3 data-ar="آخر إجراءات الإدارة" data-en="Recent admin actions">آخر إجراءات الإدارة</h3></div><span class="chip info">سجل تدقيق</span></div><div class="platform-audit"><span>09:42</span><div><strong>اعتماد ملف دار لمسة</strong><small>بواسطة: سعود · سياسة الاعتماد v1</small></div></div><div class="platform-audit"><span>09:15</span><div><strong>إيقاف حملة مخالفة</strong><small>المحتوى يحتاج تعديلًا قبل النشر</small></div></div><div class="platform-audit"><span>08:50</span><div><strong>تحديث صلاحية مديرة فرع</strong><small>الفرع: العليا · تم تسجيل السبب</small></div></div></article></div><div class="platform-guard"><span>✦</span><div><strong data-ar="قاعدة المنصة" data-en="Platform rule">قاعدة المنصة</strong><p data-ar="لا تُنشر حملة، ولا يُعتمد استرداد أو تغيير مالي حساس، ولا تُفتح صلاحية واسعة دون موافقة بشرية وسجل قابل للمراجعة." data-en="No campaign, refund or sensitive financial change is published or approved, and no broad permission opens without human approval and an auditable record.">لا تُنشر حملة، ولا يُعتمد استرداد أو تغيير مالي حساس، ولا تُفتح صلاحية واسعة دون موافقة بشرية وسجل قابل للمراجعة.</p></div></div>
+      </section>
+
+      <section class="view" id="view-complete" data-view-panel="complete" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-ar="Glam product map" data-en="Glam product map">Glam product map</p>
+            <h2 data-ar="كل الرحلات في مساحة واحدة." data-en="Every journey in one place.">كل الرحلات في مساحة واحدة.</h2>
+          </div>
+          <span class="approved-badge" data-ar="هوية Glam مثبتة" data-en="Glam identity locked">هوية Glam مثبتة</span>
+        </div>
+        <div class="complete-note panel"><span class="notice-mark" aria-hidden="true">✦</span><div><strong data-ar="نسخة المراجعة الشاملة" data-en="Complete review build">نسخة المراجعة الشاملة</strong><p data-ar="تضم رحلة العميلة من الاكتشاف إلى الحجز والتقييم، ورحلة الصالون من الانضمام إلى التشغيل، إضافة إلى إدارة المنصة. جميع البيانات تجريبية للمراجعة." data-en="Includes the customer journey from discovery to booking and review, the salon journey from onboarding to operations, and platform administration. All data is for review only.">تضم رحلة العميلة من الاكتشاف إلى الحجز والتقييم، ورحلة الصالون من الانضمام إلى التشغيل، إضافة إلى إدارة المنصة. جميع البيانات تجريبية للمراجعة.</p></div></div>
+        <div class="complete-stage"><iframe id="complete-frame" src="complete-raw.html" title="نسخة Glam التفاعلية الشاملة"></iframe></div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

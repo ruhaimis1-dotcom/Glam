@@ -1,0 +1,90 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "meta": {
+    "name": "Glam Design Tokens",
+    "version": "1.0.0",
+    "status": "approved",
+    "approvedAt": "2026-09-14",
+    "direction": "rtl-first"
+  },
+  "logo": {
+    "primaryColor": { "$type": "color", "$value": "#5A1835" },
+    "reverseColor": { "$type": "color", "$value": "#FFFCF8" },
+    "wordmarkReference": "assets/glam-wordmark-reference-lavender.png",
+    "primaryAsset": "assets/glam-wordmark-berry.png",
+    "reverseAsset": "assets/glam-wordmark-white.png",
+    "lavenderUsage": "letterform-reference-only"
+  },
+  "color": {
+    "brand": {
+      "primary": { "$type": "color", "$value": "#5A1835" },
+      "primaryDark": { "$type": "color", "$value": "#3D0F26" },
+      "primarySoft": { "$type": "color", "$value": "#8C2E55" },
+      "blush": { "$type": "color", "$value": "#E8CCD1" },
+      "roseGold": { "$type": "color", "$value": "#B98676" }
+    },
+    "surface": {
+      "canvas": { "$type": "color", "$value": "#F7F1EA" },
+      "primary": { "$type": "color", "$value": "#FFFCF8" },
+      "subtle": { "$type": "color", "$value": "#F1E8E3" }
+    },
+    "border": {
+      "default": { "$type": "color", "$value": "#E6DAD4" }
+    },
+    "text": {
+      "primary": { "$type": "color", "$value": "#21181C" },
+      "secondary": { "$type": "color", "$value": "#6F6268" },
+      "inverse": { "$type": "color", "$value": "#FFFFFF" }
+    },
+    "status": {
+      "success": { "$type": "color", "$value": "#178A61" },
+      "warning": { "$type": "color", "$value": "#B96A12" },
+      "error": { "$type": "color", "$value": "#C63C4C" },
+      "info": { "$type": "color", "$value": "#2D6FA3" }
+    }
+  },
+  "font": {
+    "family": {
+      "ui": { "$type": "fontFamily", "$value": "Readex Pro" },
+      "fallback": { "$type": "fontFamily", "$value": ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"] }
+    },
+    "weight": {
+      "regular": { "$type": "fontWeight", "$value": 400 },
+      "medium": { "$type": "fontWeight", "$value": 500 },
+      "semibold": { "$type": "fontWeight", "$value": 600 },
+      "bold": { "$type": "fontWeight", "$value": 700 }
+    },
+    "size": {
+      "caption": { "$type": "dimension", "$value": "12px" },
+      "label": { "$type": "dimension", "$value": "14px" },
+      "body": { "$type": "dimension", "$value": "16px" },
+      "bodyLarge": { "$type": "dimension", "$value": "18px" },
+      "h3": { "$type": "dimension", "$value": "20px" },
+      "h2": { "$type": "dimension", "$value": "24px" },
+      "h1": { "$type": "dimension", "$value": "32px" },
+      "display": { "$type": "dimension", "$value": "40px" }
+    }
+  },
+  "space": {
+    "1": { "$type": "dimension", "$value": "4px" },
+    "2": { "$type": "dimension", "$value": "8px" },
+    "3": { "$type": "dimension", "$value": "12px" },
+    "4": { "$type": "dimension", "$value": "16px" },
+    "6": { "$type": "dimension", "$value": "24px" },
+    "8": { "$type": "dimension", "$value": "32px" },
+    "10": { "$type": "dimension", "$value": "40px" },
+    "12": { "$type": "dimension", "$value": "48px" },
+    "16": { "$type": "dimension", "$value": "64px" }
+  },
+  "radius": {
+    "control": { "$type": "dimension", "$value": "12px" },
+    "card": { "$type": "dimension", "$value": "16px" },
+    "panel": { "$type": "dimension", "$value": "24px" },
+    "pill": { "$type": "dimension", "$value": "999px" }
+  },
+  "motion": {
+    "fast": { "$type": "duration", "$value": "160ms" },
+    "normal": { "$type": "duration", "$value": "220ms" },
+    "slow": { "$type": "duration", "$value": "320ms" }
+  }
+}
