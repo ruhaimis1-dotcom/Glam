@@ -65,8 +65,8 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
 
-  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Tajawal", "IBM Plex Sans Arabic", ui-sans-serif, sans-serif;
+  --font-sans: "Readex Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Readex Pro", ui-sans-serif, system-ui, sans-serif;
 
   --shadow-soft: 0 1px 2px oklch(0.3 0.08 340 / 4%), 0 8px 24px -12px oklch(0.3 0.08 340 / 14%);
   --shadow-lift: 0 2px 4px oklch(0.3 0.08 340 / 5%), 0 18px 40px -16px oklch(0.3 0.08 340 / 22%);
@@ -81,14 +81,14 @@
   --card-foreground: oklch(0.24 0.05 335);
   --popover: oklch(0.998 0.003 80);
   --popover-foreground: oklch(0.24 0.05 335);
-  --primary: oklch(0.33 0.11 335);
+  --primary: #5a1835;
   --primary-foreground: oklch(0.985 0.007 70);
   --secondary: oklch(0.95 0.02 355);
-  --secondary-foreground: oklch(0.33 0.11 335);
+  --secondary-foreground: #5a1835;
   --muted: oklch(0.955 0.01 60);
   --muted-foreground: oklch(0.52 0.04 340);
   --accent: oklch(0.93 0.035 355);
-  --accent-foreground: oklch(0.33 0.11 335);
+  --accent-foreground: #5a1835;
   --destructive: oklch(0.55 0.2 22);
   --destructive-foreground: oklch(0.985 0.007 70);
   --border: oklch(0.91 0.015 40);
@@ -108,13 +108,13 @@
   --sidebar-border: oklch(0.91 0.015 40);
   --sidebar-ring: oklch(0.6 0.12 350);
 
-  --plum: oklch(0.33 0.11 335);
-  --plum-deep: oklch(0.22 0.08 330);
-  --rose: oklch(0.72 0.12 355);
-  --rose-soft: oklch(0.93 0.035 355);
-  --rose-gold: oklch(0.72 0.09 40);
-  --rose-gold-foreground: oklch(0.22 0.08 330);
-  --cream: oklch(0.97 0.012 75);
+  --plum: #5a1835;
+  --plum-deep: #3d0f26;
+  --rose: #e8ccd1;
+  --rose-soft: #e8ccd1;
+  --rose-gold: #b98676;
+  --rose-gold-foreground: #3d0f26;
+  --cream: #f7f1ea;
   --success: oklch(0.6 0.12 160);
   --success-foreground: oklch(0.985 0.007 70);
   --warning: oklch(0.78 0.14 75);
@@ -164,6 +164,7 @@
     font-feature-settings: "kern", "liga";
     -webkit-font-smoothing: antialiased;
   }
+  button, a { cursor: pointer; }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;

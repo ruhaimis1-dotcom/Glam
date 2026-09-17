@@ -7,10 +7,7 @@ import { Badge } from "@/components/ui/badge";
 
 export function GlamLogo({ className, light }: { className?: string; light?: boolean }) {
   return (
-    <span className={cn("inline-flex items-baseline gap-1 font-display font-extrabold tracking-[0.18em]", className)}>
-      <span className={light ? "text-primary-foreground" : "text-primary"}>GLAM</span>
-      <span className="text-rose-gold text-[0.55em] tracking-widest font-semibold">SAUDI</span>
-    </span>
+    <img src="/glam/glam-wordmark-berry.png" alt="Glam Saudi" className={cn("h-8 w-auto object-contain", className)} />
   );
 }
 

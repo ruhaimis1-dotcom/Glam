@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, CalendarDays, Camera, CalendarCheck2, Gem, Heart, Home, MapPin, Palette, Search, Sparkles, Star, UserRound, Waves } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 
 import { CATEGORIES, INTENTS, SALONS } from "@/data/mock";
 import { GlamLogo, SalonCard, SectionTitle } from "@/components/glam/ui";
@@ -14,8 +15,16 @@ export const Route = createFileRoute("/")({
 
 // IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const [query, setQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedIntent, setSelectedIntent] = useState<string | null>(null);
   const categoryIcons = { hair: UserRound, nails: Gem, makeup: Palette, skin: Sparkles, spa: Waves, home: Home, bridal: Heart } as const;
   const intentIcons = { occasion: CalendarCheck2, routine: CalendarDays, try: Sparkles, now: Star, photo: Camera } as const;
+  const visibleSalons = useMemo(() => SALONS.slice(0, 6).filter((salon) => {
+    const text = `${salon.name} ${salon.tagline} ${salon.area} ${salon.district}`;
+    return (!query || text.includes(query)) && (!selectedCategory || salon.categories.some((category) => category === selectedCategory));
+  }), [query, selectedCategory]);
+  const discover = () => document.getElementById("salons")?.scrollIntoView({ behavior: "smooth", block: "start" });
   return (
     <div className="min-h-screen bg-[#fbf8f5] text-[#2c172b]" dir="rtl">
       <header className="sticky top-0 z-20 border-b border-[#eadfda] bg-[#fbf8f5]/95 backdrop-blur">
@@ -39,8 +48,8 @@ function Index() {
               <p className="mt-5 max-w-xl text-lg leading-8 text-[#745e70]">قارني الأعمال الحقيقية، التقييمات، الأسعار والمواعيد المتاحة في مكان واحد.</p>
               <div className="mt-8 flex max-w-xl items-center gap-2 rounded-2xl border border-[#eadfda] bg-white p-2 shadow-sm">
                 <Search className="mx-2 size-5 text-[#9d8997]" />
-                <input className="min-w-0 flex-1 bg-transparent px-1 py-3 outline-none" placeholder="ابحثي عن خدمة أو صالون أو منطقة" />
-                <button className="rounded-xl bg-[#8c285d] px-5 py-3 font-semibold text-white hover:bg-[#702047]">اكتشفي</button>
+                <input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" && discover()} className="min-w-0 flex-1 bg-transparent px-1 py-3 outline-none" placeholder="ابحثي عن خدمة أو صالون أو منطقة" />
+                <button type="button" onClick={discover} className="rounded-xl bg-[#5A1835] px-5 py-3 font-semibold text-white hover:bg-[#3D0F26]">اكتشفي</button>
               </div>
               <div className="mt-6 flex flex-wrap gap-3 text-sm text-[#745e70]"><span className="flex items-center gap-1"><MapPin className="size-4 text-[#8c285d]" /> الرياض</span><span>•</span><span>حجز واضح وموثوق</span></div>
             </div>
@@ -52,7 +61,7 @@ function Index() {
           <SectionTitle title="وش يناسبك اليوم؟" action={<Link to="/bookings" className="flex items-center gap-1 text-sm text-primary">عرض الكل <ArrowLeft className="size-4" /></Link>} />
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
             {CATEGORIES.map((category) => (
-              <button key={category.id} className="rounded-2xl border border-[#eadfda] bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-[#8c285d]/40 hover:shadow-sm">
+              <button type="button" key={category.id} onClick={() => { setSelectedCategory(category.id); setQuery(""); discover(); }} className={`rounded-2xl border border-[#eadfda] bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-[#5A1835]/40 hover:shadow-sm ${selectedCategory === category.id ? "ring-2 ring-[#5A1835]" : ""}`}>
                 {(() => { const Icon = categoryIcons[category.id]; return <Icon className="mx-auto size-6 text-[#8c285d]" strokeWidth={1.7} />; })()}
                 <span className="mt-2 block text-sm font-medium">{category.label}</span>
               </button>
@@ -65,7 +74,7 @@ function Index() {
             <SectionTitle title="اختاري حسب مزاجك" />
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               {INTENTS.map((intent) => (
-                <button key={intent.id} className="rounded-2xl border border-[#eadfda] bg-[#fbf8f5] p-5 text-right hover:border-[#8c285d]/40">
+                <button type="button" key={intent.id} onClick={() => { setSelectedIntent(intent.id); if (intent.id === "now") setQuery(""); discover(); }} className={`rounded-2xl border border-[#eadfda] bg-[#fbf8f5] p-5 text-right hover:border-[#5A1835]/40 ${selectedIntent === intent.id ? "ring-2 ring-[#5A1835]" : ""}`}>
                   {(() => { const Icon = intentIcons[intent.id]; return <Icon className="size-6 text-[#8c285d]" strokeWidth={1.7} />; })()}
                   <h3 className="mt-3 font-semibold">{intent.label}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{intent.hint}</p>
@@ -78,7 +87,7 @@ function Index() {
         <section id="salons" className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           <SectionTitle title="أماكن موثوقة حولك" action={<Link to="/bookings" className="flex items-center gap-1 text-sm text-primary">استكشفي المزيد <ArrowLeft className="size-4" /></Link>} />
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {SALONS.slice(0, 6).map((salon) => <SalonCard key={salon.id} salon={salon} />)}
+            {visibleSalons.length ? visibleSalons.map((salon) => <SalonCard key={salon.id} salon={salon} />) : <div className="col-span-full rounded-2xl border border-dashed p-8 text-center text-muted-foreground">لا توجد نتائج مطابقة. جرّبي كلمة بحث أخرى.</div>}
           </div>
           <div className="mt-10 grid gap-4 rounded-3xl bg-[#2c172b] p-6 text-white sm:grid-cols-3"><div className="flex items-center gap-3"><CalendarDays className="size-5 text-[#e3a1bc]" /><span>مواعيد حية وواضحة</span></div><div className="flex items-center gap-3"><Star className="size-5 text-[#e3a1bc]" /><span>تقييمات من عميلات حقيقيات</span></div><div className="flex items-center gap-3"><Sparkles className="size-5 text-[#e3a1bc]" /><span>تجربة Glam المنزلية</span></div></div>
         </section>

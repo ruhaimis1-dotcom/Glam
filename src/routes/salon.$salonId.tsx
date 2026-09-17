@@ -46,9 +46,9 @@ function SalonPage() {
             <p className="text-sm text-muted-foreground">تبدأ الخدمات من</p>
             <p className="mt-1 text-xl font-bold">{formatSAR(salon.priceFrom)}</p>
           </div>
-          <button type="button" className="w-full rounded-2xl bg-primary px-5 py-3.5 font-semibold text-primary-foreground hover:bg-primary/90">
+          <Link to="/bookings" className="block w-full rounded-2xl bg-primary px-5 py-3.5 text-center font-semibold text-primary-foreground hover:bg-primary/90">
             اختاري الخدمة والموعد
-          </button>
+          </Link>
           <p className="text-center text-xs text-muted-foreground">سيتم تفعيل الحجز الفعلي بعد ربط قاعدة البيانات والدفع.</p>
         </div>
       </div>
