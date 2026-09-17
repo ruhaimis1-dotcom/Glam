@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, CalendarDays, Camera, CalendarCheck2, Gem, Heart, Home, Palette, Search, Sparkles, Star, UserRound, Waves } from "lucide-react";
+import { ArrowLeft, CalendarDays, Camera, CalendarCheck2, Gem, Heart, Home, MapPin, Palette, Search, Sparkles, Star, UserRound, Waves } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 import { CATEGORIES, INTENTS, SALONS } from "@/data/mock";
