@@ -47,8 +47,11 @@ export function SalonCover({ salon, className }: { salon: Salon; className?: str
   return (
     <div className={cn("relative overflow-hidden bg-gradient-to-br", salon.tone, className)} aria-hidden>
       <div className="absolute inset-0 opacity-30 [background:radial-gradient(circle_at_20%_20%,white,transparent_45%)]" />
-      <div className="absolute bottom-3 end-3 font-display text-3xl font-extrabold tracking-widest text-primary-foreground/25">
-        GLAM
+      <div className="absolute inset-0 grid place-items-center text-center text-white/75">
+        <div>
+          <div className="font-display text-2xl font-extrabold tracking-[0.22em]">GLAM</div>
+          <div className="mt-1 text-xs">صورة الصالون قريباً</div>
+        </div>
       </div>
     </div>
   );

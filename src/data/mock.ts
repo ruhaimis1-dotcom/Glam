@@ -95,7 +95,7 @@ export const INTENTS: Intent[] = [
   { id: "routine", label: "عناية دورية", hint: "خبيرتك المعتادة، وقتك المعتاد", emoji: "🗓️" },
   { id: "try", label: "أبغى أجرب", hint: "أشياء جديدة بتقييمات موثوقة", emoji: "🌸" },
   { id: "now", label: "أحتاج الآن", hint: "أقرب موعد شاغر حولك", emoji: "⚡" },
-  { id: "photo", label: "مثل هذه الصورة", hint: "نطابق الصورة مع أعمال الخبيرات", emoji: "📷" },
+  { id: "photo", label: "عندي إلهام", hint: "نساعدك تلاقين اللوك الأقرب لذوقك", emoji: "📷" },
 ];
 
 const cover = (t: string) => t;

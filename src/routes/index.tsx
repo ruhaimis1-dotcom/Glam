@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, CalendarDays, MapPin, Search, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, CalendarDays, Camera, CalendarCheck2, Gem, Heart, Home, Palette, Search, Sparkles, Star, UserRound, Waves } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 import { CATEGORIES, INTENTS, SALONS } from "@/data/mock";
@@ -14,6 +14,8 @@ export const Route = createFileRoute("/")({
 
 // IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const categoryIcons = { hair: UserRound, nails: Gem, makeup: Palette, skin: Sparkles, spa: Waves, home: Home, bridal: Heart } as const;
+  const intentIcons = { occasion: CalendarCheck2, routine: CalendarDays, try: Sparkles, now: Star, photo: Camera } as const;
   return (
     <div className="min-h-screen bg-[#fbf8f5] text-[#2c172b]" dir="rtl">
       <header className="sticky top-0 z-20 border-b border-[#eadfda] bg-[#fbf8f5]/95 backdrop-blur">
@@ -51,7 +53,7 @@ function Index() {
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
             {CATEGORIES.map((category) => (
               <button key={category.id} className="rounded-2xl border border-[#eadfda] bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-[#8c285d]/40 hover:shadow-sm">
-                <span className="text-2xl">{category.emoji}</span>
+                {(() => { const Icon = categoryIcons[category.id]; return <Icon className="mx-auto size-6 text-[#8c285d]" strokeWidth={1.7} />; })()}
                 <span className="mt-2 block text-sm font-medium">{category.label}</span>
               </button>
             ))}
@@ -64,7 +66,7 @@ function Index() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               {INTENTS.map((intent) => (
                 <button key={intent.id} className="rounded-2xl border border-[#eadfda] bg-[#fbf8f5] p-5 text-right hover:border-[#8c285d]/40">
-                  <span className="text-2xl">{intent.emoji}</span>
+                  {(() => { const Icon = intentIcons[intent.id]; return <Icon className="size-6 text-[#8c285d]" strokeWidth={1.7} />; })()}
                   <h3 className="mt-3 font-semibold">{intent.label}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{intent.hint}</p>
                 </button>
