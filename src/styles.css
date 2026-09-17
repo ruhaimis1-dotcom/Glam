@@ -1,0 +1,207 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Glam Saudi design system — luxury beauty-tech.
+ * Deep plum (violet/burgundy) primary, soft rose surfaces, rose-gold accents,
+ * very warm light backgrounds. All colors in oklch.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Glam brand tokens */
+  --color-plum: var(--plum);
+  --color-plum-deep: var(--plum-deep);
+  --color-rose: var(--rose);
+  --color-rose-soft: var(--rose-soft);
+  --color-rose-gold: var(--rose-gold);
+  --color-rose-gold-foreground: var(--rose-gold-foreground);
+  --color-cream: var(--cream);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Tajawal", "IBM Plex Sans Arabic", ui-sans-serif, sans-serif;
+
+  --shadow-soft: 0 1px 2px oklch(0.3 0.08 340 / 4%), 0 8px 24px -12px oklch(0.3 0.08 340 / 14%);
+  --shadow-lift: 0 2px 4px oklch(0.3 0.08 340 / 5%), 0 18px 40px -16px oklch(0.3 0.08 340 / 22%);
+  --shadow-glow: 0 10px 30px -10px oklch(0.55 0.12 350 / 45%);
+}
+
+:root {
+  --radius: 1rem;
+  --background: oklch(0.985 0.007 70);
+  --foreground: oklch(0.24 0.05 335);
+  --card: oklch(0.998 0.003 80);
+  --card-foreground: oklch(0.24 0.05 335);
+  --popover: oklch(0.998 0.003 80);
+  --popover-foreground: oklch(0.24 0.05 335);
+  --primary: oklch(0.33 0.11 335);
+  --primary-foreground: oklch(0.985 0.007 70);
+  --secondary: oklch(0.95 0.02 355);
+  --secondary-foreground: oklch(0.33 0.11 335);
+  --muted: oklch(0.955 0.01 60);
+  --muted-foreground: oklch(0.52 0.04 340);
+  --accent: oklch(0.93 0.035 355);
+  --accent-foreground: oklch(0.33 0.11 335);
+  --destructive: oklch(0.55 0.2 22);
+  --destructive-foreground: oklch(0.985 0.007 70);
+  --border: oklch(0.91 0.015 40);
+  --input: oklch(0.91 0.015 40);
+  --ring: oklch(0.6 0.12 350);
+  --chart-1: oklch(0.33 0.11 335);
+  --chart-2: oklch(0.72 0.09 40);
+  --chart-3: oklch(0.8 0.06 355);
+  --chart-4: oklch(0.6 0.12 350);
+  --chart-5: oklch(0.5 0.1 300);
+  --sidebar: oklch(0.975 0.01 60);
+  --sidebar-foreground: oklch(0.24 0.05 335);
+  --sidebar-primary: oklch(0.33 0.11 335);
+  --sidebar-primary-foreground: oklch(0.985 0.007 70);
+  --sidebar-accent: oklch(0.93 0.035 355);
+  --sidebar-accent-foreground: oklch(0.33 0.11 335);
+  --sidebar-border: oklch(0.91 0.015 40);
+  --sidebar-ring: oklch(0.6 0.12 350);
+
+  --plum: oklch(0.33 0.11 335);
+  --plum-deep: oklch(0.22 0.08 330);
+  --rose: oklch(0.72 0.12 355);
+  --rose-soft: oklch(0.93 0.035 355);
+  --rose-gold: oklch(0.72 0.09 40);
+  --rose-gold-foreground: oklch(0.22 0.08 330);
+  --cream: oklch(0.97 0.012 75);
+  --success: oklch(0.6 0.12 160);
+  --success-foreground: oklch(0.985 0.007 70);
+  --warning: oklch(0.78 0.14 75);
+  --warning-foreground: oklch(0.3 0.06 60);
+}
+
+.dark {
+  --background: oklch(0.17 0.04 330);
+  --foreground: oklch(0.96 0.01 70);
+  --card: oklch(0.22 0.05 332);
+  --card-foreground: oklch(0.96 0.01 70);
+  --popover: oklch(0.22 0.05 332);
+  --popover-foreground: oklch(0.96 0.01 70);
+  --primary: oklch(0.85 0.06 355);
+  --primary-foreground: oklch(0.22 0.08 330);
+  --secondary: oklch(0.28 0.05 335);
+  --secondary-foreground: oklch(0.96 0.01 70);
+  --muted: oklch(0.26 0.04 335);
+  --muted-foreground: oklch(0.72 0.03 350);
+  --accent: oklch(0.3 0.06 345);
+  --accent-foreground: oklch(0.96 0.01 70);
+  --destructive: oklch(0.65 0.19 22);
+  --destructive-foreground: oklch(0.96 0.01 70);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.7 0.1 350);
+  --sidebar: oklch(0.2 0.05 332);
+  --sidebar-foreground: oklch(0.96 0.01 70);
+  --sidebar-primary: oklch(0.85 0.06 355);
+  --sidebar-primary-foreground: oklch(0.22 0.08 330);
+  --sidebar-accent: oklch(0.3 0.06 345);
+  --sidebar-accent-foreground: oklch(0.96 0.01 70);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.7 0.1 350);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    font-family: var(--font-sans);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "kern", "liga";
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Brand utilities */
+@utility glam-gradient {
+  background-image: linear-gradient(135deg, var(--plum-deep) 0%, var(--plum) 55%, oklch(0.45 0.13 345) 100%);
+}
+@utility rose-gradient {
+  background-image: linear-gradient(135deg, var(--rose-soft) 0%, var(--cream) 100%);
+}
+@utility gold-text {
+  background-image: linear-gradient(90deg, var(--rose-gold), oklch(0.82 0.08 50), var(--rose-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility glam-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-soft);
+}
+@utility shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+@utility shadow-lift {
+  box-shadow: var(--shadow-lift);
+}
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+@utility pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 5.5rem);
+}
