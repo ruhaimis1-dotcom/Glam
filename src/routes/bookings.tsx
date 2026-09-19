@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- legacy booking payloads are read from local storage. */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, ArrowRight, Clock3 } from "lucide-react";
 import { readStored, writeStored } from "@/lib/storage";
@@ -12,26 +13,56 @@ function BookingsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   useEffect(() => {
     let currentUserId: string | null = null;
-    const refreshLocal = () => setBookings(readStored<any[]>("glam-bookings", []).filter((booking) => currentUserId ? booking.customer_id === currentUserId : !booking.customer_id));
+    const refreshLocal = () =>
+      setBookings(
+        readStored<any[]>("glam-bookings", []).filter((booking) =>
+          currentUserId ? booking.customer_id === currentUserId : !booking.customer_id,
+        ),
+      );
     window.addEventListener("glam-bookings-updated", refreshLocal);
     window.addEventListener("storage", refreshLocal);
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       currentUserId = user?.id ?? null;
       refreshLocal();
       if (!user) return;
-      const { data } = await supabase.from("glam_reservations").select("id,status,appointment_id,glam_appointments(salon_name,service_name,starts_at)").eq("customer_id", user.id).order("created_at", { ascending: false });
+      const { data } = await supabase
+        .from("glam_reservations")
+        .select("id,status,appointment_id,glam_appointments(salon_name,service_name,starts_at)")
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false });
       if (data?.length) {
-        const remote = data.map((b: any) => ({ id: b.id, salon: b.glam_appointments?.salon_name ?? "Glam", service: b.glam_appointments?.service_name ?? "خدمة", date: b.glam_appointments?.starts_at ? new Date(b.glam_appointments.starts_at).toLocaleDateString("ar-SA") : "", time: b.glam_appointments?.starts_at ? new Date(b.glam_appointments.starts_at).toLocaleTimeString("ar-SA", { hour: "numeric", minute: "2-digit" }) : "", status: b.status === "confirmed" ? "مؤكد" : b.status }));
+        const remote = data.map((b: any) => ({
+          id: b.id,
+          salon: b.glam_appointments?.salon_name ?? "Glam",
+          service: b.glam_appointments?.service_name ?? "خدمة",
+          date: b.glam_appointments?.starts_at
+            ? new Date(b.glam_appointments.starts_at).toLocaleDateString("ar-SA")
+            : "",
+          time: b.glam_appointments?.starts_at
+            ? new Date(b.glam_appointments.starts_at).toLocaleTimeString("ar-SA", {
+                hour: "numeric",
+                minute: "2-digit",
+              })
+            : "",
+          status: b.status === "confirmed" ? "مؤكد" : b.status,
+        }));
         setBookings(remote);
         writeStored("glam-bookings", remote);
       }
     });
-    return () => { window.removeEventListener("glam-bookings-updated", refreshLocal); window.removeEventListener("storage", refreshLocal); };
+    return () => {
+      window.removeEventListener("glam-bookings-updated", refreshLocal);
+      window.removeEventListener("storage", refreshLocal);
+    };
   }, []);
   return (
     <CustomerShell title="حجوزاتي">
       <div className="mb-6 flex items-center gap-3">
-        <Link to="/" className="grid size-9 place-items-center rounded-full border bg-card" aria-label="العودة للرئيسية">
+        <Link
+          to="/"
+          className="grid size-9 place-items-center rounded-full border bg-card"
+          aria-label="العودة للرئيسية"
+        >
           <ArrowRight className="size-4" />
         </Link>
         <div>
@@ -39,16 +70,44 @@ function BookingsPage() {
           <p className="text-sm text-muted-foreground">تابعي مواعيدك وتجاربك مع Glam</p>
         </div>
       </div>
-      {bookings.length === 0 && <EmptyState
-        icon={CalendarDays}
-        title="لا توجد حجوزات حالياً"
-        desc="ابدئي باكتشاف الصالون المناسب لك، ثم اختاري الخدمة والموعد."
-        action={<Link to="/" className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground">اكتشفي الصالونات</Link>}
-      />}
-      {bookings.length > 0 && <div className="glam-card divide-y">{bookings.map(b=><div className="flex items-center gap-3 p-4" key={b.id}><CalendarDays className="size-5 text-primary"/><div><p className="font-medium">{b.salon}</p><p className="text-sm text-muted-foreground">{b.service} · {b.date} · {b.time}</p></div><span className="mr-auto rounded-full bg-success/10 px-2 py-1 text-xs text-success">{b.status}</span></div>)}</div>}
-      {bookings.length === 0 && <div className="mt-5 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-        <Clock3 className="size-4" /> الحجز الإلكتروني سيُفعّل بعد ربط قاعدة البيانات
-      </div>}
+      {bookings.length === 0 && (
+        <EmptyState
+          icon={CalendarDays}
+          title="لا توجد حجوزات حالياً"
+          desc="ابدئي باكتشاف الصالون المناسب لك، ثم اختاري الخدمة والموعد."
+          action={
+            <Link
+              to="/"
+              className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
+            >
+              اكتشفي الصالونات
+            </Link>
+          }
+        />
+      )}
+      {bookings.length > 0 && (
+        <div className="glam-card divide-y">
+          {bookings.map((b) => (
+            <div className="flex items-center gap-3 p-4" key={b.id}>
+              <CalendarDays className="size-5 text-primary" />
+              <div>
+                <p className="font-medium">{b.salon}</p>
+                <p className="text-sm text-muted-foreground">
+                  {b.service} · {b.date} · {b.time}
+                </p>
+              </div>
+              <span className="mr-auto rounded-full bg-success/10 px-2 py-1 text-xs text-success">
+                {b.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {bookings.length === 0 && (
+        <div className="mt-5 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <Clock3 className="size-4" /> الحجز الإلكتروني سيُفعّل بعد ربط قاعدة البيانات
+        </div>
+      )}
     </CustomerShell>
   );
 }
