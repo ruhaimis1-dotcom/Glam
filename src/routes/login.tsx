@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Mail, LockKeyhole } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
 
@@ -10,12 +11,15 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalized = email.trim().toLowerCase();
     if (!normalized || !password) return void setError("أدخلي البريد الإلكتروني وكلمة المرور للمتابعة.");
-    if (normalized === "saud@hirely.sa") return void navigate({ to: "/business" });
-    if (normalized === "7sayef.1@gmail.com") return void navigate({ to: "/admin" });
+    setError("");
+    const { error: authError } = await supabase.auth.signInWithPassword({ email: normalized, password });
+    if (authError) return void setError("تعذر تسجيل الدخول. تحققي من البيانات أو فعّلي الحساب أولاً.");
+    if (normalized === "saud@hirely.sa") return void navigate({ to: "/admin" });
+    if (normalized === "ruhaimi.s1@gmail.com") return void navigate({ to: "/business" });
     return void navigate({ to: "/bookings" });
   }
 
