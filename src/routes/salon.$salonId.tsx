@@ -15,7 +15,7 @@ function SalonPage() {
   const [date, setDate] = useState("اليوم");
   const [time, setTime] = useState("5:30 م");
   const [confirmed, setConfirmed] = useState(false);
-  const confirmBooking = () => { const bookings = readStored<any[]>("glam-bookings", []); bookings.unshift({ id: `GL-${Date.now().toString().slice(-6)}`, salonId, salon: salon?.name, service, date, time, status: "مؤكد" }); writeStored("glam-bookings", bookings); setConfirmed(true); };
+  const confirmBooking = () => { const bookings = readStored<any[]>("glam-bookings", []); bookings.unshift({ id: `GL-${Date.now().toString().slice(-6)}`, salonId, salon: salon?.name, service, date, time, status: "مؤكد" }); writeStored("glam-bookings", bookings); window.dispatchEvent(new Event("glam-bookings-updated")); setConfirmed(true); };
 
   if (!salon) {
     return (
