@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, CalendarDays, MapPin, ShieldCheck } from "lucide-react";
 import { byId, formatSAR } from "@/data/mock";
 import { CustomerShell } from "@/components/glam/shells";
 import { PrivacyBadges, SalonCover, Stars } from "@/components/glam/ui";
 import { readStored, writeStored } from "@/lib/storage";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/salon/$salonId")({ component: SalonPage });
 
@@ -15,7 +16,21 @@ function SalonPage() {
   const [date, setDate] = useState("اليوم");
   const [time, setTime] = useState("5:30 م");
   const [confirmed, setConfirmed] = useState(false);
-  const confirmBooking = () => { const bookings = readStored<any[]>("glam-bookings", []); bookings.unshift({ id: `GL-${Date.now().toString().slice(-6)}`, salonId, salon: salon?.name, service, date, time, status: "مؤكد" }); writeStored("glam-bookings", bookings); window.dispatchEvent(new Event("glam-bookings-updated")); setConfirmed(true); };
+  const [saving, setSaving] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+  const [appointmentId, setAppointmentId] = useState<string | null>(null);
+  useEffect(() => { supabase.from("glam_appointments").select("id,service_name").eq("salon_name", salon?.name ?? "").order("starts_at").then(({ data }) => { const match = data?.find(a => a.service_name === service) ?? data?.[0]; if (match) setAppointmentId(match.id); }); }, [salon?.name, service]);
+  const confirmBooking = async () => {
+    setSaving(true); setBookingError("");
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && appointmentId) {
+        const { error } = await supabase.from("glam_reservations").insert({ id: crypto.randomUUID(), appointment_id: appointmentId, customer_id: user.id, request_id: crypto.randomUUID(), status: "confirmed", attendance: "pending", booking_source: "salon_page" });
+        if (error) throw error;
+      }
+      const bookings = readStored<any[]>("glam-bookings", []); bookings.unshift({ id: `GL-${Date.now().toString().slice(-6)}`, salonId, salon: salon?.name, service, date, time, status: "مؤكد" }); writeStored("glam-bookings", bookings); window.dispatchEvent(new Event("glam-bookings-updated")); setConfirmed(true);
+    } catch { setBookingError("تعذر حفظ الحجز في الوقت الحالي. يرجى المحاولة مرة أخرى."); } finally { setSaving(false); }
+  };
 
   if (!salon) {
     return (
@@ -53,7 +68,7 @@ function SalonPage() {
             <p className="text-sm text-muted-foreground">تبدأ الخدمات من</p>
             <p className="mt-1 text-xl font-bold">{formatSAR(salon.priceFrom)}</p>
           </div>
-          {confirmed ? <div className="rounded-2xl bg-success/10 p-4 text-center"><p className="font-semibold text-success">تم تأكيد الحجز بنجاح</p><p className="mt-1 text-sm text-muted-foreground">{service} · {date} · {time}</p><Link to="/bookings" className="mt-3 inline-flex rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground">عرض حجوزاتي</Link></div> : <div className="space-y-3 rounded-2xl border p-4"><p className="font-semibold">اختاري الخدمة والموعد</p><select value={service} onChange={e=>setService(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3"><option>بالاياج كامل</option><option>قص وتصفيف</option><option>مكياج سهرة</option><option>تسريحة مناسبة</option></select><select value={date} onChange={e=>setDate(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3"><option>اليوم</option><option>غداً</option><option>بعد غد</option></select><select value={time} onChange={e=>setTime(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3"><option>5:30 م</option><option>7:00 م</option><option>9:00 م</option></select><button onClick={confirmBooking} className="block w-full rounded-2xl bg-primary px-5 py-3.5 text-center font-semibold text-primary-foreground hover:bg-primary/90">تأكيد الحجز</button></div>}
+          {confirmed ? <div className="rounded-2xl bg-success/10 p-4 text-center"><p className="font-semibold text-success">تم تأكيد الحجز بنجاح</p><p className="mt-1 text-sm text-muted-foreground">{service} · {date} · {time}</p><Link to="/bookings" className="mt-3 inline-flex rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground">عرض حجوزاتي</Link></div> : <div className="space-y-3 rounded-2xl border p-4"><p className="font-semibold">اختاري الخدمة والموعد</p><select value={service} onChange={e=>setService(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3"><option>بالاياج كامل</option><option>قص وتصفيف</option><option>مكياج سهرة</option><option>تسريحة مناسبة</option></select><select value={date} onChange={e=>setDate(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3"><option>اليوم</option><option>غداً</option><option>بعد غد</option></select><select value={time} onChange={e=>setTime(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3"><option>5:30 م</option><option>7:00 م</option><option>9:00 م</option></select>{bookingError && <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{bookingError}</p>}<button disabled={saving} onClick={confirmBooking} className="block w-full rounded-2xl bg-primary px-5 py-3.5 text-center font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60">{saving ? "جارٍ حفظ الحجز…" : "تأكيد الحجز"}</button></div>}
         </div>
       </div>
     </CustomerShell>
