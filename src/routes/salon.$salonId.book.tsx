@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- legacy booking payloads are read from local storage. */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, CalendarDays, CheckCircle2 } from "lucide-react";
@@ -8,10 +9,161 @@ import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/salon/$salonId/book")({ component: BookSalonPage });
 function BookSalonPage() {
-  const { salonId } = Route.useParams(); const salon = byId.salon(salonId); const navigate = useNavigate();
-  const [service, setService] = useState("بالاياج كامل"); const [date, setDate] = useState("اليوم"); const [time, setTime] = useState("5:30 م"); const [done, setDone] = useState(false); const [saving, setSaving] = useState(false); const [error, setError] = useState(""); const [appointmentId, setAppointmentId] = useState<string | null>(null);
-  useEffect(() => { supabase.from("glam_appointments").select("id,service_name,starts_at").eq("salon_name", salon?.name ?? "").order("starts_at").then(({ data }) => { const match = data?.find(a => a.service_name === service) ?? data?.[0]; if (match) setAppointmentId(match.id); }); }, [salon?.name, service]);
-  if (!salon) return <CustomerShell title="الحجز" back="/"><div className="glam-card p-8 text-center">الصالون غير موجود</div></CustomerShell>;
-  const confirm = async () => { setSaving(true); setError(""); try { const bookings = readStored<any[]>("glam-bookings", []); const { data: { user } } = await supabase.auth.getUser(); if (user && appointmentId) { const { error: insertError } = await supabase.from("glam_reservations").insert({ id: crypto.randomUUID(), appointment_id: appointmentId, customer_id: user.id, request_id: crypto.randomUUID(), status: "confirmed", attendance: "pending", booking_source: "salon_link" }); if (insertError) throw insertError; } bookings.unshift({ id: `GL-${Date.now().toString().slice(-6)}`, salonId, salon: salon.name, service, date, time, status: user && appointmentId ? "مؤكد" : "مؤكد" }); writeStored("glam-bookings", bookings); setDone(true); } catch (e) { setError("تعذر حفظ الحجز الآن. يرجى المحاولة مرة أخرى."); } finally { setSaving(false); } };
-  return <CustomerShell title="تأكيد الحجز" back={`/salon/${salonId}`}><div className="mb-6 flex items-center gap-3"><Link to="/salon/$salonId" params={{salonId}} className="grid size-9 place-items-center rounded-full border bg-card"><ArrowRight className="size-4"/></Link><div><h1 className="text-2xl font-bold">احجزي في {salon.name}</h1><p className="text-sm text-muted-foreground">اختاري الخدمة والموعد المناسب</p></div></div>{done?<section className="glam-card space-y-4 p-7 text-center"><CheckCircle2 className="mx-auto size-12 text-success"/><h2 className="text-xl font-bold">تم تأكيد الحجز</h2><p className="text-sm text-muted-foreground">{service} · {date} · {time}</p><Link to="/bookings" className="inline-flex rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground">عرض حجوزاتي</Link></section>:<section className="glam-card space-y-5 p-5"><label className="block text-sm font-medium">الخدمة<select value={service} onChange={e=>setService(e.target.value)} className="mt-2 w-full rounded-xl border bg-background px-4 py-3"><option>بالاياج كامل</option><option>قص وتصفيف</option><option>مكياج سهرة</option><option>تسريحة مناسبة</option></select></label><label className="block text-sm font-medium">التاريخ<select value={date} onChange={e=>setDate(e.target.value)} className="mt-2 w-full rounded-xl border bg-background px-4 py-3"><option>اليوم</option><option>غداً</option><option>بعد غد</option></select></label><label className="block text-sm font-medium">الوقت<select value={time} onChange={e=>setTime(e.target.value)} className="mt-2 w-full rounded-xl border bg-background px-4 py-3"><option>5:30 م</option><option>7:00 م</option><option>9:00 م</option></select></label><div className="rounded-xl bg-muted/50 p-4 text-sm"><CalendarDays className="mb-2 size-5 text-primary"/><p>{service} في {salon.name}</p><p className="mt-1 text-muted-foreground">السعر التقديري يبدأ من {formatSAR(salon.priceFrom)}</p></div>{error&&<p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}<button disabled={saving} onClick={confirm} className="w-full rounded-2xl bg-primary px-5 py-3.5 font-semibold text-primary-foreground disabled:opacity-60">{saving?"جارٍ تأكيد الحجز…":"تأكيد الحجز"}</button></section>}</CustomerShell>;
+  const { salonId } = Route.useParams();
+  const salon = byId.salon(salonId);
+  const navigate = useNavigate();
+  const [service, setService] = useState("بالاياج كامل");
+  const [date, setDate] = useState("اليوم");
+  const [time, setTime] = useState("5:30 م");
+  const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [appointmentId, setAppointmentId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase
+      .from("glam_appointments")
+      .select("id,service_name,starts_at")
+      .eq("salon_name", salon?.name ?? "")
+      .order("starts_at")
+      .then(({ data }) => {
+        const match = data?.find((a) => a.service_name === service) ?? data?.[0];
+        if (match) setAppointmentId(match.id);
+      });
+  }, [salon?.name, service]);
+  if (!salon)
+    return (
+      <CustomerShell title="الحجز" back="/">
+        <div className="glam-card p-8 text-center">الصالون غير موجود</div>
+      </CustomerShell>
+    );
+  const confirm = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("AUTH_REQUIRED");
+      if (!appointmentId) throw new Error("APPOINTMENT_UNAVAILABLE");
+      const { error: insertError } = await supabase.from("glam_reservations").insert({
+        id: crypto.randomUUID(),
+        appointment_id: appointmentId,
+        customer_id: user.id,
+        request_id: crypto.randomUUID(),
+        status: "confirmed",
+        attendance: "pending",
+        booking_source: "salon_link",
+      });
+      if (insertError) throw insertError;
+      const bookings = readStored<any[]>("glam-bookings", []);
+      bookings.unshift({
+        id: `GL-${Date.now().toString().slice(-6)}`,
+        customer_id: user.id,
+        salonId,
+        salon: salon.name,
+        service,
+        date,
+        time,
+        status: "مؤكد",
+      });
+      writeStored("glam-bookings", bookings);
+      window.dispatchEvent(new Event("glam-bookings-updated"));
+      setDone(true);
+    } catch (e) {
+      setError("تعذر حفظ الحجز الآن. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setSaving(false);
+    }
+  };
+  return (
+    <CustomerShell title="تأكيد الحجز" back={`/salon/${salonId}`}>
+      <div className="mb-6 flex items-center gap-3">
+        <Link
+          to="/salon/$salonId"
+          params={{ salonId }}
+          className="grid size-9 place-items-center rounded-full border bg-card"
+        >
+          <ArrowRight className="size-4" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold">احجزي في {salon.name}</h1>
+          <p className="text-sm text-muted-foreground">اختاري الخدمة والموعد المناسب</p>
+        </div>
+      </div>
+      {done ? (
+        <section className="glam-card space-y-4 p-7 text-center">
+          <CheckCircle2 className="mx-auto size-12 text-success" />
+          <h2 className="text-xl font-bold">تم تأكيد الحجز</h2>
+          <p className="text-sm text-muted-foreground">
+            {service} · {date} · {time}
+          </p>
+          <Link
+            to="/bookings"
+            className="inline-flex rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground"
+          >
+            عرض حجوزاتي
+          </Link>
+        </section>
+      ) : (
+        <section className="glam-card space-y-5 p-5">
+          <label className="block text-sm font-medium">
+            الخدمة
+            <select
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+              className="mt-2 w-full rounded-xl border bg-background px-4 py-3"
+            >
+              <option>بالاياج كامل</option>
+              <option>قص وتصفيف</option>
+              <option>مكياج سهرة</option>
+              <option>تسريحة مناسبة</option>
+            </select>
+          </label>
+          <label className="block text-sm font-medium">
+            التاريخ
+            <select
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-2 w-full rounded-xl border bg-background px-4 py-3"
+            >
+              <option>اليوم</option>
+              <option>غداً</option>
+              <option>بعد غد</option>
+            </select>
+          </label>
+          <label className="block text-sm font-medium">
+            الوقت
+            <select
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="mt-2 w-full rounded-xl border bg-background px-4 py-3"
+            >
+              <option>5:30 م</option>
+              <option>7:00 م</option>
+              <option>9:00 م</option>
+            </select>
+          </label>
+          <div className="rounded-xl bg-muted/50 p-4 text-sm">
+            <CalendarDays className="mb-2 size-5 text-primary" />
+            <p>
+              {service} في {salon.name}
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              السعر التقديري يبدأ من {formatSAR(salon.priceFrom)}
+            </p>
+          </div>
+          {error && (
+            <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
+          )}
+          <button
+            disabled={saving}
+            onClick={confirm}
+            className="w-full rounded-2xl bg-primary px-5 py-3.5 font-semibold text-primary-foreground disabled:opacity-60"
+          >
+            {saving ? "جارٍ تأكيد الحجز…" : "تأكيد الحجز"}
+          </button>
+        </section>
+      )}
+    </CustomerShell>
+  );
 }
