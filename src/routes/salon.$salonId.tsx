@@ -28,7 +28,7 @@ function SalonPage() {
         const { error } = await supabase.from("glam_reservations").insert({ id: crypto.randomUUID(), appointment_id: appointmentId, customer_id: user.id, request_id: crypto.randomUUID(), status: "confirmed", attendance: "pending", booking_source: "salon_page" });
         if (error) throw error;
       }
-      const bookings = readStored<any[]>("glam-bookings", []); bookings.unshift({ id: `GL-${Date.now().toString().slice(-6)}`, salonId, salon: salon?.name, service, date, time, status: "مؤكد" }); writeStored("glam-bookings", bookings); window.dispatchEvent(new Event("glam-bookings-updated")); setConfirmed(true);
+      const bookings = readStored<any[]>("glam-bookings", []); bookings.unshift({ id: `GL-${Date.now().toString().slice(-6)}`, customer_id: user?.id ?? null, salonId, salon: salon?.name, service, date, time, status: "مؤكد" }); writeStored("glam-bookings", bookings); window.dispatchEvent(new Event("glam-bookings-updated")); setConfirmed(true);
     } catch { setBookingError("تعذر حفظ الحجز في الوقت الحالي. يرجى المحاولة مرة أخرى."); } finally { setSaving(false); }
   };
 
