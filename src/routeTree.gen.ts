@@ -15,6 +15,7 @@ import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminSalonsRouteImport } from './routes/admin.salons'
@@ -22,6 +23,7 @@ import { Route as BusinessScheduleRouteImport } from './routes/business.schedule
 import { Route as BusinessServicesRouteImport } from './routes/business.services'
 import { Route as BusinessStaffRouteImport } from './routes/business.staff'
 import { Route as SalonSalonIdRouteImport } from './routes/salon.$salonId'
+import { Route as SalonSalonIdBookRouteImport } from './routes/salon.$salonId.book'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +53,11 @@ const LoginRoute = LoginRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminBookingsRoute = AdminBookingsRouteImport.update({
@@ -88,6 +95,11 @@ const SalonSalonIdRoute = SalonSalonIdRouteImport.update({
   path: '/salon/$salonId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalonSalonIdBookRoute = SalonSalonIdBookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => SalonSalonIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,13 +108,15 @@ export interface FileRoutesByFullPath {
   '/business': typeof BusinessRouteWithChildren
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/admin/salons': typeof AdminSalonsRoute
   '/business/schedule': typeof BusinessScheduleRoute
   '/business/services': typeof BusinessServicesRoute
   '/business/staff': typeof BusinessStaffRoute
-  '/salon/$salonId': typeof SalonSalonIdRoute
+  '/salon/$salonId': typeof SalonSalonIdRouteWithChildren
+  '/salon/$salonId/book': typeof SalonSalonIdBookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -111,13 +125,15 @@ export interface FileRoutesByTo {
   '/business': typeof BusinessRouteWithChildren
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/admin/salons': typeof AdminSalonsRoute
   '/business/schedule': typeof BusinessScheduleRoute
   '/business/services': typeof BusinessServicesRoute
   '/business/staff': typeof BusinessStaffRoute
-  '/salon/$salonId': typeof SalonSalonIdRoute
+  '/salon/$salonId': typeof SalonSalonIdRouteWithChildren
+  '/salon/$salonId/book': typeof SalonSalonIdBookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -127,13 +143,15 @@ export interface FileRoutesById {
   '/business': typeof BusinessRouteWithChildren
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/disputes': typeof AdminDisputesRoute
   '/admin/salons': typeof AdminSalonsRoute
   '/business/schedule': typeof BusinessScheduleRoute
   '/business/services': typeof BusinessServicesRoute
   '/business/staff': typeof BusinessStaffRoute
-  '/salon/$salonId': typeof SalonSalonIdRoute
+  '/salon/$salonId': typeof SalonSalonIdRouteWithChildren
+  '/salon/$salonId/book': typeof SalonSalonIdBookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -144,6 +162,7 @@ export interface FileRouteTypes {
     | '/business'
     | '/login'
     | '/profile'
+    | '/reset-password'
     | '/admin/bookings'
     | '/admin/disputes'
     | '/admin/salons'
@@ -151,6 +170,7 @@ export interface FileRouteTypes {
     | '/business/services'
     | '/business/staff'
     | '/salon/$salonId'
+    | '/salon/$salonId/book'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -159,6 +179,7 @@ export interface FileRouteTypes {
     | '/business'
     | '/login'
     | '/profile'
+    | '/reset-password'
     | '/admin/bookings'
     | '/admin/disputes'
     | '/admin/salons'
@@ -166,6 +187,7 @@ export interface FileRouteTypes {
     | '/business/services'
     | '/business/staff'
     | '/salon/$salonId'
+    | '/salon/$salonId/book'
   id:
     | '__root__'
     | '/'
@@ -174,6 +196,7 @@ export interface FileRouteTypes {
     | '/business'
     | '/login'
     | '/profile'
+    | '/reset-password'
     | '/admin/bookings'
     | '/admin/disputes'
     | '/admin/salons'
@@ -181,6 +204,7 @@ export interface FileRouteTypes {
     | '/business/services'
     | '/business/staff'
     | '/salon/$salonId'
+    | '/salon/$salonId/book'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -190,7 +214,8 @@ export interface RootRouteChildren {
   BusinessRoute: typeof BusinessRouteWithChildren
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
-  SalonSalonIdRoute: typeof SalonSalonIdRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SalonSalonIdRoute: typeof SalonSalonIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -235,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/bookings': {
@@ -286,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SalonSalonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/salon/$salonId/book': {
+      id: '/salon/$salonId/book'
+      path: '/book'
+      fullPath: '/salon/$salonId/book'
+      preLoaderRoute: typeof SalonSalonIdBookRouteImport
+      parentRoute: typeof SalonSalonIdRoute
+    }
   }
 }
 
@@ -319,6 +358,18 @@ const BusinessRouteWithChildren = BusinessRoute._addFileChildren(
   BusinessRouteChildren,
 )
 
+interface SalonSalonIdRouteChildren {
+  SalonSalonIdBookRoute: typeof SalonSalonIdBookRoute
+}
+
+const SalonSalonIdRouteChildren: SalonSalonIdRouteChildren = {
+  SalonSalonIdBookRoute: SalonSalonIdBookRoute,
+}
+
+const SalonSalonIdRouteWithChildren = SalonSalonIdRoute._addFileChildren(
+  SalonSalonIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -326,7 +377,8 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessRoute: BusinessRouteWithChildren,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
-  SalonSalonIdRoute: SalonSalonIdRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SalonSalonIdRoute: SalonSalonIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
