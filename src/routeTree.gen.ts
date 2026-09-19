@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as BusinessRouteImport } from './routes/business'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
@@ -40,6 +41,11 @@ const BookingsRoute = BookingsRouteImport.update({
 const BusinessRoute = BusinessRouteImport.update({
   id: '/business',
   path: '/business',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/bookings': typeof BookingsRoute
   '/business': typeof BusinessRouteWithChildren
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/bookings': typeof BookingsRoute
   '/business': typeof BusinessRouteWithChildren
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/bookings': typeof BookingsRoute
   '/business': typeof BusinessRouteWithChildren
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/disputes': typeof AdminDisputesRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bookings'
     | '/business'
+    | '/login'
     | '/profile'
     | '/admin/bookings'
     | '/admin/disputes'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bookings'
     | '/business'
+    | '/login'
     | '/profile'
     | '/admin/bookings'
     | '/admin/disputes'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bookings'
     | '/business'
+    | '/login'
     | '/profile'
     | '/admin/bookings'
     | '/admin/disputes'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BookingsRoute: typeof BookingsRoute
   BusinessRoute: typeof BusinessRouteWithChildren
+  LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   SalonSalonIdRoute: typeof SalonSalonIdRoute
 }
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/business'
       fullPath: '/business'
       preLoaderRoute: typeof BusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -304,6 +324,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BookingsRoute: BookingsRoute,
   BusinessRoute: BusinessRouteWithChildren,
+  LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   SalonSalonIdRoute: SalonSalonIdRoute,
 }

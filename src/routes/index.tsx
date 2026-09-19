@@ -35,7 +35,7 @@ function Index() {
             <a href="#salons" className="hover:text-[#8c285d]">الصالونات</a>
             <a href="#how" className="hover:text-[#8c285d]">كيف تعمل Glam؟</a>
           </nav>
-          <Link to="/bookings" className="rounded-full border border-[#8c285d]/30 px-4 py-2 text-sm font-medium text-[#8c285d] hover:bg-[#f4e8ee]">تسجيل الدخول</Link>
+          <Link to="/login" className="rounded-full border border-[#8c285d]/30 px-4 py-2 text-sm font-medium text-[#8c285d] hover:bg-[#f4e8ee]">تسجيل الدخول</Link>
         </div>
       </header>
 
