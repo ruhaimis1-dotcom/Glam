@@ -46,10 +46,10 @@ function SalonPage() {
             <p className="text-sm text-muted-foreground">تبدأ الخدمات من</p>
             <p className="mt-1 text-xl font-bold">{formatSAR(salon.priceFrom)}</p>
           </div>
-          <Link to="/bookings" className="block w-full rounded-2xl bg-primary px-5 py-3.5 text-center font-semibold text-primary-foreground hover:bg-primary/90">
+          <Link to="/salon/$salonId/book" params={{ salonId: salon.id }} className="block w-full rounded-2xl bg-primary px-5 py-3.5 text-center font-semibold text-primary-foreground hover:bg-primary/90">
             اختاري الخدمة والموعد
           </Link>
-          <p className="text-center text-xs text-muted-foreground">سيتم تفعيل الحجز الفعلي بعد ربط قاعدة البيانات والدفع.</p>
+          <p className="text-center text-xs text-muted-foreground">اختاري الخدمة والموعد، ثم أكدي طلبك.</p>
         </div>
       </div>
     </CustomerShell>
