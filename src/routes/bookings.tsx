@@ -9,12 +9,15 @@ import { EmptyState } from "@/components/glam/ui";
 export const Route = createFileRoute("/bookings")({ component: BookingsPage });
 
 function BookingsPage() {
-  const [bookings, setBookings] = useState<any[]>(() => readStored<any[]>("glam-bookings", []));
+  const [bookings, setBookings] = useState<any[]>([]);
   useEffect(() => {
-    const refreshLocal = () => setBookings(readStored<any[]>("glam-bookings", []));
+    let currentUserId: string | null = null;
+    const refreshLocal = () => setBookings(readStored<any[]>("glam-bookings", []).filter((booking) => currentUserId ? booking.customer_id === currentUserId : !booking.customer_id));
     window.addEventListener("glam-bookings-updated", refreshLocal);
     window.addEventListener("storage", refreshLocal);
     supabase.auth.getUser().then(async ({ data: { user } }) => {
+      currentUserId = user?.id ?? null;
+      refreshLocal();
       if (!user) return;
       const { data } = await supabase.from("glam_reservations").select("id,status,appointment_id,glam_appointments(salon_name,service_name,starts_at)").eq("customer_id", user.id).order("created_at", { ascending: false });
       if (data?.length) {
