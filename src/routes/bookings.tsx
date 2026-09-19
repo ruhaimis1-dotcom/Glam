@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- legacy booking payloads are read from local storage. */
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, ArrowRight, Clock3 } from "lucide-react";
+import { CalendarDays, ArrowRight } from "lucide-react";
 import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
@@ -101,11 +101,6 @@ function BookingsPage() {
               </span>
             </div>
           ))}
-        </div>
-      )}
-      {bookings.length === 0 && (
-        <div className="mt-5 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Clock3 className="size-4" /> الحجز الإلكتروني سيُفعّل بعد ربط قاعدة البيانات
         </div>
       )}
     </CustomerShell>
