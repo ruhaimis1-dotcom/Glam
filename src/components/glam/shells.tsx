@@ -1,10 +1,12 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Home, CalendarDays, UserRound, Store, LayoutDashboard, Clock, Scissors, Users, ShieldCheck,
   Building2, BookOpenCheck, Gavel, ArrowLeftRight, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 import { GlamLogo } from "./ui";
 
 type NavItem = { to: NonNullable<LinkProps["to"]>; label: string; icon: LucideIcon; exact?: boolean };
@@ -157,6 +159,12 @@ function SidebarShell({
 }
 
 export function BusinessShell({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email !== "ruhaimi.s1@gmail.com") navigate({ to: "/bookings", replace: true });
+    });
+  }, [navigate]);
   return (
     <SidebarShell
       nav={BUSINESS_NAV}
@@ -171,6 +179,12 @@ export function BusinessShell({ children }: { children: ReactNode }) {
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email !== "saud@hirely.sa") navigate({ to: "/bookings", replace: true });
+    });
+  }, [navigate]);
   return (
     <SidebarShell
       nav={ADMIN_NAV}
