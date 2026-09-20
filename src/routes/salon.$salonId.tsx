@@ -9,6 +9,7 @@ import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/salon/$salonId")({ component: SalonPage });
+// UAT deployment marker: booking selection validation is live on this branch.
 
 function SalonPage() {
   const { salonId } = Route.useParams();
