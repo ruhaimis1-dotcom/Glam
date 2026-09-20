@@ -56,14 +56,17 @@ function BookSalonPage() {
       </CustomerShell>
     );
   const confirm = async () => {
-    setSaving(true);
     setError("");
+    if (!appointmentId) {
+      setError("يرجى اختيار الوقت المتاح قبل تأكيد الحجز.");
+      return;
+    }
+    setSaving(true);
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error("AUTH_REQUIRED");
-      if (!appointmentId) throw new Error("APPOINTMENT_UNAVAILABLE");
       const { data: existing } = await supabase
         .from("glam_reservations")
         .select("id")
@@ -98,7 +101,8 @@ function BookSalonPage() {
       setDone(true);
     } catch (e) {
       console.error("booking_insert_failed", e);
-      setError("تعذر حفظ الحجز الآن. يرجى المحاولة مرة أخرى.");
+      const code = e instanceof Error ? e.message : "BOOKING_INSERT_FAILED";
+      setError(code === "AUTH_REQUIRED" ? "يجب تسجيل الدخول لإتمام الحجز." : code === "ALREADY_BOOKED" ? "هذا الموعد محجوز مسبقًا." : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.");
     } finally {
       setSaving(false);
     }
