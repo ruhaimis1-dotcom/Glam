@@ -96,7 +96,7 @@ function BookSalonPage() {
       writeStored("glam-bookings", bookings);
       window.dispatchEvent(new Event("glam-bookings-updated"));
       setDone(true);
-    } catch (e) {
+    } catch (e) {\n      console.error("booking_insert_failed", e);
       setError("تعذر حفظ الحجز الآن. يرجى المحاولة مرة أخرى.");
     } finally {
       setSaving(false);
