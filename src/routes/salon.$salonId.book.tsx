@@ -182,7 +182,7 @@ function BookSalonPage() {
           <label className="block text-sm font-medium">
             الوقت
             <select
-              value={time}
+              value={appointmentId ?? ""}
               onChange={(e) => {
                 const selected = dateAppointments.find((a) => a.id === e.target.value);
                 setAppointmentId(selected?.id ?? null);
