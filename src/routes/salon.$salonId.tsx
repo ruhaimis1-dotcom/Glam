@@ -215,7 +215,7 @@ function SalonPage() {
                 }}
                 className="w-full rounded-xl border bg-background px-4 py-3"
               >
-                {dateAppointments.length === 0 && <option value="">اختاري اليوم أولاً</option>}
+                <option value="">اختاري الوقت</option>
                 {dateAppointments.map((appointment) => (
                   <option key={appointment.id} value={appointment.id}>
                     {new Date(appointment.starts_at).toLocaleTimeString("ar-SA", { hour: "numeric", minute: "2-digit" })}
