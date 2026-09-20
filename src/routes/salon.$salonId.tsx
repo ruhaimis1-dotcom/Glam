@@ -91,7 +91,8 @@ function SalonPage() {
       writeStored("glam-bookings", bookings);
       window.dispatchEvent(new Event("glam-bookings-updated"));
       setConfirmed(true);
-    } catch (error) {\n      console.error("booking_insert_failed", error);
+    } catch (error) {
+      console.error("booking_insert_failed", error);
       setBookingError(error instanceof Error ? error.message : "BOOKING_INSERT_FAILED");
     } finally {
       setSaving(false);
