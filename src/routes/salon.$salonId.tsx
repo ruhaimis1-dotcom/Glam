@@ -8,13 +8,21 @@ import { PrivacyBadges, SalonCover, Stars } from "@/components/glam/ui";
 import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 
+function categoryForService(name: string) {
+  if (/بالياج|قص|تصفيف|صبغ/.test(name)) return "الشعر";
+  if (/مكياج/.test(name)) return "المكياج";
+  if (/بشرة|هيدرا/.test(name)) return "العناية بالبشرة";
+  if (/أظافر|مناكير|بديكير/.test(name)) return "الأظافر";
+  return "خدمات أخرى";
+}
+
 export const Route = createFileRoute("/salon/$salonId")({ component: SalonPage });
-// UAT deployment marker: booking selection validation is live on this branch.
 
 function SalonPage() {
   const { salonId } = Route.useParams();
   const salon = byId.salon(salonId);
-  const [service, setService] = useState("بالاياج كامل");
+  const [service, setService] = useState("");
+  const [category, setCategory] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [confirmed, setConfirmed] = useState(false);
@@ -38,21 +46,29 @@ function SalonPage() {
           starts_at: string;
         }>;
         setAppointments(rows);
-        const first = rows[0];
-        if (first) {
-          setService(first.service_name);
-          setDate(first.starts_at.slice(0, 10));
-          setTime("");
-          setAppointmentId(null);
-        }
+        setService("");
+        setCategory("");
+        setDate("");
+        setTime("");
+        setAppointmentId(null);
       });
   }, [salon?.name]);
   const services = [...new Set(appointments.map((a) => a.service_name))];
+  const categories = [...new Set(services.map(categoryForService))];
+  const categoryServices = services.filter((name) => categoryForService(name) === category);
   const serviceAppointments = appointments.filter((a) => a.service_name === service);
   const availableDates = [...new Set(serviceAppointments.map((a) => a.starts_at.slice(0, 10)))];
   const dateAppointments = serviceAppointments.filter((a) => a.starts_at.slice(0, 10) === date);
   const confirmBooking = async () => {
     setBookingError("");
+    if (!service) {
+      setBookingError("يرجى اختيار الخدمة أولاً.");
+      return;
+    }
+    if (!date) {
+      setBookingError("يرجى اختيار اليوم أولاً.");
+      return;
+    }
     if (!appointmentId) {
       setBookingError("يرجى اختيار الوقت المتاح قبل تأكيد الحجز.");
       return;
@@ -71,6 +87,13 @@ function SalonPage() {
         .eq("status", "confirmed")
         .maybeSingle();
       if (existing) throw new Error("ALREADY_BOOKED");
+      const { data: appointmentReservation } = await supabase
+        .from("glam_reservations")
+        .select("id,status")
+        .eq("appointment_id", appointmentId)
+        .in("status", ["confirmed", "pending"])
+        .maybeSingle();
+      if (appointmentReservation) throw new Error("APPOINTMENT_UNAVAILABLE");
       const { error } = await supabase.from("glam_reservations").insert({
         id: crypto.randomUUID(),
         appointment_id: appointmentId,
@@ -98,7 +121,8 @@ function SalonPage() {
     } catch (error) {
       console.error("booking_insert_failed", error);
       const code = error instanceof Error ? error.message : "BOOKING_INSERT_FAILED";
-      setBookingError(code === "AUTH_REQUIRED" ? "يجب تسجيل الدخول لإتمام الحجز." : code === "ALREADY_BOOKED" ? "هذا الموعد محجوز مسبقًا." : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.");
+      const unavailable = code === "APPOINTMENT_UNAVAILABLE" || code.includes("23505") || code.includes("duplicate");
+      setBookingError(code === "AUTH_REQUIRED" ? "يجب تسجيل الدخول لإتمام الحجز." : code === "ALREADY_BOOKED" || unavailable ? "هذا الموعد لم يعد متاحًا. اختاري وقتًا آخر." : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.");
     } finally {
       setSaving(false);
     }
@@ -172,24 +196,33 @@ function SalonPage() {
             <div className="space-y-3 rounded-2xl border p-4">
               <p className="font-semibold">اختاري الخدمة والموعد</p>
               <select
-                value={service}
+                value={category}
                 onChange={(e) => {
-                  const next = e.target.value;
-                  setService(next);
-                  const first = appointments.find((a) => a.service_name === next);
-                  setDate(first?.starts_at.slice(0, 10) ?? "");
+                  setCategory(e.target.value);
+                  setService("");
+                  setDate("");
                   setTime("");
                   setAppointmentId(null);
                 }}
                 className="w-full rounded-xl border bg-background px-4 py-3"
               >
-                {services.length === 0 && <option value="">لا توجد خدمات متاحة</option>}
-                {services.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
+                <option value="">اختاري التصنيف</option>
+                {categories.map((name) => <option key={name} value={name}>{name}</option>)}
               </select>
+              <select
+                value={service}
+                onChange={(e) => {
+                  setService(e.target.value);
+                  setDate("");
+                  setTime("");
+                  setAppointmentId(null);
+                }}
+                className="w-full rounded-xl border bg-background px-4 py-3"
+              >
+                <option value="">اختاري الخدمة</option>
+                {categoryServices.map((name) => <option key={name} value={name}>{name}</option>)}
+              </select>
+              {/* The original service selector is replaced by the category-filtered selector above. */}
               <select
                 value={date}
                 onChange={(e) => {
@@ -199,7 +232,8 @@ function SalonPage() {
                 }}
                 className="w-full rounded-xl border bg-background px-4 py-3"
               >
-                {availableDates.length === 0 && <option value="">لا توجد أيام متاحة</option>}
+                <option value="">اختاري اليوم</option>
+                {availableDates.length === 0 && <option value="" disabled>لا توجد أيام متاحة</option>}
                 {availableDates.map((availableDate) => (
                   <option key={availableDate} value={availableDate}>
                     {new Date(`${availableDate}T00:00:00`).toLocaleDateString("ar-SA", { dateStyle: "medium" })}

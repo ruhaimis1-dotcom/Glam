@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "title": "Glam Starter Service Catalog",
+  "description": "قالب خدمات أولي يختاره الصالون أثناء الإعداد ويمكن تعديله أو حذفه لاحقًا.",
+  "categories": [
+    {
+      "key": "hair",
+      "name_ar": "الشعر",
+      "services": [
+        { "key": "haircut_style", "name_ar": "قص وتصفيف", "pricing": { "mode": "fixed", "amount_sar": 180 }, "duration_minutes": 60 },
+        { "key": "balayage", "name_ar": "بالياج كامل", "pricing": { "mode": "from", "amount_sar": 650 }, "duration_minutes": 180, "options": [{ "name_ar": "قصير", "price_sar": 650, "duration_minutes": 150 }, { "name_ar": "متوسط", "price_sar": 850, "duration_minutes": 180 }, { "name_ar": "طويل", "price_sar": 1100, "duration_minutes": 240 }] },
+        { "key": "roots_color", "name_ar": "صبغة جذور", "pricing": { "mode": "from", "amount_sar": 250 }, "duration_minutes": 120 },
+        { "key": "hair_style", "name_ar": "تسريحة مناسبة", "pricing": { "mode": "from", "amount_sar": 280 }, "duration_minutes": 90 },
+        { "key": "hair_treatment", "name_ar": "علاج وترميم الشعر", "pricing": { "mode": "from", "amount_sar": 350 }, "duration_minutes": 120 }
+      ]
+    },
+    {
+      "key": "makeup",
+      "name_ar": "المكياج",
+      "services": [
+        { "key": "soft_makeup", "name_ar": "مكياج ناعم", "pricing": { "mode": "fixed", "amount_sar": 250 }, "duration_minutes": 60 },
+        { "key": "evening_makeup", "name_ar": "مكياج سهرة", "pricing": { "mode": "fixed", "amount_sar": 350 }, "duration_minutes": 90 },
+        { "key": "bridal_makeup", "name_ar": "مكياج عروس", "pricing": { "mode": "from", "amount_sar": 900 }, "duration_minutes": 180 }
+      ]
+    },
+    {
+      "key": "skin",
+      "name_ar": "العناية بالبشرة",
+      "services": [
+        { "key": "facial_cleaning", "name_ar": "تنظيف بشرة", "pricing": { "mode": "fixed", "amount_sar": 220 }, "duration_minutes": 60 },
+        { "key": "hydrafacial", "name_ar": "هيدرافيشل", "pricing": { "mode": "fixed", "amount_sar": 450 }, "duration_minutes": 75 },
+        { "key": "skin_glow", "name_ar": "جلسة نضارة", "pricing": { "mode": "from", "amount_sar": 300 }, "duration_minutes": 60 }
+      ]
+    },
+    {
+      "key": "nails",
+      "name_ar": "الأظافر",
+      "services": [
+        { "key": "manicure", "name_ar": "مناكير", "pricing": { "mode": "fixed", "amount_sar": 100 }, "duration_minutes": 45 },
+        { "key": "pedicure", "name_ar": "بديكير", "pricing": { "mode": "fixed", "amount_sar": 130 }, "duration_minutes": 60 },
+        { "key": "gel_nails", "name_ar": "جل أظافر", "pricing": { "mode": "from", "amount_sar": 180 }, "duration_minutes": 90 }
+      ]
+    },
+    {
+      "key": "spa",
+      "name_ar": "السبا والمساج",
+      "services": [
+        { "key": "relaxation_massage", "name_ar": "مساج استرخاء", "pricing": { "mode": "variants" }, "variants": [{ "name_ar": "45 دقيقة", "price_sar": 220, "duration_minutes": 45 }, { "name_ar": "60 دقيقة", "price_sar": 280, "duration_minutes": 60 }, { "name_ar": "90 دقيقة", "price_sar": 380, "duration_minutes": 90 }] },
+        { "key": "deep_tissue_massage", "name_ar": "مساج علاجي", "pricing": { "mode": "variants" }, "variants": [{ "name_ar": "45 دقيقة", "price_sar": 260, "duration_minutes": 45 }, { "name_ar": "60 دقيقة", "price_sar": 330, "duration_minutes": 60 }, { "name_ar": "90 دقيقة", "price_sar": 450, "duration_minutes": 90 }] }
+      ]
+    }
+  ]
+}

@@ -1,118 +1,29 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- Supabase rows are runtime-shaped until generated types are added. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Scissors } from "lucide-react";
+import { Plus, Scissors, Trash2 } from "lucide-react";
 import { BusinessShell, PageHeader } from "@/components/glam/shells";
-import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { getCurrentOrganization } from "@/lib/glam-org";
+
 export const Route = createFileRoute("/business/services")({ component: ServicesPage });
+type Category = { id: string; name: string; active: boolean };
+type Service = { id: string; name: string; minutes: number; price_sar: number; pricing_mode: "fixed" | "from" | "range" | "variants"; buffer_minutes: number; category_id: string | null; active: boolean; glam_service_categories?: { name: string } | null; glam_service_variants?: { id: string; name: string; price_sar: number; minutes: number; active: boolean }[] };
+const modeLabel: Record<Service["pricing_mode"], string> = { fixed: "سعر ثابت", from: "يبدأ من", range: "نطاق سعري", variants: "خيارات متعددة" };
+
 function ServicesPage() {
-  const [adding, setAdding] = useState(false);
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [services, setServices] = useState<string[]>(() =>
-    readStored("glam-services", [
-      "بالاياج كامل — 650 ر.س",
-      "قص وتصفيف — 180 ر.س",
-      "مكياج سهرة — 350 ر.س",
-      "تسريحة مناسبة — 280 ر.س",
-    ]),
-  );
-  useEffect(() => {
-    getCurrentOrganization().then(({ organizationId }) => {
-      if (!organizationId) return;
-      supabase
-        .from("glam_services")
-        .select("name,price_sar")
-        .eq("organization_id", organizationId)
-        .eq("active", true)
-        .order("name")
-        .then(({ data }) => {
-          if (data?.length) {
-            const rows = data.map((s: any) => `${s.name} — ${s.price_sar} ر.س`);
-            setServices(rows);
-            writeStored("glam-services", rows);
-          }
-        });
-    });
-  }, []);
-  const save = async () => {
-    if (!name.trim() || !price) return;
-    const { organizationId } = await getCurrentOrganization();
-    const { error } = organizationId
-      ? await supabase.from("glam_services").insert({
-          organization_id: organizationId,
-          name: name.trim(),
-          price_sar: Number(price),
-          minutes: 60,
-          active: true,
-          revision: 1,
-        })
-      : { error: new Error("No organization") };
-    if (error) {
-      const next = [...services, `${name.trim()} — ${price} ر.س`];
-      setServices(next);
-      writeStored("glam-services", next);
-    } else setServices([...services, `${name.trim()} — ${price} ر.س`]);
-    setName("");
-    setPrice("");
-    setAdding(false);
-  };
-  return (
-    <BusinessShell>
-      <PageHeader
-        title="الخدمات"
-        desc="الخدمات والأسعار المعروضة للعميلات"
-        action={
-          <button
-            onClick={() => setAdding(true)}
-            className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-          >
-            إضافة خدمة
-          </button>
-        }
-      />
-      {adding && (
-        <section className="glam-card mb-4 space-y-3 p-4">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl border bg-background px-4 py-3"
-            placeholder="اسم الخدمة"
-          />
-          <input
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="w-full rounded-xl border bg-background px-4 py-3"
-            placeholder="السعر بالريال"
-            type="number"
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={save}
-              className="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground"
-            >
-              حفظ الخدمة
-            </button>
-            <button
-              onClick={() => setAdding(false)}
-              className="rounded-full border px-4 py-2 text-sm"
-            >
-              إلغاء
-            </button>
-          </div>
-        </section>
-      )}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {services.map((x) => (
-          <div className="glam-card flex items-center gap-3 p-4" key={x}>
-            <Scissors className="size-5 text-primary" />
-            <span>{x}</span>
-            <span className="mr-auto text-xs text-success">نشطة</span>
-          </div>
-        ))}
-      </div>
-    </BusinessShell>
-  );
+  const [categories, setCategories] = useState<Category[]>([]); const [services, setServices] = useState<Service[]>([]); const [categoryName, setCategoryName] = useState("");
+  const [form, setForm] = useState({ name: "", price: "", minutes: "60", buffer: "0", categoryId: "", mode: "fixed" as Service["pricing_mode"] });
+  const [variant, setVariant] = useState({ name: "", price: "", minutes: "45" }); const [selectedService, setSelectedService] = useState<string | null>(null); const [busy, setBusy] = useState(false); const [message, setMessage] = useState("");
+  const load = async () => { const { organizationId } = await getCurrentOrganization(); if (!organizationId) return; const [{ data: cats }, { data: rows }] = await Promise.all([supabase.from("glam_service_categories").select("id,name,active").eq("organization_id", organizationId).eq("active", true).order("sort_order").order("name"), supabase.from("glam_services").select("id,name,minutes,price_sar,pricing_mode,buffer_minutes,category_id,active,glam_service_categories(name),glam_service_variants(id,name,price_sar,minutes,active)").eq("organization_id", organizationId).eq("active", true).order("name")]); setCategories((cats ?? []) as Category[]); setServices((rows ?? []) as Service[]); };
+  useEffect(() => { void load(); }, []);
+  const addCategory = async () => { const name = categoryName.trim(); const { organizationId } = await getCurrentOrganization(); if (!name || !organizationId) return; setBusy(true); const { error } = await supabase.from("glam_service_categories").insert({ organization_id: organizationId, name }); setBusy(false); if (error) { setMessage(error.message); return; } setCategoryName(""); setMessage("تمت إضافة التصنيف"); await load(); };
+  const addService = async () => { const { organizationId } = await getCurrentOrganization(); if (!organizationId || !form.name.trim() || !form.price || !form.minutes) return; setBusy(true); const { data, error } = await supabase.from("glam_services").insert({ organization_id: organizationId, name: form.name.trim(), price_sar: Number(form.price), minutes: Number(form.minutes), buffer_minutes: Number(form.buffer) || 0, pricing_mode: form.mode, category_id: form.categoryId || null, active: true, revision: 1 }).select("id").single(); setBusy(false); if (error) { setMessage(error.message); return; } setForm({ name: "", price: "", minutes: "60", buffer: "0", categoryId: "", mode: "fixed" }); setSelectedService(data.id); setMessage("تمت إضافة الخدمة"); await load(); };
+  const addVariant = async () => { if (!selectedService || !variant.name.trim() || !variant.price || !variant.minutes) return; setBusy(true); const { error } = await supabase.from("glam_service_variants").insert({ service_id: selectedService, name: variant.name.trim(), price_sar: Number(variant.price), minutes: Number(variant.minutes), active: true }); setBusy(false); if (error) { setMessage(error.message); return; } setVariant({ name: "", price: "", minutes: "45" }); setMessage("تمت إضافة الخيار"); await load(); };
+  const deleteService = async (id: string) => { if (!window.confirm("هل تريد إخفاء هذه الخدمة؟")) return; const { error } = await supabase.from("glam_services").update({ active: false }).eq("id", id); if (error) setMessage(error.message); else await load(); };
+  return <BusinessShell><PageHeader title="الخدمات" desc="إدارة التصنيفات والخدمات والأسعار والمدة المعروضة للعميلات" />{message && <p className="mb-4 rounded-xl border bg-background p-3 text-sm">{message}</p>}
+    <section className="glam-card mb-5 space-y-3 p-4"><h2 className="font-semibold">التصنيفات</h2><div className="flex gap-2"><input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} className="min-w-0 flex-1 rounded-xl border bg-background px-4 py-3" placeholder="مثال: الشعر" /><button disabled={busy} onClick={() => void addCategory()} className="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground"><Plus className="mr-1 inline size-4" />إضافة</button></div><div className="flex flex-wrap gap-2">{categories.map((c) => <span key={c.id} className="rounded-full border px-3 py-1 text-sm">{c.name}</span>)}</div></section>
+    <section className="glam-card mb-5 space-y-3 p-4"><h2 className="font-semibold">إضافة خدمة</h2><div className="grid gap-3 sm:grid-cols-2"><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="rounded-xl border bg-background px-4 py-3" placeholder="اسم الخدمة" /><select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} className="rounded-xl border bg-background px-4 py-3"><option value="">بدون تصنيف</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><select value={form.mode} onChange={(e) => setForm({ ...form, mode: e.target.value as Service["pricing_mode"] })} className="rounded-xl border bg-background px-4 py-3">{Object.entries(modeLabel).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select><input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="rounded-xl border bg-background px-4 py-3" placeholder="السعر بالريال" type="number" min="0" /><input value={form.minutes} onChange={(e) => setForm({ ...form, minutes: e.target.value })} className="rounded-xl border bg-background px-4 py-3" placeholder="المدة بالدقائق" type="number" min="15" step="15" /><input value={form.buffer} onChange={(e) => setForm({ ...form, buffer: e.target.value })} className="rounded-xl border bg-background px-4 py-3" placeholder="تجهيز إضافي بالدقائق" type="number" min="0" step="5" /></div><button disabled={busy} onClick={() => void addService()} className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground">حفظ الخدمة</button></section>
+    <div className="grid gap-3 sm:grid-cols-2">{services.map((s) => <article key={s.id} className="glam-card space-y-3 p-4"><div className="flex items-center gap-3"><Scissors className="size-5 text-primary" /><div><h3 className="font-semibold">{s.name}</h3><p className="text-sm text-muted-foreground">{s.glam_service_categories?.name ?? "بدون تصنيف"} · {modeLabel[s.pricing_mode]}</p></div><button onClick={() => void deleteService(s.id)} className="mr-auto text-muted-foreground" aria-label="إخفاء الخدمة"><Trash2 className="size-4" /></button></div><p className="text-sm">{s.price_sar} ر.س · {s.minutes} دقيقة{s.buffer_minutes ? ` + ${s.buffer_minutes} تجهيز` : ""}</p>{s.pricing_mode === "variants" && <div className="space-y-2 border-t pt-3">{(s.glam_service_variants ?? []).map((v) => <div key={v.id} className="flex justify-between text-sm"><span>{v.name}</span><span>{v.price_sar} ر.س · {v.minutes} د</span></div>)}<button onClick={() => setSelectedService(s.id)} className="text-sm text-primary">إضافة خيار لهذه الخدمة</button></div>}</article>)}</div>
+    {selectedService && <section className="glam-card mt-5 space-y-3 p-4"><h2 className="font-semibold">إضافة خيار خدمة</h2><div className="grid gap-3 sm:grid-cols-3"><input value={variant.name} onChange={(e) => setVariant({ ...variant, name: e.target.value })} className="rounded-xl border bg-background px-4 py-3" placeholder="مثال: مساج 60 دقيقة" /><input value={variant.price} onChange={(e) => setVariant({ ...variant, price: e.target.value })} className="rounded-xl border bg-background px-4 py-3" placeholder="السعر" type="number" /><input value={variant.minutes} onChange={(e) => setVariant({ ...variant, minutes: e.target.value })} className="rounded-xl border bg-background px-4 py-3" placeholder="المدة" type="number" step="15" /></div><button disabled={busy} onClick={() => void addVariant()} className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground">حفظ الخيار</button></section>}</BusinessShell>;
 }
