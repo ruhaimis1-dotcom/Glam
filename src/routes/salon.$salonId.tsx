@@ -92,7 +92,7 @@ function SalonPage() {
       window.dispatchEvent(new Event("glam-bookings-updated"));
       setConfirmed(true);
     } catch (error) {\n      console.error("booking_insert_failed", error);
-      setBookingError("تعذر حفظ الحجز في الوقت الحالي. يرجى المحاولة مرة أخرى.");
+      setBookingError(error instanceof Error ? error.message : "BOOKING_INSERT_FAILED");
     } finally {
       setSaving(false);
     }
