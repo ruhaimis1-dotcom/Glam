@@ -51,14 +51,17 @@ function SalonPage() {
   const availableDates = [...new Set(serviceAppointments.map((a) => a.starts_at.slice(0, 10)))];
   const dateAppointments = serviceAppointments.filter((a) => a.starts_at.slice(0, 10) === date);
   const confirmBooking = async () => {
-    setSaving(true);
     setBookingError("");
+    if (!appointmentId) {
+      setBookingError("يرجى اختيار الوقت المتاح قبل تأكيد الحجز.");
+      return;
+    }
+    setSaving(true);
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error("AUTH_REQUIRED");
-      if (!appointmentId) throw new Error("APPOINTMENT_UNAVAILABLE");
       const { data: existing } = await supabase
         .from("glam_reservations")
         .select("id")
@@ -93,7 +96,8 @@ function SalonPage() {
       setConfirmed(true);
     } catch (error) {
       console.error("booking_insert_failed", error);
-      setBookingError(error instanceof Error ? error.message : "BOOKING_INSERT_FAILED");
+      const code = error instanceof Error ? error.message : "BOOKING_INSERT_FAILED";
+      setBookingError(code === "AUTH_REQUIRED" ? "يجب تسجيل الدخول لإتمام الحجز." : code === "ALREADY_BOOKED" ? "هذا الموعد محجوز مسبقًا." : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.");
     } finally {
       setSaving(false);
     }
