@@ -7,7 +7,6 @@ import { CustomerShell } from "@/components/glam/shells";
 import { PrivacyBadges, SalonCover, Stars } from "@/components/glam/ui";
 import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
-import { bookingDateKey, bookingDate, bookingTime, bookingErrorCode } from "@/lib/booking-time";
 
 function categoryForService(name: string) {
   if (/بالياج|قص|تصفيف|صبغ/.test(name)) return "الشعر";
@@ -35,17 +34,12 @@ function SalonPage() {
   >([]);
   useEffect(() => {
     supabase
-      .rpc("glam_available_appointments")
+      .from("glam_appointments")
+      .select("id,service_name,starts_at")
       .eq("salon_name", salon?.name ?? "")
       .gte("starts_at", new Date().toISOString())
-      .select("id,service_name,starts_at")
       .order("starts_at")
-      .then(({ data, error: loadError }) => {
-        if (loadError) {
-          setAppointments([]);
-          setBookingError(loadError.code === "42501" ? "سجّلي الدخول لعرض المواعيد المتاحة والحجز." : "تعذر تحميل المواعيد. يرجى إعادة المحاولة.");
-          return;
-        }
+      .then(({ data }) => {
         const rows = (data ?? []) as Array<{
           id: string;
           service_name: string;
@@ -63,10 +57,9 @@ function SalonPage() {
   const categories = [...new Set(services.map(categoryForService))];
   const categoryServices = services.filter((name) => categoryForService(name) === category);
   const serviceAppointments = appointments.filter((a) => a.service_name === service);
-  const availableDates = [...new Set(serviceAppointments.map((a) => bookingDateKey(a.starts_at)))];
-  const dateAppointments = serviceAppointments.filter((a) => bookingDateKey(a.starts_at) === date);
+  const availableDates = [...new Set(serviceAppointments.map((a) => a.starts_at.slice(0, 10)))];
+  const dateAppointments = serviceAppointments.filter((a) => a.starts_at.slice(0, 10) === date);
   const confirmBooking = async () => {
-    if (saving) return;
     setBookingError("");
     if (!service) {
       setBookingError("يرجى اختيار الخدمة أولاً.");
@@ -101,7 +94,9 @@ function SalonPage() {
         .in("status", ["confirmed", "pending"])
         .maybeSingle();
       if (appointmentReservation) throw new Error("APPOINTMENT_UNAVAILABLE");
-      const { error } = await supabase.from("glam_reservations").insert({
+      const { data: createdReservation, error } = await supabase
+        .from("glam_reservations")
+        .insert({
         id: crypto.randomUUID(),
         appointment_id: appointmentId,
         customer_id: user.id,
@@ -109,9 +104,13 @@ function SalonPage() {
         status: "confirmed",
         attendance: "pending",
         booking_source: "salon_link",
-      });
+        })
+        .select("id,customer_id,appointment_id,status")
+        .single();
       if (error) throw error;
-      try {
+      if (!createdReservation || createdReservation.customer_id !== user.id) {
+        throw new Error("BOOKING_NOT_PERSISTED");
+      }
       const bookings = readStored<any[]>("glam-bookings", []);
       bookings.unshift({
         id: `GL-${Date.now().toString().slice(-6)}`,
@@ -125,17 +124,11 @@ function SalonPage() {
       });
       writeStored("glam-bookings", bookings);
       window.dispatchEvent(new Event("glam-bookings-updated"));
-      } catch { /* The database booking is already saved. */ }
       setConfirmed(true);
     } catch (error) {
       console.error("booking_insert_failed", error);
-      const code = bookingErrorCode(error);
+      const code = error instanceof Error ? error.message : "BOOKING_INSERT_FAILED";
       const unavailable = code === "APPOINTMENT_UNAVAILABLE" || code.includes("23505") || code.includes("duplicate");
-      if (unavailable || code === "ALREADY_BOOKED") {
-        setAppointments((rows) => rows.filter((row) => row.id !== appointmentId));
-        setAppointmentId(null);
-        setTime("");
-      }
       setBookingError(code === "AUTH_REQUIRED" ? "يجب تسجيل الدخول لإتمام الحجز." : code === "ALREADY_BOOKED" || unavailable ? "هذا الموعد لم يعد متاحًا. اختاري وقتًا آخر." : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.");
     } finally {
       setSaving(false);
@@ -212,7 +205,6 @@ function SalonPage() {
               <select
                 value={category}
                 onChange={(e) => {
-                  setBookingError("");
                   setCategory(e.target.value);
                   setService("");
                   setDate("");
@@ -227,7 +219,6 @@ function SalonPage() {
               <select
                 value={service}
                 onChange={(e) => {
-                  setBookingError("");
                   setService(e.target.value);
                   setDate("");
                   setTime("");
@@ -242,7 +233,6 @@ function SalonPage() {
               <select
                 value={date}
                 onChange={(e) => {
-                  setBookingError("");
                   setDate(e.target.value);
                   setTime("");
                   setAppointmentId(null);
@@ -253,31 +243,29 @@ function SalonPage() {
                 {availableDates.length === 0 && <option value="" disabled>لا توجد أيام متاحة</option>}
                 {availableDates.map((availableDate) => (
                   <option key={availableDate} value={availableDate}>
-                    {bookingDate(availableDate)}
+                    {new Date(`${availableDate}T00:00:00`).toLocaleDateString("ar-SA", { dateStyle: "medium" })}
                   </option>
                 ))}
               </select>
               <select
                 value={appointmentId ?? ""}
                 onChange={(e) => {
-                  setBookingError("");
                   const selected = dateAppointments.find((a) => a.id === e.target.value);
                   setAppointmentId(selected?.id ?? null);
-                  setTime(selected ? bookingTime(selected.starts_at) : "");
+                  setTime(selected ? new Date(selected.starts_at).toLocaleTimeString("ar-SA", { hour: "numeric", minute: "2-digit" }) : "");
                 }}
                 className="w-full rounded-xl border bg-background px-4 py-3"
               >
                 <option value="">اختاري الوقت</option>
                 {dateAppointments.map((appointment) => (
                   <option key={appointment.id} value={appointment.id}>
-                    {bookingTime(appointment.starts_at)}
+                    {new Date(appointment.starts_at).toLocaleTimeString("ar-SA", { hour: "numeric", minute: "2-digit" })}
                   </option>
                 ))}
               </select>
               {bookingError && (
                 <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
                   {bookingError}
-                  <Link to="/login" className="mr-2 underline">تسجيل الدخول</Link>
                 </p>
               )}
               <button

@@ -6,7 +6,6 @@ import { CustomerShell } from "@/components/glam/shells";
 import { byId, formatSAR } from "@/data/mock";
 import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
-import { bookingDateKey, bookingDate, bookingTime, bookingErrorCode } from "@/lib/booking-time";
 
 export const Route = createFileRoute("/salon/$salonId/book")({ component: BookSalonPage });
 function BookSalonPage() {
@@ -28,17 +27,12 @@ function BookSalonPage() {
   const [catalog, setCatalog] = useState<Array<{ id: string; name: string; categoryName: string; price: number; minutes: number; variants: Array<{ id: string; name: string; price: number; minutes: number }> }>>([]);
   useEffect(() => {
     supabase
-      .rpc("glam_available_appointments")
+      .from("glam_appointments")
+      .select("id,service_id,service_variant_id,service_name,starts_at")
       .eq("salon_name", salon?.name ?? "")
       .gte("starts_at", new Date().toISOString())
-      .select("id,service_id,service_variant_id,service_name,starts_at")
       .order("starts_at")
-      .then(({ data, error: loadError }) => {
-        if (loadError) {
-          setAppointments([]);
-          setError(loadError.code === "42501" ? "سجّلي الدخول لعرض المواعيد المتاحة والحجز." : "تعذر تحميل المواعيد. يرجى إعادة المحاولة.");
-          return;
-        }
+      .then(({ data }) => {
         const rows = (data ?? []) as Array<{ id: string; service_id: string | null; service_variant_id: string | null; service_name: string; starts_at: string }>;
         setAppointments(rows);
         const ids = [...new Set(rows.map((row) => row.service_id).filter(Boolean))] as string[];
@@ -59,8 +53,8 @@ function BookSalonPage() {
   const selectedService = serviceOptions.find((item) => item.id === service);
   const selectedVariant = selectedService?.variants.find((item) => item.id === variantId);
   const serviceAppointments = appointments.filter((a) => (a.service_id ? a.service_id === service : a.service_name === selectedService?.name) && (!variantId || a.service_variant_id === variantId));
-  const availableDates = [...new Set(serviceAppointments.map((a) => bookingDateKey(a.starts_at)))];
-  const dateAppointments = serviceAppointments.filter((a) => bookingDateKey(a.starts_at) === date);
+  const availableDates = [...new Set(serviceAppointments.map((a) => a.starts_at.slice(0, 10)))];
+  const dateAppointments = serviceAppointments.filter((a) => a.starts_at.slice(0, 10) === date);
   if (!salon)
     return (
       <CustomerShell title="الحجز" back="/">
@@ -68,7 +62,6 @@ function BookSalonPage() {
       </CustomerShell>
     );
   const confirm = async () => {
-    if (saving) return;
     setError("");
     if (!service) {
       setError("يرجى اختيار الخدمة أولاً.");
@@ -107,7 +100,9 @@ function BookSalonPage() {
         .in("status", ["confirmed", "pending"])
         .maybeSingle();
       if (appointmentReservation) throw new Error("APPOINTMENT_UNAVAILABLE");
-      const { error: insertError } = await supabase.from("glam_reservations").insert({
+      const { data: createdReservation, error: insertError } = await supabase
+        .from("glam_reservations")
+        .insert({
         id: crypto.randomUUID(),
         appointment_id: appointmentId,
         customer_id: user.id,
@@ -115,9 +110,13 @@ function BookSalonPage() {
         status: "confirmed",
         attendance: "pending",
         booking_source: "salon_link",
-      });
+        })
+        .select("id,customer_id,appointment_id,status")
+        .single();
       if (insertError) throw insertError;
-      try {
+      if (!createdReservation || createdReservation.customer_id !== user.id) {
+        throw new Error("BOOKING_NOT_PERSISTED");
+      }
       const bookings = readStored<any[]>("glam-bookings", []);
       bookings.unshift({
         id: `GL-${Date.now().toString().slice(-6)}`,
@@ -131,24 +130,18 @@ function BookSalonPage() {
       });
       writeStored("glam-bookings", bookings);
       window.dispatchEvent(new Event("glam-bookings-updated"));
-      } catch { /* The database booking is already saved. */ }
       setDone(true);
     } catch (e) {
       console.error("booking_insert_failed", e);
-      const code = bookingErrorCode(e);
+      const code = e instanceof Error ? e.message : "BOOKING_INSERT_FAILED";
       const unavailable = code === "APPOINTMENT_UNAVAILABLE" || code.includes("23505") || code.includes("duplicate");
-      if (unavailable || code === "ALREADY_BOOKED") {
-        setAppointments((rows) => rows.filter((row) => row.id !== appointmentId));
-        setAppointmentId(null);
-        setTime("");
-      }
       setError(code === "AUTH_REQUIRED" ? "يجب تسجيل الدخول لإتمام الحجز." : code === "ALREADY_BOOKED" || unavailable ? "هذا الموعد لم يعد متاحًا. اختاري وقتًا آخر." : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.");
     } finally {
       setSaving(false);
     }
   };
   return (
-    <CustomerShell title="تأكيد الحجز">
+    <CustomerShell title="تأكيد الحجز" back={`/salon/${salonId}`}>
       <div className="mb-6 flex items-center gap-3">
         <Link
           to="/salon/$salonId"
@@ -167,7 +160,7 @@ function BookSalonPage() {
           <CheckCircle2 className="mx-auto size-12 text-success" />
           <h2 className="text-xl font-bold">تم تأكيد الحجز</h2>
           <p className="text-sm text-muted-foreground">
-            {selectedService?.name ?? service} · {date} · {time}
+            {service} · {date} · {time}
           </p>
           <Link
             to="/bookings"
@@ -183,7 +176,6 @@ function BookSalonPage() {
             <select
               value={category}
               onChange={(e) => {
-                  setError("");
                 setCategory(e.target.value);
                 setService("");
                 setVariantId("");
@@ -202,7 +194,6 @@ function BookSalonPage() {
             <select
               value={service}
               onChange={(e) => {
-                  setError("");
                 const next = e.target.value;
                 setService(next);
                 setVariantId("");
@@ -226,7 +217,6 @@ function BookSalonPage() {
               <select
                 value={variantId}
                 onChange={(e) => {
-                  setError("");
                   setVariantId(e.target.value);
                   setDate("");
                   setTime("");
@@ -246,7 +236,6 @@ function BookSalonPage() {
             <select
               value={date}
               onChange={(e) => {
-                  setError("");
                 setDate(e.target.value);
                 setTime("");
                 setAppointmentId(null);
@@ -257,7 +246,7 @@ function BookSalonPage() {
               {availableDates.length === 0 && <option value="" disabled>لا توجد أيام متاحة</option>}
               {availableDates.map((availableDate) => (
                 <option key={availableDate} value={availableDate}>
-                  {bookingDate(availableDate)}
+                  {new Date(`${availableDate}T00:00:00`).toLocaleDateString("ar-SA", { dateStyle: "medium" })}
                 </option>
               ))}
             </select>
@@ -267,17 +256,16 @@ function BookSalonPage() {
             <select
               value={appointmentId ?? ""}
               onChange={(e) => {
-                  setError("");
                 const selected = dateAppointments.find((a) => a.id === e.target.value);
                 setAppointmentId(selected?.id ?? null);
-                setTime(selected ? bookingTime(selected.starts_at) : "");
+                setTime(selected ? new Date(selected.starts_at).toLocaleTimeString("ar-SA", { hour: "numeric", minute: "2-digit" }) : "");
               }}
               className="mt-2 w-full rounded-xl border bg-background px-4 py-3"
             >
               <option value="">اختاري الوقت</option>
               {dateAppointments.map((appointment) => (
                 <option key={appointment.id} value={appointment.id}>
-                  {bookingTime(appointment.starts_at)}
+                  {new Date(appointment.starts_at).toLocaleTimeString("ar-SA", { hour: "numeric", minute: "2-digit" })}
                 </option>
               ))}
             </select>
