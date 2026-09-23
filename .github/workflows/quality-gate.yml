@@ -18,14 +18,16 @@ jobs:
       - name: Install
         run: npm ci
       - name: Typecheck
-        run: npx tsc --noEmit
-      - name: Regression tests
-        shell: bash
         run: |
-          if [ -f tests/booking-time.test.mjs ]; then
-            node --experimental-strip-types tests/booking-time.test.mjs
-          else
-            echo "No booking regression test on this branch yet."
-          fi
+          npx tsc --noEmit 2>&1 | tee typecheck.log
+          test ${PIPESTATUS[0]} -eq 0
+      - name: Upload typecheck diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-diagnostics
+          path: typecheck.log
+      - name: Regression tests
+        run: node --experimental-strip-types tests/booking-time.test.mjs
       - name: Production build
         run: npm run build
