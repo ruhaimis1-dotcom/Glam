@@ -7,7 +7,7 @@ import { byId, formatSAR } from "@/data/mock";
 import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 
-export const Route = createFileRoute("/salon/$salonId/book" as any)({ component: BookSalonPage });
+export const Route = createFileRoute("/salon/$salonId/book")({ component: BookSalonPage });
 function BookSalonPage() {
   const { salonId } = Route.useParams() as { salonId: string };
   const salon = byId.salon(salonId);
