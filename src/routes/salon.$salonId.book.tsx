@@ -141,7 +141,7 @@ function BookSalonPage() {
     }
   };
   return (
-    <CustomerShell title="تأكيد الحجز" back={`/salon/${salonId}`}>
+    <CustomerShell title="تأكيد الحجز" back="/">
       <div className="mb-6 flex items-center gap-3">
         <Link
           to="/salon/$salonId"
