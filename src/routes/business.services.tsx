@@ -35,6 +35,8 @@ const previewServices: IntelligentService[] = [
 
 function ServicesPage() {
   const [query, setQuery] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [step, setStep] = useState(1);
   const [status, setStatus] = useState<"all" | "active" | "draft">("all");
   const services = useMemo(() => previewServices.filter((service) => {
     const matchesQuery = !query || service.nameAr.includes(query) || service.nameEn?.toLowerCase().includes(query.toLowerCase());
@@ -47,11 +49,55 @@ function ServicesPage() {
         title="الخدمات الذكية"
         desc="ابني كتالوج خدمات يفهم المدة والسعر والخصوصية ويستعد للربط مع جواز جمال العميلة."
         action={
-          <button className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm">
+          <button onClick={() => { setAdding(true); setStep(1); }} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm">
             <Plus className="size-4" /> إضافة خدمة
           </button>
         }
       />
+
+      {adding && (
+        <section className="glam-card mb-6 overflow-hidden">
+          <div className="border-b px-5 py-4 md:px-6">
+            <div className="flex items-center justify-between gap-4">
+              <div><p className="text-xs font-semibold text-primary">إضافة خدمة ذكية</p><h2 className="mt-1 text-xl font-bold">نبني الخدمة خطوة بخطوة</h2></div>
+              <button onClick={() => setAdding(false)} className="rounded-full border px-3 py-1.5 text-xs">إغلاق</button>
+            </div>
+            <div className="mt-5 grid grid-cols-4 gap-2">
+              {["الأساسيات","السعر والوقت","ذكاء الجمال","الخصوصية"].map((label,index) => <button key={label} onClick={() => setStep(index+1)} className={`rounded-xl px-2 py-2 text-xs ${step === index+1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{index+1}. {label}</button>)}
+            </div>
+          </div>
+          <div className="p-5 md:p-6">
+            {step === 1 && <div className="grid gap-4 md:grid-cols-2">
+              <label className="text-sm font-medium">اسم الخدمة بالعربية<input className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="مثال: بالياج كامل" /></label>
+              <label className="text-sm font-medium">Service name in English<input className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="Full Balayage" /></label>
+              <label className="text-sm font-medium">التصنيف الرئيسي<select className="mt-2 w-full rounded-2xl border bg-background px-4 py-3"><option>الشعر</option><option>البشرة</option><option>الأظافر</option><option>المكياج</option></select></label>
+              <label className="text-sm font-medium">التصنيف الفرعي<input className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="صبغات وتلوين" /></label>
+              <label className="text-sm font-medium md:col-span-2">وصف الخدمة<textarea rows={3} className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="اشرحي النتيجة المتوقعة وما الذي تتضمنه الخدمة..." /></label>
+            </div>}
+            {step === 2 && <div className="grid gap-4 md:grid-cols-3">
+              <label className="text-sm font-medium">طريقة التسعير<select className="mt-2 w-full rounded-2xl border bg-background px-4 py-3"><option>سعر ثابت</option><option>يبدأ من</option><option>حسب الخيار</option></select></label>
+              <label className="text-sm font-medium">السعر الأساسي<input type="number" className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="650" /></label>
+              <label className="text-sm font-medium">مدة الخدمة بالدقائق<input type="number" className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="180" /></label>
+              <label className="text-sm font-medium">تجهيز قبل الموعد<input type="number" className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="15" /></label>
+              <label className="text-sm font-medium">وقت بعد الخدمة<input type="number" className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="15" /></label>
+              <div className="rounded-2xl bg-primary/5 p-4 text-sm"><p className="font-semibold text-primary">اقتراح GLAM</p><p className="mt-1 text-muted-foreground">سيظهر هنا اقتراح المدة والسعر بعد تفعيل طبقة المساعدة.</p></div>
+            </div>}
+            {step === 3 && <div className="space-y-4">
+              <div className="rounded-2xl border p-4"><h3 className="font-bold">ملاءمة الخدمة</h3><p className="mt-1 text-sm text-muted-foreground">حددي أنواع الشعر أو البشرة أو الأظافر المناسبة، وما يحتاج تنبيهًا أو منعًا.</p><div className="mt-3 flex flex-wrap gap-2">{["شعر مصبوغ","شعر جاف","فروة حساسة","بشرة حساسة","أظافر ضعيفة"].map(x => <button key={x} className="rounded-full border px-3 py-2 text-xs hover:border-primary">{x}</button>)}</div></div>
+              <label className="block text-sm font-medium">الحساسيات أو المواد التي تحتاج تنبيه<textarea rows={3} className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="مثال: تجنب مادة محددة أو إجراء اختبار حساسية..." /></label>
+              <label className="block text-sm font-medium">ملاحظات GLAM للمطابقة<textarea rows={3} className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="معلومات تساعد لاحقًا في مطابقة الخدمة مع جواز جمال العميلة" /></label>
+            </div>}
+            {step === 4 && <div className="grid gap-3 md:grid-cols-2">
+              {["تتطلب خبيرة/موظفة","تدعم غرفة خاصة","الغرفة الخاصة مطلوبة","التصوير ممنوع افتراضيًا"].map(x => <label key={x} className="flex items-center justify-between rounded-2xl border p-4 text-sm font-medium"><span>{x}</span><input type="checkbox" className="size-4 accent-current" /></label>)}
+              <div className="md:col-span-2 rounded-2xl bg-primary/5 p-4"><p className="font-semibold">جاهزة للمراجعة</p><p className="mt-1 text-sm text-muted-foreground">في النسخة المتصلة بقاعدة البيانات ستُحفظ أولًا كمسودة، ثم تُنشر بعد مراجعة الصالون.</p></div>
+            </div>}
+            <div className="mt-6 flex justify-between border-t pt-4">
+              <button disabled={step===1} onClick={() => setStep(Math.max(1,step-1))} className="rounded-full border px-4 py-2 text-sm disabled:opacity-40">السابق</button>
+              {step < 4 ? <button onClick={() => setStep(Math.min(4,step+1))} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">التالي</button> : <button className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">حفظ كمسودة</button>}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="mb-6 rounded-[28px] border bg-gradient-to-l from-primary/10 via-card to-card p-5 md:p-6">
         <div className="flex items-start gap-4">
