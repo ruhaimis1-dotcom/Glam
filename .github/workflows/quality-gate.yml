@@ -17,7 +17,17 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
-      - name: Typecheck
+      - name: Generate routes and production build
+        run: |
+          npm run build 2>&1 | tee build.log
+          test ${PIPESTATUS[0]} -eq 0
+      - name: Upload build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics
+          path: build.log
+      - name: Typecheck generated route tree
         run: |
           npx tsc --noEmit 2>&1 | tee typecheck.log
           test ${PIPESTATUS[0]} -eq 0
@@ -29,13 +39,3 @@ jobs:
           path: typecheck.log
       - name: Regression tests
         run: node --experimental-strip-types tests/booking-time.test.mjs
-      - name: Production build
-        run: |
-          npm run build 2>&1 | tee build.log
-          test ${PIPESTATUS[0]} -eq 0
-      - name: Upload build diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-diagnostics
-          path: build.log
