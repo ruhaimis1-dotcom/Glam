@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/salon/$salonId/book")({ component: BookSalonPage });
 function BookSalonPage() {
-  const { salonId } = Route.useParams() as { salonId: string };
+  const { salonId } = Route.useParams();
   const salon = byId.salon(salonId);
   const navigate = useNavigate();
   const [service, setService] = useState("");
@@ -141,7 +141,7 @@ function BookSalonPage() {
     }
   };
   return (
-    <CustomerShell title="تأكيد الحجز" back="/">
+    <CustomerShell title="تأكيد الحجز" back={`/salon/${salonId}`}>
       <div className="mb-6 flex items-center gap-3">
         <Link
           to="/salon/$salonId"
