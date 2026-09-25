@@ -1,147 +1,505 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Clock3, Plus, Search, Sparkles, WandSparkles } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { Plus, Search } from "lucide-react";
 import { BusinessShell, PageHeader } from "@/components/glam/shells";
-import { PRICING_MODE_LABELS, SERVICE_STATUS_LABELS, type IntelligentService } from "@/domain/service-intelligence";
+import { useBusinessOrganization } from "@/lib/business-context";
+import { supabase } from "@/lib/supabase";
+import { createCatalogRepository } from "@/repositories/service-intelligence";
+import { catalogError, type CatalogService, type ServiceInput } from "@/domain/business-catalog";
 
 export const Route = createFileRoute("/business/services")({ component: ServicesPage });
-
-const previewServices: IntelligentService[] = [
-  {
-    id: "preview-1", organizationId: null, categoryId: "hair", nameAr: "بالياج كامل", nameEn: "Full Balayage",
-    descriptionAr: "تفتيح وتدرج لوني مخصص حسب قاعدة الشعر والنتيجة المطلوبة.", descriptionEn: null,
-    status: "active", pricingMode: "starts_from", basePriceSar: 650, durationMinutes: 180,
-    prepBufferMinutes: 15, cleanupBufferMinutes: 15, intelligenceNotes: "يحتاج تقييم قاعدة الشعر قبل التأكيد.",
-    femaleProfessionalRequired: true, privateRoomSupported: true, privateRoomRequired: false,
-    photographyPolicy: "allowed_with_consent", variants: [], profileRules: [],
-  },
-  {
-    id: "preview-2", organizationId: null, categoryId: "hair", nameAr: "قص وتصفيف", nameEn: "Cut & Style",
-    descriptionAr: "قص وتصفيف مع تحديد النتيجة المناسبة لنوع الشعر.", descriptionEn: null,
-    status: "active", pricingMode: "fixed", basePriceSar: 180, durationMinutes: 60,
-    prepBufferMinutes: 5, cleanupBufferMinutes: 10, intelligenceNotes: null,
-    femaleProfessionalRequired: true, privateRoomSupported: false, privateRoomRequired: false,
-    photographyPolicy: "salon_policy", variants: [], profileRules: [],
-  },
-  {
-    id: "preview-3", organizationId: null, categoryId: "makeup", nameAr: "مكياج سهرة", nameEn: "Evening Makeup",
-    descriptionAr: "مكياج مناسبة مع تخصيص اللوك حسب البشرة والتفضيلات.", descriptionEn: null,
-    status: "draft", pricingMode: "fixed", basePriceSar: 350, durationMinutes: 75,
-    prepBufferMinutes: 10, cleanupBufferMinutes: 10, intelligenceNotes: "ربط الحساسية والمنتجات في الخطوة التالية.",
-    femaleProfessionalRequired: true, privateRoomSupported: true, privateRoomRequired: false,
-    photographyPolicy: "prohibited", variants: [], profileRules: [],
-  },
-];
+const repository = createCatalogRepository(supabase);
+const emptyService: ServiceInput = {
+  name: "",
+  minutes: 60,
+  price_sar: 0,
+  active: false,
+  category_id: null,
+  subcategory_id: null,
+  pricing_mode: "fixed",
+  buffer_minutes: 0,
+};
+const fieldClass = "mt-2 w-full rounded-2xl border bg-background px-4 py-3";
+const buttonClass = "rounded-full border px-4 py-2 text-sm disabled:opacity-40";
+const primaryClass = `${buttonClass} bg-primary text-primary-foreground`;
+type Catalog = Awaited<ReturnType<typeof repository.load>>;
 
 function ServicesPage() {
+  const organization = useBusinessOrganization();
+  const [catalog, setCatalog] = useState<Catalog>({
+    services: [],
+    categories: [],
+    subcategories: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const mutation = useRef(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [query, setQuery] = useState("");
-  const [adding, setAdding] = useState(false);
+  const [status, setStatus] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [editor, setEditor] = useState<{ id: string | null; input: ServiceInput } | null>(null);
   const [step, setStep] = useState(1);
-  const [status, setStatus] = useState<"all" | "active" | "draft">("all");
-  const services = useMemo(() => previewServices.filter((service) => {
-    const matchesQuery = !query || service.nameAr.includes(query) || service.nameEn?.toLowerCase().includes(query.toLowerCase());
-    return matchesQuery && (status === "all" || service.status === status);
-  }), [query, status]);
+  const [categoryEditor, setCategoryEditor] = useState<{
+    id: string | null;
+    name: string;
+    parent: string | null;
+  } | null>(null);
+  const mounted = useRef(true);
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setLoaded(false);
+    try {
+      const data = await repository.load(organization.id);
+      if (mounted.current) {
+        setCatalog(data);
+        setLoaded(true);
+      }
+    } finally {
+      if (mounted.current) setLoading(false);
+    }
+  }, [organization.id]);
+  useEffect(() => {
+    mounted.current = true;
+    void reload().catch((failure: unknown) => {
+      if (mounted.current) setError(catalogError(failure));
+    });
+    return () => {
+      mounted.current = false;
+    };
+  }, [reload]);
+
+  async function runMutation(action: () => Promise<unknown>) {
+    if (mutation.current) return;
+    mutation.current = true;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await action();
+      if (!mounted.current) return;
+      setEditor(null);
+      setCategoryEditor(null);
+      setNotice("تم الحفظ في المؤسسة.");
+      try {
+        await reload();
+      } catch (failure) {
+        setNotice("تم الحفظ، لكن تعذر تحديث القائمة. أعيدي تحميلها قبل إجراء تغيير آخر.");
+        throw failure;
+      }
+    } catch (failure) {
+      if (mounted.current) setError(catalogError(failure));
+    } finally {
+      mutation.current = false;
+      if (mounted.current) setBusy(false);
+    }
+  }
+  function edit(service?: CatalogService) {
+    setError("");
+    setNotice("");
+    setStep(1);
+    setEditor({ id: service?.id ?? null, input: service ? { ...service } : { ...emptyService } });
+  }
+  function patch(input: Partial<ServiceInput>) {
+    setEditor((current) =>
+      current ? { ...current, input: { ...current.input, ...input } } : null,
+    );
+  }
+  function save(event: FormEvent) {
+    event.preventDefault();
+    if (editor)
+      void runMutation(() => repository.saveService(organization.id, editor.id, editor.input));
+  }
+  const services = catalog.services.filter(
+    (service) =>
+      service.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()) &&
+      (status === "all" || service.active === (status === "active")) &&
+      (!categoryFilter || service.category_id === categoryFilter),
+  );
+  const disabled = busy || loading || !loaded;
 
   return (
     <BusinessShell>
       <PageHeader
-        title="الخدمات الذكية"
-        desc="ابني كتالوج خدمات يفهم المدة والسعر والخصوصية ويستعد للربط مع جواز جمال العميلة."
+        title="الخدمات والتصنيفات"
+        desc={organization.name}
         action={
-          <button onClick={() => { setAdding(true); setStep(1); }} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm">
-            <Plus className="size-4" /> إضافة خدمة
+          <button disabled={disabled} onClick={() => edit()} className={primaryClass}>
+            <Plus className="inline size-4" /> إضافة خدمة
           </button>
         }
       />
-
-      {adding && (
-        <section className="glam-card mb-6 overflow-hidden">
-          <div className="border-b px-5 py-4 md:px-6">
-            <div className="flex items-center justify-between gap-4">
-              <div><p className="text-xs font-semibold text-primary">إضافة خدمة ذكية</p><h2 className="mt-1 text-xl font-bold">نبني الخدمة خطوة بخطوة</h2></div>
-              <button onClick={() => setAdding(false)} className="rounded-full border px-3 py-1.5 text-xs">إغلاق</button>
-            </div>
-            <div className="mt-5 grid grid-cols-4 gap-2">
-              {["الأساسيات","السعر والوقت","ذكاء الجمال","الخصوصية"].map((label,index) => <button key={label} onClick={() => setStep(index+1)} className={`rounded-xl px-2 py-2 text-xs ${step === index+1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{index+1}. {label}</button>)}
-            </div>
-          </div>
-          <div className="p-5 md:p-6">
-            {step === 1 && <div className="grid gap-4 md:grid-cols-2">
-              <label className="text-sm font-medium">اسم الخدمة بالعربية<input className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="مثال: بالياج كامل" /></label>
-              <label className="text-sm font-medium">Service name in English<input className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="Full Balayage" /></label>
-              <label className="text-sm font-medium">التصنيف الرئيسي<select className="mt-2 w-full rounded-2xl border bg-background px-4 py-3"><option>الشعر</option><option>البشرة</option><option>الأظافر</option><option>المكياج</option></select></label>
-              <label className="text-sm font-medium">التصنيف الفرعي<input className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="صبغات وتلوين" /></label>
-              <label className="text-sm font-medium md:col-span-2">وصف الخدمة<textarea rows={3} className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="اشرحي النتيجة المتوقعة وما الذي تتضمنه الخدمة..." /></label>
-            </div>}
-            {step === 2 && <div className="grid gap-4 md:grid-cols-3">
-              <label className="text-sm font-medium">طريقة التسعير<select className="mt-2 w-full rounded-2xl border bg-background px-4 py-3"><option>سعر ثابت</option><option>يبدأ من</option><option>حسب الخيار</option></select></label>
-              <label className="text-sm font-medium">السعر الأساسي<input type="number" className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="650" /></label>
-              <label className="text-sm font-medium">مدة الخدمة بالدقائق<input type="number" className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="180" /></label>
-              <label className="text-sm font-medium">تجهيز قبل الموعد<input type="number" className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="15" /></label>
-              <label className="text-sm font-medium">وقت بعد الخدمة<input type="number" className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="15" /></label>
-              <div className="rounded-2xl bg-primary/5 p-4 text-sm"><p className="font-semibold text-primary">اقتراح GLAM</p><p className="mt-1 text-muted-foreground">سيظهر هنا اقتراح المدة والسعر بعد تفعيل طبقة المساعدة.</p></div>
-            </div>}
-            {step === 3 && <div className="space-y-4">
-              <div className="rounded-2xl border p-4"><h3 className="font-bold">ملاءمة الخدمة</h3><p className="mt-1 text-sm text-muted-foreground">حددي أنواع الشعر أو البشرة أو الأظافر المناسبة، وما يحتاج تنبيهًا أو منعًا.</p><div className="mt-3 flex flex-wrap gap-2">{["شعر مصبوغ","شعر جاف","فروة حساسة","بشرة حساسة","أظافر ضعيفة"].map(x => <button key={x} className="rounded-full border px-3 py-2 text-xs hover:border-primary">{x}</button>)}</div></div>
-              <label className="block text-sm font-medium">الحساسيات أو المواد التي تحتاج تنبيه<textarea rows={3} className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="مثال: تجنب مادة محددة أو إجراء اختبار حساسية..." /></label>
-              <label className="block text-sm font-medium">ملاحظات GLAM للمطابقة<textarea rows={3} className="mt-2 w-full rounded-2xl border bg-background px-4 py-3" placeholder="معلومات تساعد لاحقًا في مطابقة الخدمة مع جواز جمال العميلة" /></label>
-            </div>}
-            {step === 4 && <div className="grid gap-3 md:grid-cols-2">
-              {["تتطلب خبيرة/موظفة","تدعم غرفة خاصة","الغرفة الخاصة مطلوبة","التصوير ممنوع افتراضيًا"].map(x => <label key={x} className="flex items-center justify-between rounded-2xl border p-4 text-sm font-medium"><span>{x}</span><input type="checkbox" className="size-4 accent-current" /></label>)}
-              <div className="md:col-span-2 rounded-2xl bg-primary/5 p-4"><p className="font-semibold">جاهزة للمراجعة</p><p className="mt-1 text-sm text-muted-foreground">في النسخة المتصلة بقاعدة البيانات ستُحفظ أولًا كمسودة، ثم تُنشر بعد مراجعة الصالون.</p></div>
-            </div>}
-            <div className="mt-6 flex justify-between border-t pt-4">
-              <button disabled={step===1} onClick={() => setStep(Math.max(1,step-1))} className="rounded-full border px-4 py-2 text-sm disabled:opacity-40">السابق</button>
-              {step < 4 ? <button onClick={() => setStep(Math.min(4,step+1))} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">التالي</button> : <button className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">حفظ كمسودة</button>}
-            </div>
-          </div>
-        </section>
+      {error && (
+        <div role="alert" className="glam-card mb-4 space-y-3 p-4 text-destructive">
+          <p>{error}</p>
+          <button
+            disabled={busy || loading}
+            className={buttonClass}
+            onClick={() => {
+              setError("");
+              void reload().catch((failure: unknown) => setError(catalogError(failure)));
+            }}
+          >
+            إعادة تحميل البيانات
+          </button>
+        </div>
       )}
-
-      <section className="mb-6 rounded-[28px] border bg-gradient-to-l from-primary/10 via-card to-card p-5 md:p-6">
-        <div className="flex items-start gap-4">
-          <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground"><Sparkles className="size-5" /></div>
-          <div>
-            <p className="text-xs font-semibold text-primary">GLAM SERVICE INTELLIGENCE</p>
-            <h2 className="mt-1 text-lg font-bold">كل خدمة تصبح جزءًا من ذكاء GLAM</h2>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">نرتب التصنيف والترجمة والمدة ووقت التجهيز وقواعد الملاءمة، ثم نستخدمها لاحقًا لمطابقة الخدمة مع جواز جمال العميلة.</p>
+      {notice && (
+        <p role="status" className="mb-4 text-primary">
+          {notice}
+        </p>
+      )}
+      {loading && <p role="status">جارٍ تحميل كتالوج المؤسسة…</p>}
+      {editor && (
+        <form onSubmit={save} className="glam-card mb-6 p-5">
+          <fieldset disabled={busy}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">{editor.id ? "تعديل الخدمة" : "إضافة خدمة"}</h2>
+              <button type="button" className={buttonClass} onClick={() => setEditor(null)}>
+                إلغاء
+              </button>
+            </div>
+            <div className="my-5 flex gap-2">
+              {["الأساسيات", "السعر والوقت"].map((label, index) => (
+                <button
+                  type="button"
+                  key={label}
+                  className={step === index + 1 ? primaryClass : buttonClass}
+                  onClick={() => setStep(index + 1)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div hidden={step !== 1} className="grid gap-4 md:grid-cols-2">
+              <label>
+                اسم الخدمة
+                <input
+                  required
+                  maxLength={120}
+                  className={fieldClass}
+                  value={editor.input.name}
+                  onChange={(e) => patch({ name: e.target.value })}
+                />
+              </label>
+              <label>
+                التصنيف الرئيسي
+                <select
+                  className={fieldClass}
+                  value={editor.input.category_id ?? ""}
+                  onChange={(e) =>
+                    patch({ category_id: e.target.value || null, subcategory_id: null })
+                  }
+                >
+                  <option value="">بدون تصنيف</option>
+                  {catalog.categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                التصنيف الفرعي
+                <select
+                  className={fieldClass}
+                  value={editor.input.subcategory_id ?? ""}
+                  disabled={!editor.input.category_id}
+                  onChange={(e) => patch({ subcategory_id: e.target.value || null })}
+                >
+                  <option value="">بدون تصنيف فرعي</option>
+                  {catalog.subcategories
+                    .filter((category) => category.category_id === editor.input.category_id)
+                    .map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={editor.input.active}
+                  onChange={(e) => patch({ active: e.target.checked })}
+                />{" "}
+                متاحة للحجز
+              </label>
+            </div>
+            <div hidden={step !== 2} className="grid gap-4 md:grid-cols-2">
+              <label>
+                طريقة التسعير
+                <select
+                  className={fieldClass}
+                  value={editor.input.pricing_mode}
+                  onChange={(e) =>
+                    patch({ pricing_mode: e.target.value as ServiceInput["pricing_mode"] })
+                  }
+                >
+                  <option value="fixed">سعر ثابت</option>
+                  <option value="from">يبدأ من</option>
+                  {["range", "variants"].includes(editor.input.pricing_mode) && (
+                    <option value={editor.input.pricing_mode}>إعداد متقدم محفوظ</option>
+                  )}
+                </select>
+              </label>
+              <label>
+                السعر (ر.س)
+                <input
+                  required
+                  type="number"
+                  min={0}
+                  max={10000}
+                  step="0.01"
+                  className={fieldClass}
+                  value={editor.input.price_sar}
+                  onChange={(e) => patch({ price_sar: e.target.valueAsNumber })}
+                />
+              </label>
+              <label>
+                المدة (دقيقة)
+                <input
+                  required
+                  type="number"
+                  min={15}
+                  max={480}
+                  step={15}
+                  className={fieldClass}
+                  value={editor.input.minutes}
+                  onChange={(e) => patch({ minutes: e.target.valueAsNumber })}
+                />
+              </label>
+              <label>
+                وقت التجهيز (دقيقة)
+                <input
+                  required
+                  type="number"
+                  min={0}
+                  max={120}
+                  step={1}
+                  className={fieldClass}
+                  value={editor.input.buffer_minutes}
+                  onChange={(e) => patch({ buffer_minutes: e.target.valueAsNumber })}
+                />
+              </label>
+            </div>
+            <div className="mt-5 flex gap-3">
+              {step === 1 ? (
+                <button
+                  type="button"
+                  className={primaryClass}
+                  onClick={() => {
+                    if (editor.input.name.trim()) setStep(2);
+                    else setError("أدخلي اسم الخدمة أولاً.");
+                  }}
+                >
+                  التالي
+                </button>
+              ) : (
+                <>
+                  <button type="button" className={buttonClass} onClick={() => setStep(1)}>
+                    السابق
+                  </button>
+                  <button disabled={disabled} className={primaryClass} type="submit">
+                    {busy ? "جارٍ الحفظ…" : "حفظ الخدمة"}
+                  </button>
+                </>
+              )}
+            </div>
+          </fieldset>
+        </form>
+      )}
+      <section className="glam-card mb-6 p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold">تصنيفات المؤسسة</h2>
+          <button
+            disabled={disabled}
+            className={buttonClass}
+            onClick={() => setCategoryEditor({ id: null, name: "", parent: null })}
+          >
+            إضافة تصنيف
+          </button>
+        </div>
+        {categoryEditor && (
+          <form
+            className="my-4 flex flex-wrap items-end gap-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void runMutation(() =>
+                repository.saveCategory(
+                  organization.id,
+                  categoryEditor.id,
+                  categoryEditor.name,
+                  categoryEditor.parent,
+                ),
+              );
+            }}
+          >
+            <label>
+              اسم التصنيف
+              <input
+                required
+                disabled={busy}
+                maxLength={categoryEditor.parent ? 120 : 80}
+                className={fieldClass}
+                value={categoryEditor.name}
+                onChange={(e) => setCategoryEditor({ ...categoryEditor, name: e.target.value })}
+              />
+            </label>
+            <button type="submit" disabled={disabled} className={primaryClass}>
+              حفظ التصنيف
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              className={buttonClass}
+              onClick={() => setCategoryEditor(null)}
+            >
+              إلغاء
+            </button>
+          </form>
+        )}
+        {!loading && loaded && !catalog.categories.length && (
+          <p className="mt-3 text-muted-foreground">لا توجد تصنيفات بعد.</p>
+        )}
+        {catalog.categories.map((category) => (
+          <div className="mt-4 border-t pt-3" key={category.id}>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-bold">{category.name}</span>
+              <button
+                disabled={disabled}
+                className={buttonClass}
+                onClick={() =>
+                  setCategoryEditor({ id: category.id, name: category.name, parent: null })
+                }
+              >
+                تعديل
+              </button>
+              <button
+                disabled={disabled}
+                className={buttonClass}
+                onClick={() => setCategoryEditor({ id: null, name: "", parent: category.id })}
+              >
+                إضافة فرعي
+              </button>
+              <button
+                disabled={disabled}
+                className={buttonClass}
+                onClick={() => {
+                  if (window.confirm(`حذف التصنيف «${category.name}»؟ يجب إزالة ارتباطاته أولاً.`))
+                    void runMutation(() =>
+                      repository.deleteCategory(organization.id, category.id, false),
+                    );
+                }}
+              >
+                حذف
+              </button>
+            </div>
+            {catalog.subcategories
+              .filter((sub) => sub.category_id === category.id)
+              .map((sub) => (
+                <div key={sub.id} className="ms-5 mt-2 flex flex-wrap items-center gap-2">
+                  <span>{sub.name}</span>
+                  <button
+                    disabled={disabled}
+                    className={buttonClass}
+                    onClick={() =>
+                      setCategoryEditor({ id: sub.id, name: sub.name, parent: category.id })
+                    }
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    disabled={disabled}
+                    className={buttonClass}
+                    onClick={() => {
+                      if (window.confirm(`حذف التصنيف الفرعي «${sub.name}»؟`))
+                        void runMutation(() =>
+                          repository.deleteCategory(organization.id, sub.id, true),
+                        );
+                    }}
+                  >
+                    حذف
+                  </button>
+                </div>
+              ))}
           </div>
-        </div>
+        ))}
       </section>
-
-      <div className="mb-5 flex flex-col gap-3 md:flex-row">
-        <label className="relative flex-1">
-          <Search className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحثي عن خدمة..." className="w-full rounded-2xl border bg-card py-3 pe-4 ps-11 text-sm outline-none focus:border-primary" />
+      <div className="mb-5 flex flex-wrap gap-3">
+        <label className="flex flex-1 items-center gap-2">
+          <Search className="size-4" />
+          <input
+            aria-label="البحث عن خدمة"
+            placeholder="ابحثي عن خدمة…"
+            className={fieldClass}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
         </label>
-        <div className="flex rounded-2xl border bg-card p-1">
-          {([["all","الكل"],["active","نشطة"],["draft","مسودة"]] as const).map(([value,label]) => (
-            <button key={value} onClick={() => setStatus(value)} className={`rounded-xl px-4 py-2 text-sm transition ${status === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>{label}</button>
+        <select
+          aria-label="حالة الخدمة"
+          className={buttonClass}
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="all">كل الحالات</option>
+          <option value="active">متاحة للحجز</option>
+          <option value="inactive">غير متاحة</option>
+        </select>
+        <select
+          aria-label="تصفية حسب التصنيف"
+          className={buttonClass}
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+        >
+          <option value="">كل التصنيفات</option>
+          {catalog.categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
           ))}
-        </div>
+        </select>
       </div>
-
+      {!loading && loaded && !services.length && (
+        <p className="glam-card p-5">لا توجد خدمات مطابقة. أضيفي خدمة أو غيّري البحث.</p>
+      )}
       <div className="grid gap-4 lg:grid-cols-2">
         {services.map((service) => (
-          <article key={service.id} className="glam-card group p-5 transition hover:-translate-y-0.5 hover:shadow-md">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-bold">{service.nameAr}</h3>
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${service.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{SERVICE_STATUS_LABELS[service.status]}</span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">{service.nameEn}</p>
-              </div>
-              <button className="rounded-full border px-3 py-1.5 text-xs font-medium transition hover:border-primary hover:text-primary">تعديل</button>
+          <article className="glam-card p-5" key={service.id}>
+            <h2 className="text-lg font-bold">{service.name}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {service.active ? "متاحة للحجز" : "غير متاحة للحجز"} ·{" "}
+              {catalog.categories.find((category) => category.id === service.category_id)?.name ??
+                "بدون تصنيف"}
+              {service.subcategory_id
+                ? ` / ${catalog.subcategories.find((category) => category.id === service.subcategory_id)?.name ?? "—"}`
+                : ""}
+            </p>
+            <p className="my-4">
+              {service.pricing_mode === "from" ? "يبدأ من " : ""}
+              {service.price_sar} ر.س · {service.minutes} دقيقة · تجهيز {service.buffer_minutes}{" "}
+              دقيقة
+            </p>
+            <div className="flex gap-2">
+              <button disabled={disabled} className={buttonClass} onClick={() => edit(service)}>
+                تعديل الخدمة
+              </button>
+              <button
+                disabled={disabled}
+                className={buttonClass}
+                onClick={() => {
+                  if (
+                    window.confirm(`حذف الخدمة «${service.name}»؟ لا يمكن حذف خدمة مرتبطة بمواعيد.`)
+                  )
+                    void runMutation(() => repository.deleteService(organization.id, service.id));
+                }}
+              >
+                حذف الخدمة
+              </button>
             </div>
-            <p className="mt-4 text-sm leading-6 text-muted-foreground">{service.descriptionAr}</p>
-            <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-sm">
-              <div><p className="text-xs text-muted-foreground">{PRICING_MODE_LABELS[service.pricingMode]}</p><p className="mt-1 font-bold">{service.basePriceSar ? `${service.basePriceSar} ر.س` : "—"}</p></div>
-              <div><p className="text-xs text-muted-foreground">مدة الخدمة</p><p className="mt-1 flex items-center gap-1 font-bold"><Clock3 className="size-3.5" /> {service.durationMinutes ?? "—"} د</p></div>
-              <div><p className="text-xs text-muted-foreground">وقت إضافي</p><p className="mt-1 font-bold">{service.prepBufferMinutes + service.cleanupBufferMinutes} د</p></div>
-            </div>
-            {service.intelligenceNotes && <div className="mt-4 flex gap-2 rounded-2xl bg-primary/5 p-3 text-xs leading-5 text-muted-foreground"><WandSparkles className="mt-0.5 size-4 shrink-0 text-primary" /><span>{service.intelligenceNotes}</span></div>}
           </article>
         ))}
       </div>
