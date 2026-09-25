@@ -141,9 +141,19 @@ function reducer(state: State, action: Action): State {
     case "addBooking":
       return { ...state, bookings: [action.booking, ...state.bookings] };
     case "cancelBooking":
-      return { ...state, bookings: state.bookings.map((b) => (b.id === action.id ? { ...b, status: "cancelled" } : b)) };
+      return {
+        ...state,
+        bookings: state.bookings.map((b) =>
+          b.id === action.id ? { ...b, status: "cancelled" } : b,
+        ),
+      };
     case "completeBooking":
-      return { ...state, bookings: state.bookings.map((b) => (b.id === action.id ? { ...b, status: "completed" } : b)) };
+      return {
+        ...state,
+        bookings: state.bookings.map((b) =>
+          b.id === action.id ? { ...b, status: "completed" } : b,
+        ),
+      };
     case "addWaitlist":
       return { ...state, waitlist: [action.entry, ...state.waitlist] };
     case "removeWaitlist":
@@ -152,7 +162,9 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         reviews: [action.review, ...state.reviews],
-        bookings: state.bookings.map((b) => (b.id === action.review.bookingId ? { ...b, reviewed: true } : b)),
+        bookings: state.bookings.map((b) =>
+          b.id === action.review.bookingId ? { ...b, reviewed: true } : b,
+        ),
       };
     case "addCampaign":
       return { ...state, campaigns: [action.campaign, ...state.campaigns] };

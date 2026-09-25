@@ -4,4 +4,55 @@ import { useEffect, useState } from "react";
 import { AdminShell, PageHeader } from "@/components/glam/shells";
 import { supabase } from "@/lib/supabase";
 export const Route = createFileRoute("/admin/bookings")({ component: AdminBookingsPage });
-function AdminBookingsPage(){const fallback=["GS-1081 · لوميير ستوديو · اليوم 5:30 م","GS-1080 · نيل بار الرياض · اليوم 7:00 م","GS-1079 · سكينة سبا · غداً 2:00 م"]; const [rows,setRows]=useState<any[]>(fallback.map(label=>({label,status:"confirmed"}))); useEffect(()=>{supabase.from("glam_reservations").select("id,status,created_at").order("created_at",{ascending:false}).limit(20).then(({data})=>{if(data?.length)setRows(data.map((r:any,i)=>({id:r.id,label:`${r.id?.slice(0,8)??`GS-${i}`} · حجز عميلة`,status:r.status??"confirmed"})))})},[]); const update=async(row:any)=>{if(!row.id)return;const status=row.status==="confirmed"?"completed":"confirmed";await supabase.from("glam_reservations").update({status}).eq("id",row.id);setRows(rows.map(r=>r===row?{...r,status}:r))}; return <AdminShell><PageHeader title="الحجوزات" desc="سجل الحجوزات في المنصة"/><div className="glam-card divide-y">{rows.map((x:any)=><div className="flex items-center gap-3 p-4" key={x.id??x.label}><CalendarCheck className="size-5 text-primary"/><span>{x.label}</span><button onClick={()=>update(x)} className="mr-auto rounded-full bg-success/10 px-2 py-1 text-xs text-success">{x.status==="completed"?"مكتمل":"مؤكد"}</button></div>)}</div></AdminShell>}
+function AdminBookingsPage() {
+  const fallback = [
+    "GS-1081 · لوميير ستوديو · اليوم 5:30 م",
+    "GS-1080 · نيل بار الرياض · اليوم 7:00 م",
+    "GS-1079 · سكينة سبا · غداً 2:00 م",
+  ];
+  const [rows, setRows] = useState<{ id?: string; label: string; status: string }[]>(
+    fallback.map((label) => ({ label, status: "confirmed" })),
+  );
+  useEffect(() => {
+    supabase
+      .from("glam_reservations")
+      .select("id,status,created_at")
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (data?.length)
+          setRows(
+            data.map((r, i) => ({
+              id: r.id,
+              label: `${r.id?.slice(0, 8) ?? `GS-${i}`} · حجز عميلة`,
+              status: r.status ?? "confirmed",
+            })),
+          );
+      });
+  }, []);
+  const update = async (row: { id?: string; label: string; status: string }) => {
+    if (!row.id) return;
+    const status = row.status === "confirmed" ? "completed" : "confirmed";
+    await supabase.from("glam_reservations").update({ status }).eq("id", row.id);
+    setRows(rows.map((r) => (r === row ? { ...r, status } : r)));
+  };
+  return (
+    <AdminShell>
+      <PageHeader title="الحجوزات" desc="سجل الحجوزات في المنصة" />
+      <div className="glam-card divide-y">
+        {rows.map((x) => (
+          <div className="flex items-center gap-3 p-4" key={x.id ?? x.label}>
+            <CalendarCheck className="size-5 text-primary" />
+            <span>{x.label}</span>
+            <button
+              onClick={() => update(x)}
+              className="mr-auto rounded-full bg-success/10 px-2 py-1 text-xs text-success"
+            >
+              {x.status === "completed" ? "مكتمل" : "مؤكد"}
+            </button>
+          </div>
+        ))}
+      </div>
+    </AdminShell>
+  );
+}
