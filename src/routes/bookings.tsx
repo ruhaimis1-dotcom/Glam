@@ -37,12 +37,8 @@ function BookingsPage() {
           customer_id: user.id,
           salon: b.glam_appointments?.salon_name ?? "Glam",
           service: b.glam_appointments?.service_name ?? "خدمة",
-          date: b.glam_appointments?.starts_at
-            ? bookingDate(b.glam_appointments.starts_at)
-            : "",
-          time: b.glam_appointments?.starts_at
-            ? bookingTime(b.glam_appointments.starts_at)
-            : "",
+          date: b.glam_appointments?.starts_at ? bookingDate(b.glam_appointments.starts_at) : "",
+          time: b.glam_appointments?.starts_at ? bookingTime(b.glam_appointments.starts_at) : "",
           status: b.status === "confirmed" ? "مؤكد" : b.status,
         }));
         setBookings(remote);

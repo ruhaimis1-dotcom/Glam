@@ -22,6 +22,7 @@ import { Route as BusinessScheduleRouteImport } from './routes/business.schedule
 import { Route as BusinessServicesRouteImport } from './routes/business.services'
 import { Route as BusinessStaffRouteImport } from './routes/business.staff'
 import { Route as SalonSalonIdRouteImport } from './routes/salon.$salonId'
+import { Route as SalonSalonIdBookRouteImport } from './routes/salon.$salonId.book'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -88,6 +89,11 @@ const SalonSalonIdRoute = SalonSalonIdRouteImport.update({
   path: '/salon/$salonId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalonSalonIdBookRoute = SalonSalonIdBookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => SalonSalonIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -102,7 +108,8 @@ export interface FileRoutesByFullPath {
   '/business/schedule': typeof BusinessScheduleRoute
   '/business/services': typeof BusinessServicesRoute
   '/business/staff': typeof BusinessStaffRoute
-  '/salon/$salonId': typeof SalonSalonIdRoute
+  '/salon/$salonId': typeof SalonSalonIdRouteWithChildren
+  '/salon/$salonId/book': typeof SalonSalonIdBookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -117,7 +124,8 @@ export interface FileRoutesByTo {
   '/business/schedule': typeof BusinessScheduleRoute
   '/business/services': typeof BusinessServicesRoute
   '/business/staff': typeof BusinessStaffRoute
-  '/salon/$salonId': typeof SalonSalonIdRoute
+  '/salon/$salonId': typeof SalonSalonIdRouteWithChildren
+  '/salon/$salonId/book': typeof SalonSalonIdBookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,7 +141,8 @@ export interface FileRoutesById {
   '/business/schedule': typeof BusinessScheduleRoute
   '/business/services': typeof BusinessServicesRoute
   '/business/staff': typeof BusinessStaffRoute
-  '/salon/$salonId': typeof SalonSalonIdRoute
+  '/salon/$salonId': typeof SalonSalonIdRouteWithChildren
+  '/salon/$salonId/book': typeof SalonSalonIdBookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/business/services'
     | '/business/staff'
     | '/salon/$salonId'
+    | '/salon/$salonId/book'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/business/services'
     | '/business/staff'
     | '/salon/$salonId'
+    | '/salon/$salonId/book'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/business/services'
     | '/business/staff'
     | '/salon/$salonId'
+    | '/salon/$salonId/book'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -190,7 +202,7 @@ export interface RootRouteChildren {
   BusinessRoute: typeof BusinessRouteWithChildren
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
-  SalonSalonIdRoute: typeof SalonSalonIdRoute
+  SalonSalonIdRoute: typeof SalonSalonIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -286,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SalonSalonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/salon/$salonId/book': {
+      id: '/salon/$salonId/book'
+      path: '/book'
+      fullPath: '/salon/$salonId/book'
+      preLoaderRoute: typeof SalonSalonIdBookRouteImport
+      parentRoute: typeof SalonSalonIdRoute
+    }
   }
 }
 
@@ -319,6 +338,18 @@ const BusinessRouteWithChildren = BusinessRoute._addFileChildren(
   BusinessRouteChildren,
 )
 
+interface SalonSalonIdRouteChildren {
+  SalonSalonIdBookRoute: typeof SalonSalonIdBookRoute
+}
+
+const SalonSalonIdRouteChildren: SalonSalonIdRouteChildren = {
+  SalonSalonIdBookRoute: SalonSalonIdBookRoute,
+}
+
+const SalonSalonIdRouteWithChildren = SalonSalonIdRoute._addFileChildren(
+  SalonSalonIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -326,7 +357,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessRoute: BusinessRouteWithChildren,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
-  SalonSalonIdRoute: SalonSalonIdRoute,
+  SalonSalonIdRoute: SalonSalonIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

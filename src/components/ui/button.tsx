@@ -14,7 +14,8 @@ const buttonVariants = cva(
         gold: "bg-rose-gold text-rose-gold-foreground shadow-soft hover:brightness-105",
         soft: "bg-rose-soft text-accent-foreground hover:bg-accent",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline: "border border-input bg-card shadow-sm hover:bg-accent hover:text-accent-foreground",
+        outline:
+          "border border-input bg-card shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",

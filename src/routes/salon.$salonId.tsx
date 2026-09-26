@@ -97,13 +97,13 @@ function SalonPage() {
       const { data: createdReservation, error } = await supabase
         .from("glam_reservations")
         .insert({
-        id: crypto.randomUUID(),
-        appointment_id: appointmentId,
-        customer_id: user.id,
-        request_id: crypto.randomUUID(),
-        status: "confirmed",
-        attendance: "pending",
-        booking_source: "salon_link",
+          id: crypto.randomUUID(),
+          appointment_id: appointmentId,
+          customer_id: user.id,
+          request_id: crypto.randomUUID(),
+          status: "confirmed",
+          attendance: "pending",
+          booking_source: "salon_link",
         })
         .select("id,customer_id,appointment_id,status")
         .single();
@@ -128,8 +128,15 @@ function SalonPage() {
     } catch (error) {
       console.error("booking_insert_failed", error);
       const code = error instanceof Error ? error.message : "BOOKING_INSERT_FAILED";
-      const unavailable = code === "APPOINTMENT_UNAVAILABLE" || code.includes("23505") || code.includes("duplicate");
-      setBookingError(code === "AUTH_REQUIRED" ? "يجب تسجيل الدخول لإتمام الحجز." : code === "ALREADY_BOOKED" || unavailable ? "هذا الموعد لم يعد متاحًا. اختاري وقتًا آخر." : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.");
+      const unavailable =
+        code === "APPOINTMENT_UNAVAILABLE" || code.includes("23505") || code.includes("duplicate");
+      setBookingError(
+        code === "AUTH_REQUIRED"
+          ? "يجب تسجيل الدخول لإتمام الحجز."
+          : code === "ALREADY_BOOKED" || unavailable
+            ? "هذا الموعد لم يعد متاحًا. اختاري وقتًا آخر."
+            : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.",
+      );
     } finally {
       setSaving(false);
     }
@@ -214,7 +221,11 @@ function SalonPage() {
                 className="w-full rounded-xl border bg-background px-4 py-3"
               >
                 <option value="">اختاري التصنيف</option>
-                {categories.map((name) => <option key={name} value={name}>{name}</option>)}
+                {categories.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
               </select>
               <select
                 value={service}
@@ -227,7 +238,11 @@ function SalonPage() {
                 className="w-full rounded-xl border bg-background px-4 py-3"
               >
                 <option value="">اختاري الخدمة</option>
-                {categoryServices.map((name) => <option key={name} value={name}>{name}</option>)}
+                {categoryServices.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
               </select>
               {/* The original service selector is replaced by the category-filtered selector above. */}
               <select
@@ -240,10 +255,16 @@ function SalonPage() {
                 className="w-full rounded-xl border bg-background px-4 py-3"
               >
                 <option value="">اختاري اليوم</option>
-                {availableDates.length === 0 && <option value="" disabled>لا توجد أيام متاحة</option>}
+                {availableDates.length === 0 && (
+                  <option value="" disabled>
+                    لا توجد أيام متاحة
+                  </option>
+                )}
                 {availableDates.map((availableDate) => (
                   <option key={availableDate} value={availableDate}>
-                    {new Date(`${availableDate}T00:00:00`).toLocaleDateString("ar-SA", { dateStyle: "medium" })}
+                    {new Date(`${availableDate}T00:00:00`).toLocaleDateString("ar-SA", {
+                      dateStyle: "medium",
+                    })}
                   </option>
                 ))}
               </select>
@@ -252,14 +273,24 @@ function SalonPage() {
                 onChange={(e) => {
                   const selected = dateAppointments.find((a) => a.id === e.target.value);
                   setAppointmentId(selected?.id ?? null);
-                  setTime(selected ? new Date(selected.starts_at).toLocaleTimeString("ar-SA", { hour: "numeric", minute: "2-digit" }) : "");
+                  setTime(
+                    selected
+                      ? new Date(selected.starts_at).toLocaleTimeString("ar-SA", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })
+                      : "",
+                  );
                 }}
                 className="w-full rounded-xl border bg-background px-4 py-3"
               >
                 <option value="">اختاري الوقت</option>
                 {dateAppointments.map((appointment) => (
                   <option key={appointment.id} value={appointment.id}>
-                    {new Date(appointment.starts_at).toLocaleTimeString("ar-SA", { hour: "numeric", minute: "2-digit" })}
+                    {new Date(appointment.starts_at).toLocaleTimeString("ar-SA", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
                   </option>
                 ))}
               </select>
