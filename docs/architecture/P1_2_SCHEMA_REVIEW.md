@@ -1,5 +1,9 @@
 # P1.2 — verified GLAM schema and review boundary
 
+Follow-up implementation: [PR4_IMPLEMENTATION_FOLLOWUP.md](PR4_IMPLEMENTATION_FOLLOWUP.md).
+The historical P1 file is now archived at `docs/sql/archive/20260923_001_service_intelligence.sql`;
+the references below describe the original inspection. No SQL has been applied.
+
 Inspected 2026-09-25 on `tevqysdswqkgqartpzdg`, the project referenced by
 `src/lib/supabase.ts`. Inspection used SELECT queries against information_schema,
 pg_catalog and pg_policies only. No migration, DDL, DML, mutation RPC, seed,

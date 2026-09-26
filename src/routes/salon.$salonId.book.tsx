@@ -1,17 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- legacy booking payloads are read from local storage. */
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, CalendarDays, CheckCircle2 } from "lucide-react";
 import { CustomerShell } from "@/components/glam/shells";
 import { byId, formatSAR } from "@/data/mock";
 import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
+import { startBookingCatalogLoad, type BookingCatalogState } from "@/repositories/booking-catalog";
 
 export const Route = createFileRoute("/salon/$salonId/book")({ component: BookSalonPage });
 function BookSalonPage() {
   const { salonId } = Route.useParams();
+  return <BookingForm key={salonId} salonId={salonId} />;
+}
+
+function BookingForm({ salonId }: { salonId: string }) {
   const salon = byId.salon(salonId);
-  const navigate = useNavigate();
   const [service, setService] = useState("");
   const [variantId, setVariantId] = useState("");
   const [category, setCategory] = useState("");
@@ -21,95 +25,28 @@ function BookSalonPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
-  const [appointments, setAppointments] = useState<
-    Array<{
-      id: string;
-      service_id: string | null;
-      service_variant_id: string | null;
-      service_name: string;
-      starts_at: string;
-    }>
-  >([]);
-  const [catalog, setCatalog] = useState<
-    Array<{
-      id: string;
-      name: string;
-      categoryName: string;
-      price: number;
-      minutes: number;
-      variants: Array<{ id: string; name: string; price: number; minutes: number }>;
-    }>
-  >([]);
+  const [catalogState, setCatalogState] = useState<BookingCatalogState>({ status: "loading" });
+  const catalogStatus = catalogState.status;
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    supabase
-      .from("glam_appointments")
-      .select("id,service_id,service_variant_id,service_name,starts_at")
-      .eq("salon_name", salon?.name ?? "")
-      .gte("starts_at", new Date().toISOString())
-      .order("starts_at")
-      .then(({ data }) => {
-        const rows = (data ?? []) as Array<{
-          id: string;
-          service_id: string | null;
-          service_variant_id: string | null;
-          service_name: string;
-          starts_at: string;
-        }>;
-        setAppointments(rows);
-        const ids = [...new Set(rows.map((row) => row.service_id).filter(Boolean))] as string[];
-        if (ids.length)
-          supabase
-            .from("glam_services")
-            .select(
-              "id,name,price_sar,minutes,glam_service_categories(name),glam_service_variants(id,name,price_sar,minutes,active)",
-            )
-            .in("id", ids)
-            .eq("active", true)
-            .then(({ data: rows2 }) =>
-              setCatalog(
-                (rows2 ?? []).map((row: any) => ({
-                  id: row.id,
-                  name: row.name,
-                  categoryName: row.glam_service_categories?.name ?? "خدمات أخرى",
-                  price: Number(row.price_sar),
-                  minutes: Number(row.minutes),
-                  variants: (row.glam_service_variants ?? [])
-                    .filter((v: any) => v.active)
-                    .map((v: any) => ({
-                      id: v.id,
-                      name: v.name,
-                      price: Number(v.price_sar),
-                      minutes: Number(v.minutes),
-                    })),
-                })),
-              ),
-            );
-        else setCatalog([]);
-        setService("");
-        setVariantId("");
-        setCategory("");
-        setDate("");
-        setTime("");
-        setAppointmentId(null);
-      });
-  }, [salon?.name]);
-  const fallback = [...new Set(appointments.map((a) => a.service_name))].map((name) => ({
-    id: name,
-    name,
-    categoryName: "خدمات أخرى",
-    price: salon?.priceFrom ?? 0,
-    minutes: 60,
-    variants: [] as Array<{ id: string; name: string; price: number; minutes: number }>,
-  }));
-  const serviceOptions = catalog.length ? catalog : fallback;
+    setService("");
+    setVariantId("");
+    setCategory("");
+    setDate("");
+    setTime("");
+    setAppointmentId(null);
+    setError("");
+    setDone(false);
+    return startBookingCatalogLoad(supabase, salon?.name ?? "", setCatalogState);
+  }, [salon?.name, attempt]);
+  const { appointments, catalog: serviceOptions } =
+    catalogState.status === "ready" ? catalogState.data : { appointments: [], catalog: [] };
   const categories = [...new Set(serviceOptions.map((item) => item.categoryName))];
   const categoryServices = serviceOptions.filter((item) => item.categoryName === category);
   const selectedService = serviceOptions.find((item) => item.id === service);
   const selectedVariant = selectedService?.variants.find((item) => item.id === variantId);
   const serviceAppointments = appointments.filter(
-    (a) =>
-      (a.service_id ? a.service_id === service : a.service_name === selectedService?.name) &&
-      (!variantId || a.service_variant_id === variantId),
+    (a) => a.service_id === service && (!variantId || a.service_variant_id === variantId),
   );
   const availableDates = [...new Set(serviceAppointments.map((a) => a.starts_at.slice(0, 10)))];
   const dateAppointments = serviceAppointments.filter((a) => a.starts_at.slice(0, 10) === date);
@@ -121,7 +58,7 @@ function BookSalonPage() {
     );
   const confirm = async () => {
     setError("");
-    if (!service) {
+    if (catalogStatus !== "ready" || !selectedService) {
       setError("يرجى اختيار الخدمة أولاً.");
       return;
     }
@@ -133,7 +70,7 @@ function BookSalonPage() {
       setError("يرجى اختيار اليوم أولاً.");
       return;
     }
-    if (!appointmentId) {
+    if (!appointmentId || !dateAppointments.some((a) => a.id === appointmentId)) {
       setError("يرجى اختيار الوقت المتاح قبل تأكيد الحجز.");
       return;
     }
@@ -234,6 +171,25 @@ function BookSalonPage() {
             عرض حجوزاتي
           </Link>
         </section>
+      ) : catalogStatus === "loading" ? (
+        <p role="status" className="glam-card p-5">
+          جارٍ تحميل الخدمات والمواعيد…
+        </p>
+      ) : catalogStatus === "error" ? (
+        <section className="glam-card space-y-4 p-5">
+          <p role="alert">تعذر تحميل الخدمات والمواعيد. لا يمكن تأكيد الحجز قبل اكتمال التحميل.</p>
+          <button
+            type="button"
+            onClick={() => setAttempt((value) => value + 1)}
+            className="rounded-full border px-5 py-2.5"
+          >
+            إعادة المحاولة
+          </button>
+        </section>
+      ) : serviceOptions.length === 0 ? (
+        <p role="status" className="glam-card p-5">
+          لا توجد خدمات متاحة للحجز حاليًا.
+        </p>
       ) : (
         <section className="glam-card space-y-5 p-5">
           <label className="block text-sm font-medium">
@@ -357,27 +313,25 @@ function BookSalonPage() {
               ))}
             </select>
           </label>
-          <div className="rounded-xl bg-muted/50 p-4 text-sm">
-            <CalendarDays className="mb-2 size-5 text-primary" />
-            <p>
-              {selectedService?.name ?? service}{" "}
-              {selectedVariant ? `· ${selectedVariant.name}` : ""} في {salon.name}
-            </p>
-            <p className="mt-1 text-muted-foreground">
-              السعر{" "}
-              {selectedVariant
-                ? formatSAR(selectedVariant.price)
-                : selectedService
-                  ? formatSAR(selectedService.price)
-                  : `يبدأ من ${formatSAR(salon.priceFrom)}`}{" "}
-              · المدة {selectedVariant?.minutes ?? selectedService?.minutes ?? 60} دقيقة
-            </p>
-          </div>
+          {selectedService && (
+            <div className="rounded-xl bg-muted/50 p-4 text-sm">
+              <CalendarDays className="mb-2 size-5 text-primary" />
+              <p>
+                {selectedService.name} {selectedVariant?.name} في {salon.name}
+              </p>
+              {(!selectedService.variants.length || selectedVariant) && (
+                <p className="mt-1 text-muted-foreground">
+                  السعر {formatSAR((selectedVariant ?? selectedService).price)} · المدة{" "}
+                  {(selectedVariant ?? selectedService).minutes} دقيقة
+                </p>
+              )}
+            </div>
+          )}
           {error && (
             <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
           )}
           <button
-            disabled={saving}
+            disabled={saving || !selectedService || !appointmentId}
             onClick={confirm}
             className="w-full rounded-2xl bg-primary px-5 py-3.5 font-semibold text-primary-foreground disabled:opacity-60"
           >
