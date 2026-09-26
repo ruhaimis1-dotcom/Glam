@@ -81,10 +81,10 @@ test("all catalog writer signatures revoke PUBLIC/anon execution and grant authe
   }
 });
 
-test("only the prepared live-baseline migration is runnable; historical SQL is archived", () => {
+test("only reviewed live-baseline migrations are runnable; historical SQL is archived", () => {
   assert.deepEqual(
     readdirSync(directory).filter((file) => file.endsWith(".sql")),
-    [filename],
+    [filename, "20260926150009_booking_catalog_visibility.sql"],
   );
   assert.match(
     readFileSync(

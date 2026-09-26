@@ -1,5 +1,4 @@
--- MANUAL INTEGRATION TEST, NOT EXECUTED. Run only after explicit approval on an
--- isolated clone of the actual GLAM baseline with the new migration applied.
+-- Local integration test: run only on an isolated restored GLAM schema.
 -- psql --set ON_ERROR_STOP=1 --file supabase/tests/catalog_contract.sql
 -- No pgTAP dependency. Every assertion raises on failure; all fixtures roll back.
 begin;
@@ -141,6 +140,14 @@ do $$
 declare f record; v uuid;
 begin
   select * into f from catalog_fixture;
+  v := public.glam_save_catalog_service(f.org_a,null,'Manager created',45,0,true,null,null,'fixed',0);
+  if not exists(select 1 from public.glam_services where id=v and organization_id=f.org_a and price_sar=0) then
+    raise exception 'manager create/read failed';
+  end if;
+  perform public.glam_delete_catalog_service(f.org_a,v);
+  if exists(select 1 from public.glam_services where id=v) then
+    raise exception 'manager delete/read failed';
+  end if;
   begin
     perform public.glam_save_catalog_service(f.org_a,f.created_service,'Wrong category',45,1,true,f.category_b,null,'fixed',0);
     raise exception 'cross-tenant category allowed';
@@ -242,23 +249,207 @@ begin
   exception when check_violation then null; end;
 end $$;
 
+-- Independently disable each classification level while the service stays active.
+-- These are table/RLS assertions, not tests of the legacy booking RPCs/trigger.
+
 update public.glam_service_categories set active=false where id=(select category_a from catalog_fixture);
+do $$
+begin
+  if not exists(select 1 from public.glam_services
+    where id=(select created_service from catalog_fixture) and active) then
+    raise exception 'classification fixture must retain an active service';
+  end if;
+end $$;
+
 select set_config('request.jwt.claim.sub',customer::text,true) from catalog_fixture;
 set local role authenticated;
 do $$
 declare f record;
 begin
   select * into f from catalog_fixture;
-  if exists(select 1 from public.glam_service_categories where id=f.category_a)
+  if exists(select 1 from public.glam_services where id=f.created_service)
     or exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a)
-    or exists(select 1 from public.glam_services where id=f.created_service) then
-    raise exception 'inactive category leaked through older permissive policies';
+    or exists(select 1 from public.glam_service_categories where id=f.category_a) then
+    raise exception 'customer: glam_service_categories disabled visibility mismatch';
   end if;
 end $$;
 reset role;
+
+select set_config('request.jwt.claim.sub','',true);
+set local role anon;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if exists(select 1 from public.glam_services where id=f.created_service)
+    or exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a)
+    or exists(select 1 from public.glam_service_categories where id=f.category_a) then
+    raise exception 'anon: glam_service_categories disabled visibility mismatch';
+  end if;
+end $$;
+reset role;
+
+select set_config('request.jwt.claim.sub',owner_a::text,true) from catalog_fixture;
+set local role authenticated;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if not exists(select 1 from public.glam_services where id=f.created_service)
+    or not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a)
+    or not exists(select 1 from public.glam_service_categories where id=f.category_a) then
+    raise exception 'owner_a: glam_service_categories disabled visibility mismatch';
+  end if;
+end $$;
+reset role;
+
+select set_config('request.jwt.claim.sub',manager_a::text,true) from catalog_fixture;
+set local role authenticated;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if not exists(select 1 from public.glam_services where id=f.created_service)
+    or not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a)
+    or not exists(select 1 from public.glam_service_categories where id=f.category_a) then
+    raise exception 'manager_a: glam_service_categories disabled visibility mismatch';
+  end if;
+end $$;
+reset role;
+
 update public.glam_service_categories set active=true where id=(select category_a from catalog_fixture);
 
+select set_config('request.jwt.claim.sub',customer::text,true) from catalog_fixture;
+set local role authenticated;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if not exists(select 1 from public.glam_services where id=f.created_service and active)
+    or not exists(select 1 from public.glam_service_categories where id=f.category_a)
+    or not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a) then
+    raise exception 'customer: glam_service_categories reactivation did not restore catalog visibility';
+  end if;
+end $$;
+reset role;
+
+select set_config('request.jwt.claim.sub','',true);
+set local role anon;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if not exists(select 1 from public.glam_services where id=f.created_service and active)
+    or not exists(select 1 from public.glam_service_categories where id=f.category_a)
+    or not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a) then
+    raise exception 'anon: glam_service_categories reactivation did not restore catalog visibility';
+  end if;
+end $$;
+reset role;
+
+update public.glam_service_subcategories set active=false where id=(select subcategory_a from catalog_fixture);
+do $$
+begin
+  if not exists(select 1 from public.glam_services
+    where id=(select created_service from catalog_fixture) and active) then
+    raise exception 'classification fixture must retain an active service';
+  end if;
+end $$;
+
+select set_config('request.jwt.claim.sub',customer::text,true) from catalog_fixture;
+set local role authenticated;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if exists(select 1 from public.glam_services where id=f.created_service)
+    or exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a) then
+    raise exception 'customer: glam_service_subcategories disabled visibility mismatch';
+  end if;
+  if not exists(select 1 from public.glam_service_categories where id=f.category_a) then
+    raise exception 'customer: disabling child hid its active parent';
+  end if;
+end $$;
+reset role;
+
+select set_config('request.jwt.claim.sub','',true);
+set local role anon;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if exists(select 1 from public.glam_services where id=f.created_service)
+    or exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a) then
+    raise exception 'anon: glam_service_subcategories disabled visibility mismatch';
+  end if;
+  if not exists(select 1 from public.glam_service_categories where id=f.category_a) then
+    raise exception 'anon: disabling child hid its active parent';
+  end if;
+end $$;
+reset role;
+
+select set_config('request.jwt.claim.sub',owner_a::text,true) from catalog_fixture;
+set local role authenticated;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if not exists(select 1 from public.glam_services where id=f.created_service)
+    or not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a)
+    or not exists(select 1 from public.glam_service_categories where id=f.category_a) then
+    raise exception 'owner_a: glam_service_subcategories disabled visibility mismatch';
+  end if;
+end $$;
+reset role;
+
+select set_config('request.jwt.claim.sub',manager_a::text,true) from catalog_fixture;
+set local role authenticated;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if not exists(select 1 from public.glam_services where id=f.created_service)
+    or not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a)
+    or not exists(select 1 from public.glam_service_categories where id=f.category_a) then
+    raise exception 'manager_a: glam_service_subcategories disabled visibility mismatch';
+  end if;
+end $$;
+reset role;
+
+update public.glam_service_subcategories set active=true where id=(select subcategory_a from catalog_fixture);
+
+select set_config('request.jwt.claim.sub',customer::text,true) from catalog_fixture;
+set local role authenticated;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if not exists(select 1 from public.glam_services where id=f.created_service and active)
+    or not exists(select 1 from public.glam_service_categories where id=f.category_a)
+    or not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a) then
+    raise exception 'customer: glam_service_subcategories reactivation did not restore catalog visibility';
+  end if;
+end $$;
+reset role;
+
+select set_config('request.jwt.claim.sub','',true);
+set local role anon;
+do $$
+declare f record;
+begin
+  select * into f from catalog_fixture;
+  if not exists(select 1 from public.glam_services where id=f.created_service and active)
+    or not exists(select 1 from public.glam_service_categories where id=f.category_a)
+    or not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a) then
+    raise exception 'anon: glam_service_subcategories reactivation did not restore catalog visibility';
+  end if;
+end $$;
+reset role;
+
 -- Revocation and specialist denial are checked after a successful manager edit.
+\ir catalog_booking_visibility.sql
+\ir catalog_delivery_contract.sql
+
 delete from public.glam_memberships where user_id=(select manager_a from catalog_fixture);
 select set_config('request.jwt.claim.sub',manager_a::text,true) from catalog_fixture;
 set local role authenticated;
@@ -284,4 +475,10 @@ begin
   end if;
 end $$;
 reset role;
+do $$ begin
+  if exists(select 1 from public.glam_service_delivery_options
+    where service_id=(select created_service from catalog_fixture)) then
+    raise exception 'service deletion did not cascade to delivery options';
+  end if;
+end $$;
 rollback;
