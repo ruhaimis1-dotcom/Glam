@@ -165,6 +165,14 @@ alter table public.glam_service_categories enable row level security;
 alter table public.glam_service_subcategories enable row level security;
 alter table public.glam_service_variants enable row level security;
 
+-- Live baseline has this ALL policy TO PUBLIC. Its membership subquery runs
+-- with the reader's privileges, but anon has no SELECT on glam_memberships.
+-- A permissive OR policy does not remove that dependency/permission check.
+-- Narrow this known management policy before opening subcategory reads to anon;
+-- do not grant anonymous users access to the private membership table.
+alter policy service_subcategories_managed_by_business_members
+on public.glam_service_subcategories to authenticated;
+
 -- Catalog tables are read-only to API roles. Writes use the checked RPCs.
 revoke all on table public.glam_services, public.glam_service_categories,
   public.glam_service_subcategories, public.glam_service_variants from public,anon,authenticated;
@@ -173,7 +181,8 @@ grant select on table public.glam_services, public.glam_service_categories,
 
 -- Permissive policies establish the intended read path. Restrictive policies
 -- impose the same ceiling on ALL older permissive policies (which combine OR).
--- Keep older policies intact; no assumptions about their names or removal.
+-- Keep older expressions intact; the verified management-policy role above is
+-- the one exception. No policies are dropped or blanket-replaced.
 create policy catalog_categories_read on public.glam_service_categories
 for select to anon,authenticated
 using (glam_private.catalog_row_visible(organization_id,active));

@@ -5,6 +5,34 @@
 begin;
 set local statement_timeout='30s';
 
+-- Check exact function ACLs, not only rejection of one anonymous RPC call.
+do $$
+declare signature text; target oid;
+begin
+  foreach signature in array array[
+    'public.glam_save_catalog_service(uuid,uuid,text,integer,numeric,boolean,uuid,uuid,text,integer)',
+    'public.glam_delete_catalog_service(uuid,uuid)',
+    'public.glam_save_catalog_category(uuid,uuid,text,uuid)',
+    'public.glam_delete_catalog_category(uuid,uuid,boolean)',
+    'glam_private.save_catalog_service(uuid,uuid,text,integer,numeric,boolean,uuid,uuid,text,integer)',
+    'glam_private.delete_catalog_service(uuid,uuid)',
+    'glam_private.save_catalog_category(uuid,uuid,text,uuid)',
+    'glam_private.delete_catalog_category(uuid,uuid,boolean)'
+  ] loop
+    target := signature::regprocedure::oid;
+    if has_function_privilege('anon',target,'EXECUTE')
+      or not has_function_privilege('authenticated',target,'EXECUTE')
+      or exists (
+        select 1 from pg_proc p,
+          lateral aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a
+        where p.oid=target and a.grantee=0 and a.privilege_type='EXECUTE'
+      ) then raise exception 'unexpected function EXECUTE privileges: %',signature; end if;
+  end loop;
+  if has_table_privilege('anon','public.glam_memberships','SELECT') then
+    raise exception 'anonymous membership read must not be the policy workaround';
+  end if;
+end $$;
+
 create temp table catalog_fixture as select
   gen_random_uuid() owner_a, gen_random_uuid() manager_a,
   gen_random_uuid() owner_b, gen_random_uuid() customer,
@@ -180,6 +208,13 @@ begin
   if not exists(select 1 from public.glam_services where id=f.active_service) or
     not exists(select 1 from public.glam_service_categories where id=f.category_a) then
     raise exception 'anonymous published catalog read blocked';
+  end if;
+  -- Regression: the old TO PUBLIC management policy referenced memberships
+  -- without anon SELECT. Read the subcategory AND a classified service so its
+  -- nested policy dependency is exercised, not only an unclassified service.
+  if not exists(select 1 from public.glam_service_subcategories where id=f.subcategory_a)
+    or not exists(select 1 from public.glam_services where id=f.created_service) then
+    raise exception 'anonymous subcategory/classified-service read blocked';
   end if;
   if exists(select 1 from public.glam_services where id in(f.inactive_service,f.hidden_service)) then
     raise exception 'anonymous inactive/unpublished read allowed';
