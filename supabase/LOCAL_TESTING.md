@@ -15,8 +15,8 @@ machine; no production database credential is needed to run these tests.
 
 The runner verifies the `glam-pr4-review` container has network `none`, no
 published ports and the expected image. It creates a fresh database owned by
-postgres from `template0`, restores public/glam_private/auth, applies both
-migrations in order and runs `catalog_contract.sql`. That script includes
+postgres from `template0`, restores public/glam_private/auth, applies all
+four migrations in order and runs `catalog_contract.sql`. That script includes
 `catalog_booking_visibility.sql` and `catalog_delivery_contract.sql` using psql
 `\ir`. It is a rollback assertion script, not pgTAP. The runner stops on failures
 and verifies that users/services/reservations are empty after rollback.
@@ -61,7 +61,7 @@ schema is restored into the runtime database and compared before migrations:
 normalized schema-only DDL, schema ACL/owners, Auth JWT helper definitions and
 all 21 public foreign keys to auth.users. Recreating public requires reproducing
 the baseline PUBLIC USAGE grant, which pg_dump assumes already exists.
-The runner refuses a mismatch. Both PR migrations are then applied locally.
+The runner refuses a mismatch. All four PR migrations are then applied locally.
 
 Auth initializes its own runtime schema using its official migrations. A
 schema-only export contains no auth.schema_migrations ledger rows; copying a
@@ -155,3 +155,17 @@ sessions, and historical NULL fixtures. Privileged SQL only orchestrates local
 fixtures/locks. SQL tests also exercise old/new wrappers, ACLs, atomic rollback
 and preserved history. The browser gate continues to use the existing customer's
 direct REST path, proving its compatibility with the new database guards.
+
+## Isolated recovery rehearsal
+
+Run `node scripts/test-release-recovery.mjs` after the SQL runner has prepared
+`glam-pr4-review`. It verifies the local Docker endpoint, network=none, no ports,
+image and snapshot hash. It creates new databases only; nothing is dropped.
+Synthetic services, appointments and reservations are backed up with pg_dump,
+then migrations 1–3 are applied and an intentional transaction failure occurs
+before migration 4. The backup is restored to a separate database and all four
+migrations are applied. Full service/appointment/reservation rows and IDs are
+compared, preserving historical NULL channels. A later explicit-channel booking
+is included in a second backup and separate restore. Dumps and results stay in
+the ignored `.temp` directory. This is not a production backup/PITR rehearsal,
+cutover, or reconciliation of writes occurring after the backup point.
