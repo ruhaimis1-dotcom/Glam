@@ -162,9 +162,13 @@ end $$;
 grant execute on function pg_temp.reject_delivery(text,text) to authenticated;
 select set_config('request.jwt.claim.sub',customer::text,true) from catalog_fixture;
 set local role authenticated;
-select pg_temp.reject_delivery(null,'DELIVERY_UNAVAILABLE');
 select pg_temp.reject_delivery('home','DELIVERY_UNAVAILABLE');
 select pg_temp.reject_delivery('invalid','DELIVERY_UNAVAILABLE');
+reset role;
+insert into public.glam_service_delivery_options(organization_id,service_id,channel)
+select org_a,created_service,'home' from catalog_fixture;
+set local role authenticated;
+select pg_temp.reject_delivery(null,'DELIVERY_REQUIRED');
 reset role;
 update public.glam_service_delivery_options set enabled=false where service_id=(select created_service from catalog_fixture);
 set local role authenticated;
@@ -175,5 +179,6 @@ set local role authenticated;
 select pg_temp.reject_delivery('salon','DELIVERY_QUOTE_REQUIRED');
 reset role;
 update public.glam_service_delivery_options set travel_fee_sar=0 where service_id=(select created_service from catalog_fixture);
+\ir reservation_delivery_contract.sql
 delete from public.glam_appointments where id=(select appointment_id from booking_fixture);
 delete from public.glam_service_specialists where service_id=(select created_service from catalog_fixture);

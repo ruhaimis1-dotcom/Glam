@@ -129,5 +129,29 @@ or travel fee until an explicit quotation flow exists. No implicit price change.
 New reservations must send delivery_channel (salon/home); the database checks
 the enabled channel again and retains it on the reservation. Existing history
 is not backfilled. Services without configured channels cannot be booked; an
-owner/manager must choose their channels. Legacy booking RPC callers that omit
-the channel fail closed and need a channel-aware contract before release.
+owner/manager must choose their channels.
+
+## Reservation compatibility (additive migration 20260927155514)
+
+All original reserve/reserve_direct/reschedule signatures and grants remain.
+Additional overloads accept a required p_channel argument (no overload defaults).
+Old callers omitting it resolve exactly one enabled channel; multiple channels
+return DELIVERY_REQUIRED and zero return DELIVERY_UNAVAILABLE. No default salon
+or home is invented. Rescheduling without a new choice preserves the original
+channel; a historical NULL requires an explicit choice when ambiguous. The
+replacement records channel/source/lineage without modifying the old channel.
+Failed replacements roll back cancellation. Replays return the original result;
+conflicting request identities/channels fail.
+
+Both direct REST inserts and RPC bookings serialize by request identity and
+specialist before eligibility/overlap reads. Service, category and channel locks
+coordinate with catalog saves. Mutations require READ COMMITTED (PostgREST's
+tested configuration); snapshot-isolated writers fail closed. A status-only
+reactivation cannot fill an unknown historical channel.
+
+The HTTP gate includes real concurrent requests, mixed REST/RPC overlapping
+slots, concurrent replacements, settings/price changes held by separate database
+sessions, and historical NULL fixtures. Privileged SQL only orchestrates local
+fixtures/locks. SQL tests also exercise old/new wrappers, ACLs, atomic rollback
+and preserved history. The browser gate continues to use the existing customer's
+direct REST path, proving its compatibility with the new database guards.

@@ -3,8 +3,9 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { loadBookingCatalog } from "../../src/repositories/booking-catalog.ts";
 import { createCatalogRepository } from "../../src/repositories/service-intelligence.ts";
+import { runReservationDelivery } from "./reservation-delivery-http.mjs";
 
-export async function runContract({ authURL, restURL, anon, admin, expired, sql }) {
+export async function runContract({ authURL, restURL, anon, admin, expired, sql, sqlAsync }) {
   let passed = 0;
   const checks = [];
   function check(ok, label) {
@@ -523,6 +524,7 @@ export async function runContract({ authURL, restURL, anon, admin, expired, sql 
   );
   await assert.rejects(() => createCatalogRepository(clients.manager).load(org), /FORBIDDEN/);
   check(true, "repository rejects revoked manager without token refresh");
+  await runReservationDelivery({ rpc, request, restURL, token, users, org, sql, sqlAsync, check });
   const refresh = await request(authURL, "/token?grant_type=refresh_token", null, "POST", {
     refresh_token: users.customer.refresh,
   });

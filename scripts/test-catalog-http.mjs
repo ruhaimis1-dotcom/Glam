@@ -1,5 +1,5 @@
 // Dedicated local Supabase Auth/PostgREST stack. Never reads application .env.
-import { execFileSync } from "node:child_process";
+import { execFileSync, execFile } from "node:child_process";
 import { createHash, createHmac, randomBytes } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { resolve, join } from "node:path";
@@ -51,6 +51,34 @@ function sql(query, database = "postgres", role = "supabase_admin") {
     ["exec", "-i", db, "psql", "-X", "-U", role, "-d", database, "-v", "ON_ERROR_STOP=1", "-At"],
     query,
   );
+}
+// Separate local PostgreSQL connection for deterministic lock/race assertions.
+function sqlAsync(query) {
+  return new Promise((resolve, reject) => {
+    const child = execFile(
+      docker,
+      [
+        "exec",
+        "-i",
+        db,
+        "psql",
+        "-X",
+        "-U",
+        "supabase_admin",
+        "-d",
+        "postgres",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-At",
+      ],
+      { encoding: "utf8", windowsHide: true },
+      (error, stdout) => {
+        if (error) reject(new Error("Concurrent local SQL failed"));
+        else resolve(stdout);
+      },
+    );
+    child.stdin.end(query);
+  });
 }
 async function waitFor(test, label) {
   for (let n = 0; n < 60; n++) {
@@ -332,6 +360,7 @@ try {
     ? (await import("../tests/e2e/catalog-browser.mjs")).runBrowserContract
     : runContract;
   const result = await execute({
+    sqlAsync,
     baseURL,
     dir,
     authURL,
