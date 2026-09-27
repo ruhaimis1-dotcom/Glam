@@ -80,3 +80,6 @@
 لا تطبيق SQL على مشروع GLAM الحي، ولا `db push` أو migration repair أو دمج PR أو نشر. ملف التصدير والاعتمادات والسجلات المحلية خارج Git؛ تُحفظ فقط ملفات الإصلاح والاختبار والتوثيق المختارة صراحة.
 
 Final gate: npm ci, build, typecheck, 32 Node tests and local SQL passed. ESLint excludes generated supabase/.temp/** helpers; source lint passes with 10 existing warnings. No snapshot, credentials or local CLI configuration is included in this commit.
+# تحديث 2026-09-27
+
+اكتملت بوابة HTTP المحلية بحسابات Auth حقيقية و159 تحققًا، بما فيها repositories التطبيق. راجعي [تقرير Auth/REST الأحدث](PR4_HTTP_TEST_RESULTS_2026_09_27_AR.md) للنتائج وحدود التغطية الحالية؛ البنود أدناه تصف حالة المراجعة السابقة.
