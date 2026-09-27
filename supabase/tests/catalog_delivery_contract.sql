@@ -1,76 +1,62 @@
--- Existing delivery contract: schema supports salon/home, but API roles have
--- no SELECT/INSERT/UPDATE/DELETE grant. Do not silently broaden it in this PR.
-insert into public.glam_service_delivery_options(organization_id,service_id,channel,price_sar,minutes)
-select org_a,created_service,'salon',0,45 from catalog_fixture
-union all select org_a,created_service,'home',25,60 from catalog_fixture;
-do $$
-declare f record;
-begin
- select * into f from catalog_fixture;
- if (select count(*) from public.glam_service_delivery_options where service_id=f.created_service)<>2 then
-   raise exception 'delivery channel fixtures missing';
- end if;
- begin
-   insert into public.glam_service_delivery_options(organization_id,service_id,channel)
-   values(f.org_a,f.created_service,'invalid-channel');
-   raise exception 'invalid delivery channel accepted' using errcode='ZX003';
- exception when check_violation then null; end;
- if has_table_privilege('anon','public.glam_service_delivery_options','SELECT')
-   or has_table_privilege('authenticated','public.glam_service_delivery_options','SELECT') then
-   raise exception 'delivery read privileges unexpectedly changed';
- end if;
- if has_function_privilege('anon','glam_private.can_read_appointment(uuid)','EXECUTE') then
-   raise exception 'anonymous private appointment function privilege broadened';
- end if;
- if exists(select 1 from pg_proc p,
-   lateral aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a
-   where p.oid='glam_private.catalog_service_bookable(uuid)'::regprocedure
-   and a.grantee=0 and a.privilege_type='EXECUTE') then
-   raise exception 'booking predicate unexpectedly executable by PUBLIC';
- end if;
-end $$;
-
-create function pg_temp.check_delivery_denied() returns void
-language plpgsql security invoker as $$
-declare f record;
-begin
- select * into f from catalog_fixture;
- begin
-   perform 1 from public.glam_service_delivery_options where service_id=f.created_service;
-   raise exception 'delivery SELECT unexpectedly allowed' using errcode='ZX004';
- exception when insufficient_privilege then null; end;
- begin
-   insert into public.glam_service_delivery_options(organization_id,service_id,channel)
-   values(f.org_a,f.created_service,'salon');
-   raise exception 'delivery INSERT unexpectedly allowed' using errcode='ZX004';
- exception when insufficient_privilege then null; end;
- begin
-   update public.glam_service_delivery_options set enabled=false where service_id=f.created_service;
-   raise exception 'delivery UPDATE unexpectedly allowed' using errcode='ZX004';
- exception when insufficient_privilege then null; end;
- begin
-   delete from public.glam_service_delivery_options where service_id=f.created_service;
-   raise exception 'delivery DELETE unexpectedly allowed' using errcode='ZX004';
- exception when insufficient_privilege then null; end;
-end $$;
-grant execute on function pg_temp.check_delivery_denied() to authenticated,anon;
+-- Included in the rollback-only catalog fixture transaction.
+create function pg_temp.save_delivery(mode text, target_org uuid default null) returns uuid
+language sql security invoker as $$
+ select public.glam_save_catalog_service_with_delivery(coalesce(target_org,f.org_a),s.id,s.name,s.minutes,s.price_sar,s.active,s.category_id,s.subcategory_id,s.pricing_mode,s.buffer_minutes,mode)
+ from catalog_fixture f join public.glam_services s on s.id=f.created_service
+$$;
+grant execute on function pg_temp.save_delivery(text,uuid) to authenticated,anon;
 select set_config('request.jwt.claim.sub',owner_a::text,true) from catalog_fixture;
 set local role authenticated;
-select pg_temp.check_delivery_denied();
+select pg_temp.save_delivery('both');
+do $$ begin
+ if (select count(*) from public.glam_service_delivery_options where service_id=(select created_service from catalog_fixture) and enabled)<>2 then raise exception 'owner channels missing'; end if;
+end $$;
 reset role;
 select set_config('request.jwt.claim.sub',manager_a::text,true) from catalog_fixture;
 set local role authenticated;
-select pg_temp.check_delivery_denied();
+select pg_temp.save_delivery('home');
+do $$ begin
+ if (select count(*) from public.glam_service_delivery_options where service_id=(select created_service from catalog_fixture) and enabled)<>1 then raise exception 'manager update failed'; end if;
+ begin
+  perform pg_temp.save_delivery('invalid');
+  raise exception 'invalid channel allowed' using errcode='ZX003';
+ exception when invalid_parameter_value then null; end;
+end $$;
 reset role;
+create function pg_temp.delivery_denied() returns void language plpgsql security invoker as $$
+begin
+ begin
+  perform pg_temp.save_delivery('salon');
+  raise exception 'unauthorized RPC allowed' using errcode='ZX004';
+ exception when insufficient_privilege then null; end;
+end $$;
+grant execute on function pg_temp.delivery_denied() to authenticated,anon;
 select set_config('request.jwt.claim.sub',customer::text,true) from catalog_fixture;
 set local role authenticated;
-select pg_temp.check_delivery_denied();
+select pg_temp.delivery_denied();
+do $$ begin
+ if exists(select 1 from public.glam_service_delivery_options where service_id=(select created_service from catalog_fixture) and channel='salon') then raise exception 'disabled channel exposed'; end if;
+end $$;
 reset role;
 select set_config('request.jwt.claim.sub',specialist::text,true) from catalog_fixture;
 set local role authenticated;
-select pg_temp.check_delivery_denied();
+select pg_temp.delivery_denied();
+reset role;
+select set_config('request.jwt.claim.sub',owner_b::text,true) from catalog_fixture;
+set local role authenticated;
+select pg_temp.delivery_denied();
 reset role;
 select set_config('request.jwt.claim.sub','',true);
 set local role anon;
-select pg_temp.check_delivery_denied();
+select pg_temp.delivery_denied();
 reset role;
+do $$ begin
+ if has_table_privilege('authenticated','public.glam_service_delivery_options','INSERT')
+ or has_table_privilege('authenticated','public.glam_service_delivery_options','UPDATE')
+ or has_table_privilege('authenticated','public.glam_service_delivery_options','DELETE') then raise exception 'direct mutation granted'; end if;
+ if has_function_privilege('anon','public.glam_save_catalog_service_with_delivery(uuid,uuid,text,integer,numeric,boolean,uuid,uuid,text,integer,text)','EXECUTE') then raise exception 'anonymous RPC granted'; end if;
+ begin
+  update public.glam_service_delivery_options set organization_id=(select org_b from catalog_fixture) where service_id=(select created_service from catalog_fixture);
+  raise exception 'cross tenant link accepted' using errcode='ZX004';
+ exception when foreign_key_violation then null; end;
+end $$;

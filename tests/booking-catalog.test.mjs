@@ -23,7 +23,36 @@ const service = {
   category_id: null,
   glam_service_categories: null,
   glam_service_variants: [],
+  glam_service_delivery_options: [
+    { channel: "salon", enabled: true, price_sar: null, minutes: null, travel_fee_sar: 0 },
+  ],
 };
+
+test("booking channels fail closed for disabled options or unquoted overrides", async () => {
+  const f = fixture();
+  const base = {
+    channel: "home",
+    enabled: true,
+    price_sar: null,
+    minutes: null,
+    travel_fee_sar: 0,
+  };
+  for (const options of [
+    [],
+    [{ ...base, enabled: false }],
+    [{ ...base, travel_fee_sar: 25 }],
+    [{ ...base, price_sar: 99 }],
+    [{ ...base, minutes: 60 }],
+  ]) {
+    f.responses.glam_services.data = [{ ...service, glam_service_delivery_options: options }];
+    const result = await loadBookingCatalog(f.client, "Salon");
+    assert.deepEqual(result.catalog[0].channels, []);
+    assert.equal(result.catalog[0].price, 0);
+    assert.equal(result.catalog[0].minutes, 45);
+  }
+  f.responses.glam_services.data = [{ ...service, glam_service_delivery_options: [base] }];
+  assert.deepEqual((await loadBookingCatalog(f.client, "Salon")).catalog[0].channels, ["home"]);
+});
 function fixture() {
   const responses = {
     glam_appointments: { data: [appointment], error: null },
@@ -92,6 +121,7 @@ test("retry reads both collections afresh and preserves real identity, zero pric
     name: "Haircut",
     price: 0,
     minutes: 45,
+    channels: ["salon"],
     categoryName: "خدمات أخرى",
     variants: [],
   });

@@ -88,6 +88,7 @@ function fixture({ role = "owner", user = { id: "user", email: "different@exampl
               pricing_mode: args.p_pricing_mode,
               buffer_minutes: args.p_buffer,
               revision: 1,
+              glam_service_delivery_options: [{ channel: args.p_delivery, enabled: true }],
             };
         tables[table] = [...tables[table].filter((item) => item.id !== id), row];
       }
@@ -105,7 +106,22 @@ const input = {
   subcategory_id: null,
   pricing_mode: "fixed",
   buffer_minutes: 15,
+  delivery: "salon",
+  glam_service_delivery_options: [{ channel: "salon", enabled: true }],
 };
+
+test("delivery is explicitly required; all three modes leave price and duration unchanged", async () => {
+  for (const delivery of ["", null, "other"])
+    assert.throws(() => validateService({ ...input, delivery }), /INVALID_DELIVERY/);
+  for (const delivery of ["salon", "home", "both"]) {
+    const f = fixture();
+    await f.repo.saveService("a", null, { ...input, delivery });
+    const call = f.calls.find((c) => c.rpc);
+    assert.equal(call.args.p_delivery, delivery);
+    assert.equal(call.args.p_price, input.price_sar);
+    assert.equal(call.args.p_minutes, input.minutes);
+  }
+});
 
 for (const role of ["owner", "manager"])
   test(`${role} access follows membership, not email`, async () => {

@@ -4,7 +4,7 @@ import { validateService } from "../domain/business-catalog.ts";
 import { requireBusinessOrganization } from "../lib/business-access.ts";
 
 const serviceColumns =
-  "id,organization_id,name,minutes,price_sar,active,revision,category_id,subcategory_id,pricing_mode,buffer_minutes";
+  "id,organization_id,name,minutes,price_sar,active,revision,category_id,subcategory_id,pricing_mode,buffer_minutes,glam_service_delivery_options!glam_service_delivery_options_service_id_fkey(channel,enabled)";
 
 export function createCatalogRepository(client: SupabaseClient) {
   async function load(organizationId: string) {
@@ -30,7 +30,12 @@ export function createCatalogRepository(client: SupabaseClient) {
     ]);
     for (const result of results) if (result.error) throw result.error;
     return {
-      services: (results[0]!.data ?? []) as CatalogService[],
+      services: (results[0]!.data ?? []).map((row) => {
+        const channels = row.glam_service_delivery_options
+          .filter((d: { enabled: boolean }) => d.enabled)
+          .map((d: { channel: string }) => d.channel);
+        return { ...row, delivery: channels.length === 2 ? "both" : (channels[0] ?? "") };
+      }) as CatalogService[],
       categories: (results[1]!.data ?? []) as CatalogCategory[],
       subcategories: (results[2]!.data ?? []) as CatalogCategory[],
     };
@@ -41,7 +46,7 @@ export function createCatalogRepository(client: SupabaseClient) {
     await requireBusinessOrganization(client, organizationId);
     // One transaction validates ownership, category hierarchy and revision.
     // Requires the reviewed SQL proposal; missing RPC errors are never hidden.
-    const { data, error } = await client.rpc("glam_save_catalog_service", {
+    const { data, error } = await client.rpc("glam_save_catalog_service_with_delivery", {
       p_org: organizationId,
       p_id: id,
       p_name: input.name.trim(),
@@ -52,6 +57,7 @@ export function createCatalogRepository(client: SupabaseClient) {
       p_subcategory: input.subcategory_id,
       p_pricing_mode: input.pricing_mode,
       p_buffer: input.buffer_minutes,
+      p_delivery: input.delivery,
     });
     if (error) throw error;
     if (!data) throw new Error("WRITE_NOT_CONFIRMED");

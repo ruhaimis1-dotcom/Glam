@@ -258,7 +258,31 @@ try {
         name,
         url,
         routes: [{ name, paths: [path], strip_path: true }],
-        plugins: [{ name: "key-auth", config: { key_names: ["apikey"], hide_credentials: true } }],
+        plugins: [
+          {
+            name: "cors",
+            config: {
+              origins: ["http://127.0.0.1:4175"],
+              headers: [
+                "Authorization",
+                "apikey",
+                "Content-Type",
+                "Prefer",
+                "X-Client-Info",
+                "Accept-Profile",
+                "Content-Profile",
+                "X-Supabase-Api-Version",
+              ],
+              methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+              exposed_headers: ["Content-Range"],
+              credentials: true,
+            },
+          },
+          {
+            name: "key-auth",
+            config: { key_names: ["apikey"], hide_credentials: true, run_on_preflight: false },
+          },
+        ],
       })),
     }),
   );
@@ -304,7 +328,12 @@ try {
     throw Error("Backend network is not internal");
   if (port("gateway")["8000/tcp"].some((binding) => binding.HostIp !== "127.0.0.1"))
     throw Error("Gateway must be loopback-only");
-  const result = await runContract({
+  const execute = process.argv.includes("--browser")
+    ? (await import("../tests/e2e/catalog-browser.mjs")).runBrowserContract
+    : runContract;
+  const result = await execute({
+    baseURL,
+    dir,
     authURL,
     restURL,
     anon,
@@ -316,7 +345,13 @@ try {
     join(dir, "result.json"),
     JSON.stringify({ stack: id, authUserLinks: links("postgres"), ...result }, null, 2),
   );
-  console.log(`PASS: ${result.passed} HTTP assertions. Report: ${join(dir, "result.json")}`);
+  const gaps = result.blockers?.length ?? 0;
+  for (const gap of result.blockers ?? []) console.log(`UI_GAP: ${gap}`);
+  console.log(
+    `${gaps ? "INCOMPLETE" : "PASS"}: ${result.passed} ${process.argv.includes("--browser") ? "browser checkpoints" : "HTTP assertions"}; ${gaps} coverage gaps. Report: ${join(dir, "result.json")}`,
+  );
+  // Do not turn a missing requested UI feature into a green integration gate.
+  if (gaps) process.exitCode = 2;
 } finally {
   // Stop only containers created by this run; retain data for local inspection.
   for (const name of ["gateway", "rest", "auth", "db"]) {
@@ -325,5 +360,27 @@ try {
     } catch {
       /* container may not have started */
     }
+  }
+  // Keep stopped containers/volumes for inspection, but release this run's
+  // ephemeral subnets. Retaining two networks per run exhausts Docker's pools.
+  for (const network of [id, `${id}-ingress`]) {
+    let info;
+    try {
+      info = JSON.parse(d(["network", "inspect", network]))[0];
+    } catch {
+      continue;
+    } // Setup may have failed before creating this network.
+    const members = Object.entries(info.Containers ?? {});
+    const expected = new Set(["gateway", "rest", "auth", "db"].map((name) => `${id}-${name}`));
+    if (members.some(([, member]) => !expected.has(member.Name))) {
+      console.log(`CLEANUP_SKIPPED: unexpected member on ${network}`);
+      continue;
+    }
+    if (members.some(([containerId]) => JSON.parse(d(["inspect", containerId]))[0].State.Running)) {
+      console.log(`CLEANUP_SKIPPED: container still running on ${network}`);
+      continue;
+    }
+    for (const [containerId] of members) d(["network", "disconnect", network, containerId]);
+    d(["network", "rm", network]);
   }
 }

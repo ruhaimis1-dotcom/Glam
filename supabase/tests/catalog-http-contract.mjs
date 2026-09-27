@@ -159,6 +159,7 @@ export async function runContract({ authURL, restURL, anon, admin, expired, sql 
     subcategory_id: null,
     pricing_mode: "fixed",
     buffer_minutes: 0,
+    delivery: "salon",
   });
   await createCatalogRepository(clients.manager).saveService(org, repoService, {
     name: "SDK archived",
@@ -169,6 +170,7 @@ export async function runContract({ authURL, restURL, anon, admin, expired, sql 
     subcategory_id: null,
     pricing_mode: "fixed",
     buffer_minutes: 0,
+    delivery: "salon",
   });
   check(
     (await repository.load(org)).services.some((s) => s.id === repoService && !s.active),
@@ -273,7 +275,7 @@ export async function runContract({ authURL, restURL, anon, admin, expired, sql 
   );
   check(privateSchema.status === 406, "glam_private not exposed in REST");
   for (const role of ["owner", "manager", "specialist", "customer", "ownerB", "anon"]) {
-    for (const method of ["GET", "POST", "PATCH", "DELETE"]) {
+    for (const method of ["POST", "PATCH", "DELETE"]) {
       const r = await request(
         restURL,
         `/glam_service_delivery_options?service_id=eq.${sid}`,
@@ -288,6 +290,72 @@ export async function runContract({ authURL, restURL, anon, admin, expired, sql 
       check([401, 403].includes(r.status), `${role} delivery ${method} remains denied`);
     }
   }
+  // New channel contract: real Auth/RPC, tenant isolation and read ceilings.
+  for (const role of ["owner", "manager"]) {
+    const r = await rpc(
+      role,
+      "glam_save_catalog_service_with_delivery",
+      service({
+        p_id: sid,
+        p_delivery: "both",
+        p_category: category.data,
+        p_subcategory: subcategory.data,
+      }),
+    );
+    check(r.status === 200, role + " saves both channels atomically");
+    check(
+      (await read(role, "glam_service_delivery_options", "service_id=eq." + sid)).data.filter(
+        (d) => d.enabled,
+      ).length === 2,
+      role + " rereads both channels",
+    );
+  }
+  for (const role of ["specialist", "customer", "ownerB", "anon"]) {
+    const r = await rpc(
+      role,
+      "glam_save_catalog_service_with_delivery",
+      service({ p_id: sid, p_delivery: "home" }),
+    );
+    check([401, 403].includes(r.status), role + " cannot change channels");
+  }
+  for (const mode of [null, "invalid"]) {
+    const r = await rpc(
+      "owner",
+      "glam_save_catalog_service_with_delivery",
+      service({ p_id: sid, p_delivery: mode }),
+    );
+    check(r.status === 400, "invalid channel rejected");
+  }
+  const managedDraft = await rpc(
+    "manager",
+    "glam_save_catalog_service_with_delivery",
+    service({ p_name: "Private delivery draft", p_active: false, p_delivery: "both" }),
+  );
+  check(managedDraft.status === 200, "manager creates a service with channels");
+  for (const role of ["owner", "manager", "customer", "specialist", "ownerB", "anon"]) {
+    const result = await read(
+      role,
+      "glam_service_delivery_options",
+      "service_id=eq." + managedDraft.data,
+    );
+    check(
+      result.status === 200 && result.data.length === (["owner", "manager"].includes(role) ? 2 : 0),
+      role + " delivery draft visibility follows tenant and activity",
+    );
+  }
+  const crossTenant = await rpc(
+    "ownerB",
+    "glam_save_catalog_service_with_delivery",
+    service({ p_org: other, p_id: sid, p_delivery: "home" }),
+  );
+  check(crossTenant.status === 403, "owner cannot attach foreign service to own tenant");
+  await rpc("manager", "glam_delete_catalog_service", { p_org: org, p_id: managedDraft.data });
+  check(
+    sql(
+      `select count(*) from public.glam_service_delivery_options where service_id='${sid}' and (price_sar is not null or minutes is not null or travel_fee_sar<>0);`,
+    ).trim() === "0",
+    "channel changes preserve inherited price/duration and zero fee",
+  );
   const a = randomUUID();
   sql(`insert into public.glam_service_specialists(service_id,specialist_id) values ('${sid}','${users.specialist.id}');
     insert into public.glam_schedule_windows(organization_id,specialist_id,kind,starts_at,ends_at)
@@ -311,6 +379,7 @@ export async function runContract({ authURL, restURL, anon, admin, expired, sql 
     customer_id: users.customer.id,
     request_id: randomUUID(),
     booking_source: "salon_link",
+    delivery_channel: "salon",
   });
   async function visible(expected, label) {
     const catalog = await loadBookingCatalog(clients.customer, "HTTP Salon A");

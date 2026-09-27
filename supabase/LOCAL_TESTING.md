@@ -79,7 +79,55 @@ SQL only sets up fixtures and changes classifications/membership for test cases.
 Fresh passwords and signing keys exist only in the ignored run directory under
 supabase/.temp and local containers. Do not upload that directory. Results there
 contain assertion labels and counts, not tokens. Containers stop in finally;
-test data, volumes and networks are retained for inspection, not reused.
+test data and stopped containers/volumes are retained for inspection, not reused.
+The runner disconnects only its stopped containers from its own temporary networks
+and removes those networks to avoid exhausting Docker address pools. Other projects'
+networks are untouched. Recreate networking before restarting archived containers.
 
 This is an opt-in integration gate, separate from the snapshot-free CI Node
 tests. It does not render a browser UI or exercise external email/OAuth providers.
+
+## Rendered browser gate
+
+```powershell
+npm run test:catalog:browser
+```
+
+Uses the same schema-verified Docker setup and a Vite server bound to
+127.0.0.1:4175. Install dependencies with npm ci; Playwright is pinned in the
+lockfile. On Windows, the runner uses installed Microsoft Edge in headless mode
+with a fresh profile. Set GLAM_TEST_BROWSER=chrome to use installed Chrome.
+No separate browser download or personal browser profile is needed.
+
+The page is restricted to local requests; production Supabase requests would be
+blocked and fail the suite. Local Kong enables CORS only for the test Vite origin.
+Separate test users log in through the actual login form. Desktop 1440x1000 and
+Pixel 7 emulation cover create/edit, account switching, customer booking, failed
+reads and retry. Screenshots and result.json remain in the ignored run directory.
+The browser and Vite server close at the end, as do this run's Docker containers.
+
+Exit 0 means all requested checks completed, exit 1 indicates a failed assertion
+or setup failure, and exit 2 means core checks passed but requested UI features
+remain missing. The gate now checks 18 core checkpoints plus four delivery
+checks: owner/manager create/edit/reload salon/home/both on each viewport, and
+customer channel availability, stale-channel rejection/retry and persisted home
+booking on each viewport. Assertions wait up to 15 seconds, including 503 retries.
+It emulates a mobile viewport, not physical
+Android/iOS hardware. Salon identity/display metadata still uses the existing
+static salon directory; the local fixture matches that name, while services,
+prices, appointments and reservations come from the local GLAM database.
+
+## Delivery contract (additive migration 20260927141701)
+
+The new checked RPC saves the service and enabled channels in one transaction.
+Direct channel writes remain denied; SELECT follows tenant, publication and
+active-service/category ceilings. New options inherit price/duration (NULL
+overrides) and use zero travel fee. Existing overrides are preserved, not reset.
+The booking UI and trigger refuse a channel needing a different price, duration
+or travel fee until an explicit quotation flow exists. No implicit price change.
+
+New reservations must send delivery_channel (salon/home); the database checks
+the enabled channel again and retains it on the reservation. Existing history
+is not backfilled. Services without configured channels cannot be booked; an
+owner/manager must choose their channels. Legacy booking RPC callers that omit
+the channel fail closed and need a channel-aware contract before release.

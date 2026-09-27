@@ -18,6 +18,7 @@ const emptyService: ServiceInput = {
   subcategory_id: null,
   pricing_mode: "fixed",
   buffer_minutes: 0,
+  delivery: "",
 };
 const fieldClass = "mt-2 w-full rounded-2xl border bg-background px-4 py-3";
 const buttonClass = "rounded-full border px-4 py-2 text-sm disabled:opacity-40";
@@ -227,6 +228,21 @@ function ServicesPage() {
                 />{" "}
                 متاحة للحجز
               </label>
+              <label>
+                قناة التقديم
+                <select
+                  aria-label="قناة التقديم"
+                  required
+                  className={fieldClass}
+                  value={editor.input.delivery}
+                  onChange={(e) => patch({ delivery: e.target.value as ServiceInput["delivery"] })}
+                >
+                  <option value="">اختاري قناة التقديم</option>
+                  <option value="salon">داخل الصالون</option>
+                  <option value="home">منزلية</option>
+                  <option value="both">كلاهما</option>
+                </select>
+              </label>
             </div>
             <div hidden={step !== 2} className="grid gap-4 md:grid-cols-2">
               <label>
@@ -291,8 +307,8 @@ function ServicesPage() {
                   type="button"
                   className={primaryClass}
                   onClick={() => {
-                    if (editor.input.name.trim()) setStep(2);
-                    else setError("أدخلي اسم الخدمة أولاً.");
+                    if (editor.input.name.trim() && editor.input.delivery) setStep(2);
+                    else setError("أدخلي اسم الخدمة واختاري قناة التقديم أولاً.");
                   }}
                 >
                   التالي
@@ -479,6 +495,16 @@ function ServicesPage() {
                 : ""}
             </p>
             <p className="my-4">
+              <span className="block">
+                {
+                  {
+                    salon: "داخل الصالون",
+                    home: "منزلية",
+                    both: "كلاهما",
+                    "": "لم تُحدد قناة التقديم",
+                  }[service.delivery]
+                }
+              </span>
               {service.pricing_mode === "from" ? "يبدأ من " : ""}
               {service.price_sar} ر.س · {service.minutes} دقيقة · تجهيز {service.buffer_minutes}{" "}
               دقيقة

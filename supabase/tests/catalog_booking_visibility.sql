@@ -1,5 +1,7 @@
 -- Included by catalog_contract.sql inside its rollback transaction/fixtures.
 -- Real bookings exercise both catalog and schedule triggers under authenticated.
+insert into public.glam_service_delivery_options(organization_id,service_id,channel)
+select org_a,created_service,'salon' from catalog_fixture;
 create temp table booking_fixture as select gen_random_uuid() appointment_id,
   date_trunc('day',now()) + interval '2 days 12 hours' starts_at;
 grant select on booking_fixture to authenticated,anon;
@@ -34,8 +36,8 @@ begin
    select exists(select 1 from public.glam_available_appointments() s where s.id=a) into visible;
    if visible is distinct from expected then insert into booking_failures values(label||': available_appointments'); end if;
    begin
-     insert into public.glam_reservations(appointment_id,customer_id,request_id,booking_source)
-     values(a,f.customer,gen_random_uuid(),'salon_link');
+     insert into public.glam_reservations(appointment_id,customer_id,request_id,booking_source,delivery_channel)
+     values(a,f.customer,gen_random_uuid(),'salon_link','salon');
      -- Roll back the test booking even on success so later probes see a free slot.
      raise exception 'ROLLBACK_TEST_BOOKING' using errcode='ZX001';
    exception
@@ -94,8 +96,8 @@ end $$;
 -- is not offered for a new booking. Preserve staff access to their schedule.
 select set_config('request.jwt.claim.sub',customer::text,true) from catalog_fixture;
 set local role authenticated;
-insert into public.glam_reservations(appointment_id,customer_id,request_id,booking_source)
-select b.appointment_id,f.customer,gen_random_uuid(),'salon_link'
+insert into public.glam_reservations(appointment_id,customer_id,request_id,booking_source,delivery_channel)
+select b.appointment_id,f.customer,gen_random_uuid(),'salon_link','salon'
 from catalog_fixture f cross join booking_fixture b;
 reset role;
 update public.glam_service_categories set active=false where id=(select category_a from catalog_fixture);
@@ -132,8 +134,8 @@ begin
    raise exception 'stale revision offered for booking';
  end if;
  begin
-   insert into public.glam_reservations(appointment_id,customer_id,request_id,booking_source)
-   values(a,f.customer,gen_random_uuid(),'salon_link');
+   insert into public.glam_reservations(appointment_id,customer_id,request_id,booking_source,delivery_channel)
+   values(a,f.customer,gen_random_uuid(),'salon_link','salon');
    raise exception 'stale revision booking allowed' using errcode='ZX002';
  exception when raise_exception then
    if sqlerrm <> 'SERVICE_UNAVAILABLE' then raise; end if;
@@ -141,5 +143,37 @@ begin
 end $$;
 reset role;
 -- Remove local FK fixtures before the enclosing service-delete tests.
+-- Channel checks use a current revision and a free scheduled appointment.
+update public.glam_appointments set service_revision=(select revision from public.glam_services where id=(select created_service from catalog_fixture))
+where id=(select appointment_id from booking_fixture);
+create function pg_temp.reject_delivery(channel text, expected text) returns void language plpgsql security invoker as $$
+declare f record; a uuid;
+begin
+ select * into f from catalog_fixture;
+ select appointment_id into a from booking_fixture;
+ begin
+  insert into public.glam_reservations(appointment_id,customer_id,request_id,delivery_channel)
+  values(a,f.customer,gen_random_uuid(),channel);
+  raise exception 'invalid delivery booking accepted' using errcode='ZX005';
+ exception when invalid_parameter_value then
+  if sqlerrm<>expected then raise; end if;
+ end;
+end $$;
+grant execute on function pg_temp.reject_delivery(text,text) to authenticated;
+select set_config('request.jwt.claim.sub',customer::text,true) from catalog_fixture;
+set local role authenticated;
+select pg_temp.reject_delivery(null,'DELIVERY_UNAVAILABLE');
+select pg_temp.reject_delivery('home','DELIVERY_UNAVAILABLE');
+select pg_temp.reject_delivery('invalid','DELIVERY_UNAVAILABLE');
+reset role;
+update public.glam_service_delivery_options set enabled=false where service_id=(select created_service from catalog_fixture);
+set local role authenticated;
+select pg_temp.reject_delivery('salon','DELIVERY_UNAVAILABLE');
+reset role;
+update public.glam_service_delivery_options set enabled=true,travel_fee_sar=25 where service_id=(select created_service from catalog_fixture);
+set local role authenticated;
+select pg_temp.reject_delivery('salon','DELIVERY_QUOTE_REQUIRED');
+reset role;
+update public.glam_service_delivery_options set travel_fee_sar=0 where service_id=(select created_service from catalog_fixture);
 delete from public.glam_appointments where id=(select appointment_id from booking_fixture);
 delete from public.glam_service_specialists where service_id=(select created_service from catalog_fixture);

@@ -11,6 +11,7 @@ export type CatalogService = {
   subcategory_id: string | null;
   pricing_mode: "fixed" | "from" | "range" | "variants";
   buffer_minutes: number;
+  delivery: "salon" | "home" | "both" | "";
 };
 export type CatalogCategory = {
   id: string;
@@ -23,6 +24,7 @@ export type CatalogCategory = {
 export type ServiceInput = Omit<CatalogService, "id" | "organization_id" | "revision">;
 
 export function validateService(input: ServiceInput) {
+  if (!["salon", "home", "both"].includes(input.delivery)) throw new Error("INVALID_DELIVERY");
   if (!input.name.trim() || input.name.trim().length > 120) throw new Error("INVALID_NAME");
   if (
     !Number.isInteger(input.minutes) ||

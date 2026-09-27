@@ -16,6 +16,15 @@ const optionSchema = z.object({
   active: z.boolean(),
 });
 const serviceSchema = optionSchema.extend({
+  glam_service_delivery_options: z.array(
+    z.object({
+      channel: z.enum(["salon", "home"]),
+      enabled: z.boolean(),
+      price_sar: z.number().nullable(),
+      minutes: z.number().nullable(),
+      travel_fee_sar: z.number(),
+    }),
+  ),
   category_id: z.string().uuid().nullable(),
   glam_service_categories: z.object({ name: z.string().min(1) }).nullable(),
   glam_service_variants: z.array(optionSchema),
@@ -28,6 +37,7 @@ export type BookingService = {
   categoryName: string;
   price: number;
   minutes: number;
+  channels: Array<"salon" | "home">;
   variants: Array<{ id: string; name: string; price: number; minutes: number }>;
 };
 export type BookingCatalog = { appointments: BookingAppointment[]; catalog: BookingService[] };
@@ -75,7 +85,7 @@ export async function loadBookingCatalog(
   const servicesResult = await client
     .from("glam_services")
     .select(
-      "id,name,price_sar,minutes,active,category_id,glam_service_categories!glam_services_category_id_fkey(name),glam_service_variants!glam_service_variants_service_id_fkey(id,name,price_sar,minutes,active)",
+      "id,name,price_sar,minutes,active,category_id,glam_service_categories!glam_services_category_id_fkey(name),glam_service_variants!glam_service_variants_service_id_fkey(id,name,price_sar,minutes,active),glam_service_delivery_options!glam_service_delivery_options_service_id_fkey(channel,enabled,price_sar,minutes,travel_fee_sar)",
     )
     .in("id", ids)
     .eq("active", true);
@@ -93,6 +103,15 @@ export async function loadBookingCatalog(
         categoryName: row.glam_service_categories?.name ?? "خدمات أخرى",
         price: row.price_sar,
         minutes: row.minutes,
+        channels: row.glam_service_delivery_options
+          .filter(
+            (d) =>
+              d.enabled &&
+              d.travel_fee_sar === 0 &&
+              (d.price_sar === null || d.price_sar === row.price_sar) &&
+              (d.minutes === null || d.minutes === row.minutes),
+          )
+          .map((d) => d.channel),
         variants: row.glam_service_variants
           .filter((v) => v.active)
           .map((v) => ({

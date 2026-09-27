@@ -18,6 +18,7 @@ function BookingForm({ salonId }: { salonId: string }) {
   const salon = byId.salon(salonId);
   const [service, setService] = useState("");
   const [variantId, setVariantId] = useState("");
+  const [channel, setChannel] = useState("");
   const [category, setCategory] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -30,6 +31,7 @@ function BookingForm({ salonId }: { salonId: string }) {
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     setService("");
+    setChannel("");
     setVariantId("");
     setCategory("");
     setDate("");
@@ -64,6 +66,10 @@ function BookingForm({ salonId }: { salonId: string }) {
     }
     if (selectedService?.variants.length && !variantId) {
       setError("يرجى اختيار خيار الخدمة والمدة أولاً.");
+      return;
+    }
+    if (!selectedService.channels.some((c) => c === channel)) {
+      setError("قناة التقديم غير متاحة. أعيدي تحميل الخدمات واختاري قناة صالحة.");
       return;
     }
     if (!date) {
@@ -105,6 +111,7 @@ function BookingForm({ salonId }: { salonId: string }) {
           status: "confirmed",
           attendance: "pending",
           booking_source: "salon_link",
+          delivery_channel: channel,
         })
         .select("id,customer_id,appointment_id,status")
         .single();
@@ -128,15 +135,22 @@ function BookingForm({ salonId }: { salonId: string }) {
       setDone(true);
     } catch (e) {
       console.error("booking_insert_failed", e);
-      const code = e instanceof Error ? e.message : "BOOKING_INSERT_FAILED";
+      const code =
+        e instanceof Error
+          ? e.message
+          : typeof e === "object" && e !== null && "message" in e
+            ? String(e.message)
+            : "BOOKING_INSERT_FAILED";
       const unavailable =
         code === "APPOINTMENT_UNAVAILABLE" || code.includes("23505") || code.includes("duplicate");
       setError(
-        code === "AUTH_REQUIRED"
-          ? "يجب تسجيل الدخول لإتمام الحجز."
-          : code === "ALREADY_BOOKED" || unavailable
-            ? "هذا الموعد لم يعد متاحًا. اختاري وقتًا آخر."
-            : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.",
+        code === "DELIVERY_UNAVAILABLE" || code === "DELIVERY_QUOTE_REQUIRED"
+          ? "قناة التقديم لم تعد متاحة بهذا السعر والوقت. أعيدي تحميل الخدمات لاختيار قناة صالحة."
+          : code === "AUTH_REQUIRED"
+            ? "يجب تسجيل الدخول لإتمام الحجز."
+            : code === "ALREADY_BOOKED" || unavailable
+              ? "هذا الموعد لم يعد متاحًا. اختاري وقتًا آخر."
+              : "تعذر حفظ الحجز حاليًا. يرجى المحاولة مرة أخرى.",
       );
     } finally {
       setSaving(false);
@@ -199,6 +213,7 @@ function BookingForm({ salonId }: { salonId: string }) {
               onChange={(e) => {
                 setCategory(e.target.value);
                 setService("");
+                setChannel("");
                 setVariantId("");
                 setDate("");
                 setTime("");
@@ -221,6 +236,7 @@ function BookingForm({ salonId }: { salonId: string }) {
               onChange={(e) => {
                 const next = e.target.value;
                 setService(next);
+                setChannel("");
                 setVariantId("");
                 setDate("");
                 setTime("");
@@ -236,6 +252,29 @@ function BookingForm({ salonId }: { salonId: string }) {
               ))}
             </select>
           </label>
+          {selectedService && (
+            <label className="block text-sm font-medium">
+              قناة التقديم
+              <select
+                aria-label="قناة التقديم"
+                value={channel}
+                onChange={(e) => setChannel(e.target.value)}
+                className="mt-2 w-full rounded-xl border bg-background px-4 py-3"
+              >
+                <option value="">اختاري قناة التقديم</option>
+                {selectedService.channels.map((c) => (
+                  <option key={c} value={c}>
+                    {c === "salon" ? "داخل الصالون" : "منزلية"}
+                  </option>
+                ))}
+              </select>
+              {!selectedService.channels.length && (
+                <span role="status">
+                  لا توجد قناة تقديم متاحة لهذه الخدمة بالسعر والمدة المعروضين.
+                </span>
+              )}
+            </label>
+          )}
           {selectedService?.variants.length ? (
             <label className="block text-sm font-medium">
               خيار الخدمة والمدة
@@ -328,10 +367,20 @@ function BookingForm({ salonId }: { salonId: string }) {
             </div>
           )}
           {error && (
-            <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
+            <div role="alert" className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+              <p>{error}</p>
+              <button type="button" onClick={() => setAttempt((value) => value + 1)}>
+                إعادة تحميل الخدمات
+              </button>
+            </div>
           )}
           <button
-            disabled={saving || !selectedService || !appointmentId}
+            disabled={
+              saving ||
+              !selectedService ||
+              !appointmentId ||
+              !selectedService.channels.some((c) => c === channel)
+            }
             onClick={confirm}
             className="w-full rounded-2xl bg-primary px-5 py-3.5 font-semibold text-primary-foreground disabled:opacity-60"
           >
