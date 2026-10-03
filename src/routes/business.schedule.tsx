@@ -5,24 +5,32 @@ import { useEffect, useState } from "react";
 import { BusinessShell, PageHeader } from "@/components/glam/shells";
 import { supabase } from "@/lib/supabase";
 import { bookingTime, bookingDateKey } from "@/lib/booking-time";
-import { getCurrentOrganization } from "@/lib/glam-org";
+import { useBusinessOrganization } from "@/lib/business-context";
 export const Route = createFileRoute("/business/schedule")({ component: SchedulePage });
 function SchedulePage() {
+  const { id: organizationId, name: organizationName } = useBusinessOrganization();
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
-    getCurrentOrganization().then(async ({ organizationId }) => {
+    let cancelled = false;
+    void (async () => {
       if (!organizationId) return;
       const day = bookingDateKey(new Date());
       const dayStart = new Date(`${day}T00:00:00+03:00`);
       const dayEnd = new Date(dayStart.getTime() + 86400000);
       const { data } = await supabase
         .from("glam_appointments")
-        .select("id,starts_at,ends_at,service_name,specialist_name,buffer_minutes,service_variant_id")
+        .select(
+          "id,starts_at,ends_at,service_name,specialist_name,buffer_minutes,service_variant_id",
+        )
         .eq("organization_id", organizationId)
         .gte("starts_at", dayStart.toISOString())
         .lt("starts_at", dayEnd.toISOString())
         .order("starts_at");
-      if (!data?.length) { setRows([]); return; }
+      if (cancelled) return;
+      if (!data?.length) {
+        setRows([]);
+        return;
+      }
       const ids = data.map((a) => a.id);
       const { data: reservations } = await supabase
         .from("glam_reservations")
@@ -32,6 +40,7 @@ function SchedulePage() {
       const reservationByAppointment = new Map(
         (reservations ?? []).map((r) => [r.appointment_id, r]),
       );
+      if (cancelled) return;
       setRows(
         data.map((a) => ({
           id: a.id,
@@ -40,8 +49,11 @@ function SchedulePage() {
           attendance: reservationByAppointment.get(a.id)?.attendance ?? "pending",
         })),
       );
-    });
-  }, []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [organizationId]);
   const update = async (row: any) => {
     if (!row.id) return;
     if (!row.reservationId) return;
@@ -54,9 +66,11 @@ function SchedulePage() {
   };
   return (
     <BusinessShell>
-      <PageHeader title="جدول اليوم" desc="المواعيد المجدولة في لوميير ستوديو" />
+      <PageHeader title="جدول اليوم" desc={`المواعيد المجدولة في ${organizationName}`} />
       <div className="glam-card divide-y">
-        {rows.length === 0 && <p className="p-4 text-muted-foreground">لا توجد مواعيد لليوم بتوقيت الرياض.</p>}
+        {rows.length === 0 && (
+          <p className="p-4 text-muted-foreground">لا توجد مواعيد لليوم بتوقيت الرياض.</p>
+        )}
         {rows.map((x: any) => (
           <div className="flex items-center gap-3 p-4" key={x.id ?? x.label}>
             <Clock className="size-4 text-primary" />

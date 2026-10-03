@@ -1,0 +1,92 @@
+{
+  "project": "tevqysdswqkgqartpzdg",
+  "readDate": "2026-09-27",
+  "method": "Supabase CLI migration list with explicit passwordless db-url and PGOPTIONS default_transaction_read_only=on; password entered locally and cleared",
+  "remoteVersions": [
+    "20260909094546",
+    "20260909094650",
+    "20260909115040",
+    "20260909115214",
+    "20260909120059",
+    "20260909120852",
+    "20260909121359",
+    "20260909145209",
+    "20260909151501",
+    "20260909202534",
+    "20260909203401",
+    "20260909205836",
+    "20260909210708",
+    "20260909211056",
+    "20260909212631",
+    "20260909213726",
+    "20260909214005",
+    "20260909214006",
+    "20260916093600",
+    "20260916093925",
+    "20260916095045",
+    "20260916104805",
+    "20260916105259",
+    "20260916111926",
+    "20260916112327",
+    "20260916113658",
+    "20260916120120",
+    "20260916120215",
+    "20260916121255",
+    "20260916121905",
+    "20260916123315",
+    "20260916124026",
+    "20260916124106",
+    "20260917045429",
+    "20260917050627",
+    "20260917050653",
+    "20260917050843",
+    "20260917053047",
+    "20260917053224",
+    "20260917053349",
+    "20260919140907",
+    "20260919232403",
+    "20260919232454",
+    "20260919232525",
+    "20260920083348",
+    "20260920084041",
+    "20260920084951",
+    "20260920085232",
+    "20260920090648",
+    "20260920090818",
+    "20260920203634",
+    "20260920205341",
+    "20260920211955",
+    "20260923214122",
+    "20260923214630"
+  ],
+  "localMigrations": [
+    {
+      "file": "20260925205817_catalog_contract_and_visibility.sql",
+      "version": "20260925205817",
+      "appliedRemotely": false,
+      "sha256": "5510c079a2f4662a3161d77910c5dc5ac56f8b9674944404998b613cf27f3f3f"
+    },
+    {
+      "file": "20260926150009_booking_catalog_visibility.sql",
+      "version": "20260926150009",
+      "appliedRemotely": false,
+      "sha256": "d7857cfa9ede93c9551e47589fbfc0ec31bf5278e519f2207d1c84fbf6705534"
+    },
+    {
+      "file": "20260927141701_catalog_delivery_booking.sql",
+      "version": "20260927141701",
+      "appliedRemotely": false,
+      "sha256": "e0c2ce1a13686389dd9f5c4bc80b7f4d77a625db4a1a28b6256f413150327668"
+    },
+    {
+      "file": "20260927155514_reservation_delivery_compatibility.sql",
+      "version": "20260927155514",
+      "appliedRemotely": false,
+      "sha256": "6bc6ed77bb70793355bd946d41c5da3dc9f64ad319dcb4839962dd2573cde364"
+    }
+  ],
+  "limitations": [
+    "History comparison is not a fresh schema-drift audit. Local schema is the previously reviewed schema-only snapshot.",
+    "Remote historical migration bodies are absent locally. No history repair, remote SQL write, or db push was performed."
+  ]
+}

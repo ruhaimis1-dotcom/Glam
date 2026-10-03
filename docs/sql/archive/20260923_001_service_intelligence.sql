@@ -1,3 +1,4 @@
+-- ARCHIVED PROPOSAL ONLY. Incompatible with live GLAM; never run as a migration.
 -- GLAM P1 Service Intelligence
 -- Additive/backward-compatible foundation. No destructive legacy changes.
 

@@ -1,0 +1,1195 @@
+{
+  "inspected_on": "2026-09-26",
+  "project_ref": "tevqysdswqkgqartpzdg",
+  "reviewed_head": "1213e1f96f0664b557fa0d51389979b14087b8c2",
+  "scope": "Read-only metadata SELECTs and aggregate link-integrity counts; no migration or role test executed.",
+  "columns": [
+    {
+      "table_name": "glam_memberships",
+      "column_name": "organization_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_memberships",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_memberships",
+      "column_name": "role",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_organizations",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "table_name": "glam_organizations",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_organizations",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'pending'::text"
+    },
+    {
+      "table_name": "glam_organizations",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "glam_organizations",
+      "column_name": "created_by",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_organizations",
+      "column_name": "onboarding_request",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_salon_pages",
+      "column_name": "organization_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_salon_pages",
+      "column_name": "slug",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_salon_pages",
+      "column_name": "title",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_salon_pages",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "glam_salon_pages",
+      "column_name": "address",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "glam_salon_pages",
+      "column_name": "published",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "glam_salon_pages",
+      "column_name": "logo_url",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "glam_salon_pages",
+      "column_name": "cover_url",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "''::text"
+    },
+    {
+      "table_name": "glam_service_categories",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "table_name": "glam_service_categories",
+      "column_name": "organization_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_categories",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_categories",
+      "column_name": "sort_order",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "glam_service_categories",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "glam_service_categories",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "column_name": "organization_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "column_name": "category_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "column_name": "sort_order",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "column_name": "service_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_variants",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_variants",
+      "column_name": "price_sar",
+      "data_type": "numeric",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_variants",
+      "column_name": "minutes",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_service_variants",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "column_name": "sort_order",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "organization_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "minutes",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "price_sar",
+      "data_type": "numeric",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "revision",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "1"
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "category_id",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "pricing_mode",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'fixed'::text"
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "buffer_minutes",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "glam_services",
+      "column_name": "subcategory_id",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "column_default": null
+    }
+  ],
+  "constraints": [
+    {
+      "table_name": "glam_appointments",
+      "conname": "glam_appointments_service_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (service_id) REFERENCES glam_services(id)"
+    },
+    {
+      "table_name": "glam_service_categories",
+      "conname": "glam_service_categories_name_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK (((length(btrim(name)) >= 1) AND (length(btrim(name)) <= 80)))"
+    },
+    {
+      "table_name": "glam_service_categories",
+      "conname": "glam_service_categories_organization_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (organization_id) REFERENCES glam_organizations(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "glam_service_categories",
+      "conname": "glam_service_categories_organization_id_name_key",
+      "contype": "u",
+      "convalidated": true,
+      "definition": "UNIQUE (organization_id, name)"
+    },
+    {
+      "table_name": "glam_service_categories",
+      "conname": "glam_service_categories_pkey",
+      "contype": "p",
+      "convalidated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "glam_service_delivery_options",
+      "conname": "glam_service_delivery_options_service_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (service_id) REFERENCES glam_services(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "glam_service_specialists",
+      "conname": "glam_service_specialists_service_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (service_id) REFERENCES glam_services(id)"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "conname": "glam_service_subcategories_category_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (category_id) REFERENCES glam_service_categories(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "conname": "glam_service_subcategories_name_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK (((length(btrim(name)) >= 1) AND (length(btrim(name)) <= 120)))"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "conname": "glam_service_subcategories_organization_id_category_id_name_key",
+      "contype": "u",
+      "convalidated": true,
+      "definition": "UNIQUE (organization_id, category_id, name)"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "conname": "glam_service_subcategories_organization_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (organization_id) REFERENCES glam_organizations(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "glam_service_subcategories",
+      "conname": "glam_service_subcategories_pkey",
+      "contype": "p",
+      "convalidated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "conname": "glam_service_variants_minutes_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK ((((minutes >= 15) AND (minutes <= 480)) AND ((minutes % 15) = 0)))"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "conname": "glam_service_variants_name_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK (((length(btrim(name)) >= 1) AND (length(btrim(name)) <= 120)))"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "conname": "glam_service_variants_pkey",
+      "contype": "p",
+      "convalidated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "conname": "glam_service_variants_price_sar_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK (((price_sar >= (0)::numeric) AND (price_sar <= (10000)::numeric)))"
+    },
+    {
+      "table_name": "glam_service_variants",
+      "conname": "glam_service_variants_service_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (service_id) REFERENCES glam_services(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_buffer_minutes_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK (((buffer_minutes >= 0) AND (buffer_minutes <= 120)))"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_category_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (category_id) REFERENCES glam_service_categories(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_minutes_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK ((((minutes >= 15) AND (minutes <= 480)) AND ((minutes % 15) = 0)))"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_name_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK (((length(TRIM(BOTH FROM name)) >= 1) AND (length(TRIM(BOTH FROM name)) <= 120)))"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_organization_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (organization_id) REFERENCES glam_organizations(id)"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_organization_id_name_key",
+      "contype": "u",
+      "convalidated": true,
+      "definition": "UNIQUE (organization_id, name)"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_pkey",
+      "contype": "p",
+      "convalidated": true,
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_price_sar_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK (((price_sar >= (0)::numeric) AND (price_sar <= (10000)::numeric)))"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_pricing_mode_check",
+      "contype": "c",
+      "convalidated": true,
+      "definition": "CHECK ((pricing_mode = ANY (ARRAY['fixed'::text, 'from'::text, 'range'::text, 'variants'::text])))"
+    },
+    {
+      "table_name": "glam_services",
+      "conname": "glam_services_subcategory_id_fkey",
+      "contype": "f",
+      "convalidated": true,
+      "definition": "FOREIGN KEY (subcategory_id) REFERENCES glam_service_subcategories(id) ON DELETE SET NULL"
+    }
+  ],
+  "policies": [
+    {
+      "schemaname": "public",
+      "tablename": "glam_memberships",
+      "policyname": "memberships_self",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(( SELECT auth.uid() AS uid) = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_organizations",
+      "policyname": "organizations_member",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_memberships m\n  WHERE ((m.organization_id = glam_organizations.id) AND (m.user_id = ( SELECT auth.uid() AS uid)))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_salon_pages",
+      "policyname": "published_salon_pages_authenticated_read",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(published = true)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_salon_pages",
+      "policyname": "published_salon_pages_public_read",
+      "permissive": "PERMISSIVE",
+      "roles": "{anon}",
+      "cmd": "SELECT",
+      "qual": "(published = true)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_salon_pages",
+      "policyname": "salon_page_manager",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_memberships m\n  WHERE ((m.organization_id = glam_salon_pages.organization_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.role = ANY (ARRAY['owner'::text, 'manager'::text])))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM glam_memberships m\n  WHERE ((m.organization_id = glam_salon_pages.organization_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.role = ANY (ARRAY['owner'::text, 'manager'::text])))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_service_categories",
+      "policyname": "published_service_categories_public_read",
+      "permissive": "PERMISSIVE",
+      "roles": "{anon,authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_salon_pages p\n  WHERE ((p.organization_id = glam_service_categories.organization_id) AND (p.published = true))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_service_categories",
+      "policyname": "service_categories_managed_by_business_members",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_memberships m\n  WHERE ((m.organization_id = glam_service_categories.organization_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.role = ANY (ARRAY['owner'::text, 'manager'::text])))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM glam_memberships m\n  WHERE ((m.organization_id = glam_service_categories.organization_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.role = ANY (ARRAY['owner'::text, 'manager'::text])))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_service_subcategories",
+      "policyname": "service_subcategories_managed_by_business_members",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_memberships m\n  WHERE ((m.organization_id = glam_service_subcategories.organization_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.role = ANY (ARRAY['owner'::text, 'manager'::text])))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM glam_memberships m\n  WHERE ((m.organization_id = glam_service_subcategories.organization_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.role = ANY (ARRAY['owner'::text, 'manager'::text])))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_service_subcategories",
+      "policyname": "service_subcategories_public_read",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_salon_pages p\n  WHERE ((p.organization_id = glam_service_subcategories.organization_id) AND (p.published = true))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_service_variants",
+      "policyname": "published_service_variants_public_read",
+      "permissive": "PERMISSIVE",
+      "roles": "{anon,authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (glam_services s\n     JOIN glam_salon_pages p ON ((p.organization_id = s.organization_id)))\n  WHERE ((s.id = glam_service_variants.service_id) AND (s.active = true) AND (p.published = true))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_service_variants",
+      "policyname": "service_variants_managed_by_business_members",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (glam_services s\n     JOIN glam_memberships m ON ((m.organization_id = s.organization_id)))\n  WHERE ((s.id = glam_service_variants.service_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.role = ANY (ARRAY['owner'::text, 'manager'::text])))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (glam_services s\n     JOIN glam_memberships m ON ((m.organization_id = s.organization_id)))\n  WHERE ((s.id = glam_service_variants.service_id) AND (m.user_id = ( SELECT auth.uid() AS uid)) AND (m.role = ANY (ARRAY['owner'::text, 'manager'::text])))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_services",
+      "policyname": "published_services_public_read",
+      "permissive": "PERMISSIVE",
+      "roles": "{anon}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_salon_pages p\n  WHERE ((p.organization_id = glam_services.organization_id) AND (p.published = true))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_services",
+      "policyname": "published_services_read",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_salon_pages p\n  WHERE ((p.organization_id = glam_services.organization_id) AND (p.published = true))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "glam_services",
+      "policyname": "service_member",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM glam_memberships m\n  WHERE ((m.organization_id = glam_services.organization_id) AND (m.user_id = ( SELECT auth.uid() AS uid)))))",
+      "with_check": null
+    }
+  ],
+  "functions": [
+    {
+      "nspname": "glam_private",
+      "proname": "add_service",
+      "args": "p_org uuid, p_name text, p_minutes integer, p_price numeric",
+      "returns": "uuid",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "owner": "postgres",
+      "proacl": "{postgres=X/postgres,authenticated=X/postgres}",
+      "anon_exec": false,
+      "authenticated_exec": true,
+      "definition": "CREATE OR REPLACE FUNCTION glam_private.add_service(p_org uuid, p_name text, p_minutes integer, p_price numeric)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare result uuid;\nbegin\n if auth.uid() is null or not exists(select 1 from public.glam_memberships where organization_id=p_org and user_id=auth.uid() and role in ('owner','manager')) then raise exception 'FORBIDDEN'; end if;\n insert into public.glam_services(organization_id,name,minutes,price_sar) values(p_org,trim(p_name),p_minutes,p_price) returning id into result;\n return result;\nend $function$\n"
+    },
+    {
+      "nspname": "glam_private",
+      "proname": "edit_service",
+      "args": "p_id uuid, p_name text, p_minutes integer, p_price numeric, p_active boolean",
+      "returns": "uuid",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "owner": "postgres",
+      "proacl": "{postgres=X/postgres,authenticated=X/postgres}",
+      "anon_exec": false,
+      "authenticated_exec": true,
+      "definition": "CREATE OR REPLACE FUNCTION glam_private.edit_service(p_id uuid, p_name text, p_minutes integer, p_price numeric, p_active boolean)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare s public.glam_services;\nbegin\n select * into s from public.glam_services where id=p_id for update;\n if auth.uid() is null or not found or not exists(select 1 from public.glam_memberships where organization_id=s.organization_id and user_id=auth.uid() and role in ('owner','manager')) then raise exception 'FORBIDDEN'; end if;\n update public.glam_services set name=trim(p_name),minutes=p_minutes,price_sar=p_price,active=p_active,\n revision=revision+case when (name,minutes,price_sar) is distinct from (trim(p_name),p_minutes,p_price) then 1 else 0 end where id=p_id;\n return p_id;\nend $function$\n"
+    },
+    {
+      "nspname": "public",
+      "proname": "glam_add_service",
+      "args": "p_org uuid, p_name text, p_minutes integer, p_price numeric",
+      "returns": "uuid",
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "owner": "postgres",
+      "proacl": "{postgres=X/postgres,authenticated=X/postgres}",
+      "anon_exec": false,
+      "authenticated_exec": true,
+      "definition": "CREATE OR REPLACE FUNCTION public.glam_add_service(p_org uuid, p_name text, p_minutes integer, p_price numeric)\n RETURNS uuid\n LANGUAGE sql\n SET search_path TO ''\nAS $function$select glam_private.add_service(p_org,p_name,p_minutes,p_price)$function$\n"
+    },
+    {
+      "nspname": "public",
+      "proname": "glam_edit_service",
+      "args": "p_id uuid, p_name text, p_minutes integer, p_price numeric, p_active boolean",
+      "returns": "uuid",
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=\"\""
+      ],
+      "owner": "postgres",
+      "proacl": "{postgres=X/postgres,authenticated=X/postgres}",
+      "anon_exec": false,
+      "authenticated_exec": true,
+      "definition": "CREATE OR REPLACE FUNCTION public.glam_edit_service(p_id uuid, p_name text, p_minutes integer, p_price numeric, p_active boolean)\n RETURNS uuid\n LANGUAGE sql\n SET search_path TO ''\nAS $function$select glam_private.edit_service(p_id,p_name,p_minutes,p_price,p_active)$function$\n"
+    }
+  ],
+  "table_acl": [
+    {
+      "relname": "glam_memberships",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "anon",
+      "sel": false,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=Dxtm/postgres,authenticated=r/postgres}"
+    },
+    {
+      "relname": "glam_memberships",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "authenticated",
+      "sel": true,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=Dxtm/postgres,authenticated=r/postgres}"
+    },
+    {
+      "relname": "glam_organizations",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "anon",
+      "sel": false,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=Dxtm/postgres,authenticated=r/postgres}"
+    },
+    {
+      "relname": "glam_organizations",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "authenticated",
+      "sel": true,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=Dxtm/postgres,authenticated=r/postgres}"
+    },
+    {
+      "relname": "glam_salon_pages",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "anon",
+      "sel": true,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=Dxtm/postgres,authenticated=arw/postgres,anon=r/postgres}"
+    },
+    {
+      "relname": "glam_salon_pages",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "authenticated",
+      "sel": true,
+      "ins": true,
+      "upd": true,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=Dxtm/postgres,authenticated=arw/postgres,anon=r/postgres}"
+    },
+    {
+      "relname": "glam_service_categories",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "anon",
+      "sel": false,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=Dxtm/postgres,authenticated=Dxtm/postgres,service_role=Dxtm/postgres}"
+    },
+    {
+      "relname": "glam_service_categories",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "authenticated",
+      "sel": false,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=Dxtm/postgres,authenticated=Dxtm/postgres,service_role=Dxtm/postgres}"
+    },
+    {
+      "relname": "glam_service_subcategories",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "anon",
+      "sel": false,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=Dxtm/postgres,authenticated=Dxtm/postgres,service_role=Dxtm/postgres}"
+    },
+    {
+      "relname": "glam_service_subcategories",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "authenticated",
+      "sel": false,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=Dxtm/postgres,authenticated=Dxtm/postgres,service_role=Dxtm/postgres}"
+    },
+    {
+      "relname": "glam_service_variants",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "anon",
+      "sel": false,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=Dxtm/postgres,authenticated=Dxtm/postgres,service_role=Dxtm/postgres}"
+    },
+    {
+      "relname": "glam_service_variants",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "authenticated",
+      "sel": false,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,anon=Dxtm/postgres,authenticated=Dxtm/postgres,service_role=Dxtm/postgres}"
+    },
+    {
+      "relname": "glam_services",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "anon",
+      "sel": true,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=Dxtm/postgres,authenticated=r/postgres,anon=r/postgres}"
+    },
+    {
+      "relname": "glam_services",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "owner": "postgres",
+      "rolname": "authenticated",
+      "sel": true,
+      "ins": false,
+      "upd": false,
+      "del": false,
+      "relacl": "{postgres=arwdDxtm/postgres,service_role=Dxtm/postgres,authenticated=r/postgres,anon=r/postgres}"
+    }
+  ],
+  "schema_and_triggers": [
+    {
+      "kind": "schema",
+      "name": "public",
+      "details": {
+        "acl": [
+          "pg_database_owner=UC/pg_database_owner",
+          "=U/pg_database_owner",
+          "postgres=U/pg_database_owner",
+          "anon=U/pg_database_owner",
+          "authenticated=U/pg_database_owner",
+          "service_role=U/pg_database_owner"
+        ],
+        "anon_usage": true,
+        "anon_create": false,
+        "authenticated_usage": true,
+        "authenticated_create": false
+      }
+    },
+    {
+      "kind": "schema",
+      "name": "glam_private",
+      "details": {
+        "acl": [
+          "postgres=UC/postgres",
+          "authenticated=U/postgres",
+          "anon=U/postgres",
+          "service_role=U/postgres"
+        ],
+        "anon_usage": true,
+        "anon_create": false,
+        "authenticated_usage": true,
+        "authenticated_create": false
+      }
+    }
+  ],
+  "function_defaults": [
+    {
+      "owner": "supabase_admin",
+      "nspname": "public",
+      "defaclobjtype": "f",
+      "defaclacl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}"
+    },
+    {
+      "owner": "postgres",
+      "nspname": "public",
+      "defaclobjtype": "f",
+      "defaclacl": "{postgres=X/postgres}"
+    }
+  ],
+  "link_integrity": [
+    {
+      "cross_org_service_category": 0,
+      "cross_org_subcategory_parent": 0,
+      "invalid_service_subcategory": 0
+    }
+  ],
+  "migrations": [
+    {
+      "version": "20260909094546",
+      "name": "accounts"
+    },
+    {
+      "version": "20260909094650",
+      "name": "restrict_rls_auto_enable"
+    },
+    {
+      "version": "20260909115040",
+      "name": "booking_reservations"
+    },
+    {
+      "version": "20260909115214",
+      "name": "booking_availability"
+    },
+    {
+      "version": "20260909120059",
+      "name": "booking_reschedule"
+    },
+    {
+      "version": "20260909120852",
+      "name": "booking_schedules"
+    },
+    {
+      "version": "20260909121359",
+      "name": "booking_catalog"
+    },
+    {
+      "version": "20260909145209",
+      "name": "booking_service_management"
+    },
+    {
+      "version": "20260909151501",
+      "name": "booking_attendance"
+    },
+    {
+      "version": "20260909202534",
+      "name": "salon_pages"
+    },
+    {
+      "version": "20260909203401",
+      "name": "salon_media_source"
+    },
+    {
+      "version": "20260909205836",
+      "name": "salon_uploads"
+    },
+    {
+      "version": "20260909210708",
+      "name": "public_salon_slots"
+    },
+    {
+      "version": "20260909211056",
+      "name": "salon_onboarding"
+    },
+    {
+      "version": "20260909212631",
+      "name": "platform_approval"
+    },
+    {
+      "version": "20260909213726",
+      "name": "team_invites"
+    },
+    {
+      "version": "20260909214005",
+      "name": "appointment_visibility"
+    },
+    {
+      "version": "20260909214006",
+      "name": "team_invite_preview"
+    },
+    {
+      "version": "20260916093600",
+      "name": "add_salon_reservations_read_rpc"
+    },
+    {
+      "version": "20260916093925",
+      "name": "harden_salon_reservations_read_rpc"
+    },
+    {
+      "version": "20260916095045",
+      "name": "add_salon_clients_read_rpc"
+    },
+    {
+      "version": "20260916104805",
+      "name": "inventory_mvp_foundation"
+    },
+    {
+      "version": "20260916105259",
+      "name": "inventory_fk_indexes"
+    },
+    {
+      "version": "20260916111926",
+      "name": "finance_operations_foundation"
+    },
+    {
+      "version": "20260916112327",
+      "name": "finance_operations_indexes_and_rls"
+    },
+    {
+      "version": "20260916113658",
+      "name": "reports_analytics_foundation"
+    },
+    {
+      "version": "20260916120120",
+      "name": "payments_foundation"
+    },
+    {
+      "version": "20260916120215",
+      "name": "payments_foundation_hardening"
+    },
+    {
+      "version": "20260916121255",
+      "name": "notifications_foundation"
+    },
+    {
+      "version": "20260916121905",
+      "name": "notifications_payment_hook"
+    },
+    {
+      "version": "20260916123315",
+      "name": "integration_settings_foundation"
+    },
+    {
+      "version": "20260916124026",
+      "name": "integration_settings_access_fix"
+    },
+    {
+      "version": "20260916124106",
+      "name": "integration_settings_updated_by_index"
+    },
+    {
+      "version": "20260917045429",
+      "name": "add_payment_webhook_event_ledger"
+    },
+    {
+      "version": "20260917050627",
+      "name": "wire_booking_inventory_review_notifications"
+    },
+    {
+      "version": "20260917050653",
+      "name": "fix_reservation_notification_org_lookup"
+    },
+    {
+      "version": "20260917050843",
+      "name": "fix_review_organization_lookup"
+    },
+    {
+      "version": "20260917053047",
+      "name": "add_payment_webhook_ingestion_contract"
+    },
+    {
+      "version": "20260917053224",
+      "name": "grant_service_role_webhook_schema_usage"
+    },
+    {
+      "version": "20260917053349",
+      "name": "fix_payment_webhook_variable_scope"
+    },
+    {
+      "version": "20260919140907",
+      "name": "add_business_admin_operational_tables"
+    },
+    {
+      "version": "20260919232403",
+      "name": "allow_public_booking_catalog_reads"
+    },
+    {
+      "version": "20260919232454",
+      "name": "allow_public_published_salon_pages_read"
+    },
+    {
+      "version": "20260919232525",
+      "name": "grant_public_booking_catalog_select"
+    },
+    {
+      "version": "20260920083348",
+      "name": "allow_authenticated_published_salon_pages_read"
+    },
+    {
+      "version": "20260920084041",
+      "name": "seed_lumiere_availability_slots_v2"
+    },
+    {
+      "version": "20260920084951",
+      "name": "grant_authenticated_reservation_access"
+    },
+    {
+      "version": "20260920085232",
+      "name": "complete_lumiere_booking_schedule"
+    },
+    {
+      "version": "20260920090648",
+      "name": "fix_authenticated_reservation_insert_policy"
+    },
+    {
+      "version": "20260920090818",
+      "name": "link_lumiere_specialist_membership"
+    },
+    {
+      "version": "20260920203634",
+      "name": "seed_lumiere_service_categories"
+    },
+    {
+      "version": "20260920205341",
+      "name": "expose_service_categories_and_variants"
+    },
+    {
+      "version": "20260920211955",
+      "name": "link_lumiere_haircut_specialist"
+    },
+    {
+      "version": "20260923214122",
+      "name": "add_service_subcategories_and_delivery_options"
+    },
+    {
+      "version": "20260923214630",
+      "name": "seed_initial_service_catalog_categories"
+    }
+  ]
+}

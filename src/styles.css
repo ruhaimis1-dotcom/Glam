@@ -75,20 +75,20 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.985 0.007 70);
-  --foreground: oklch(0.24 0.05 335);
+  --background: #FAF7F3;
+  --foreground: #30272B;
   --card: oklch(0.998 0.003 80);
   --card-foreground: oklch(0.24 0.05 335);
   --popover: oklch(0.998 0.003 80);
   --popover-foreground: oklch(0.24 0.05 335);
-  --primary: #5a1835;
+  --primary: #541B35;
   --primary-foreground: oklch(0.985 0.007 70);
   --secondary: oklch(0.95 0.02 355);
-  --secondary-foreground: #5a1835;
+  --secondary-foreground: #541B35;
   --muted: oklch(0.955 0.01 60);
-  --muted-foreground: oklch(0.52 0.04 340);
+  --muted-foreground: #70646A;
   --accent: oklch(0.93 0.035 355);
-  --accent-foreground: #5a1835;
+  --accent-foreground: #541B35;
   --destructive: oklch(0.55 0.2 22);
   --destructive-foreground: oklch(0.985 0.007 70);
   --border: oklch(0.91 0.015 40);
@@ -108,13 +108,13 @@
   --sidebar-border: oklch(0.91 0.015 40);
   --sidebar-ring: oklch(0.6 0.12 350);
 
-  --plum: #5a1835;
-  --plum-deep: #3d0f26;
-  --rose: #e8ccd1;
-  --rose-soft: #e8ccd1;
-  --rose-gold: #b98676;
-  --rose-gold-foreground: #3d0f26;
-  --cream: #f7f1ea;
+  --plum: #541B35;
+  --plum-deep: #401329;
+  --rose: #F4E8EA;
+  --rose-soft: #F4E8EA;
+  --rose-gold: #AD705B;
+  --rose-gold-foreground: #401329;
+  --cream: #FAF7F3;
   --success: oklch(0.6 0.12 160);
   --success-foreground: oklch(0.985 0.007 70);
   --warning: oklch(0.78 0.14 75);
@@ -164,8 +164,14 @@
     font-feature-settings: "kern", "liga";
     -webkit-font-smoothing: antialiased;
   }
-  button, a { cursor: pointer; }
-  h1, h2, h3, h4 {
+  button,
+  a {
+    cursor: pointer;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
@@ -173,7 +179,12 @@
 
 /* Brand utilities */
 @utility glam-gradient {
-  background-image: linear-gradient(135deg, var(--plum-deep) 0%, var(--plum) 55%, oklch(0.45 0.13 345) 100%);
+  background-image: linear-gradient(
+    135deg,
+    var(--plum-deep) 0%,
+    var(--plum) 55%,
+    oklch(0.45 0.13 345) 100%
+  );
 }
 @utility rose-gradient {
   background-image: linear-gradient(135deg, var(--rose-soft) 0%, var(--cream) 100%);
@@ -201,7 +212,9 @@
 }
 @utility no-scrollbar {
   scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 @utility pb-safe {
   padding-bottom: calc(env(safe-area-inset-bottom) + 5.5rem);
