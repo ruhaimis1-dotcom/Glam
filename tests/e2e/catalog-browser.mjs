@@ -297,6 +297,44 @@ export async function runBrowserContract({ baseURL, anon, admin, sql, dir }) {
         ).toBe("1");
         await shot("booking-confirmed");
         pass(`${device}: customer booking persists locally`);
+        await page.goto(`${appURL}/profile`);
+        const displayName = `عميلة اختبار ${device}`;
+        await page.getByLabel("اسمك", { exact: true }).fill(displayName);
+        await page.getByRole("button", { name: "حفظ الاسم", exact: true }).click();
+        await expect(page.getByRole("status")).toContainText("تم حفظ اسمك.");
+        await page.reload();
+        await expect(page.getByLabel("اسمك", { exact: true })).toHaveValue(displayName);
+        expect(
+          sql(
+            `select display_name from public.glam_profiles where user_id='${accounts.customer.id}';`,
+          ).trim(),
+        ).toBe(displayName);
+        pass(`${device}: profile name saves to database and persists after reload`);
+        await page.goto(`${appURL}/bookings`);
+        await expect(page.getByText(edited, { exact: false })).toBeVisible();
+        await page.route("**/rest/v1/glam_reservations?**", fault);
+        await page.reload();
+        await expect(page.getByRole("alert")).toContainText("تعذر تحميل حجوزاتك");
+        await expect(page.getByText(edited, { exact: false })).toHaveCount(0);
+        await page.unroute("**/rest/v1/glam_reservations?**", fault);
+        await page.getByRole("button", { name: "إعادة المحاولة", exact: true }).click();
+        await expect(page.getByText(edited, { exact: false })).toBeVisible();
+        pass(`${device}: booking list error clears stale data and retry recovers`);
+        const emptyReservations = (route) =>
+          route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+        await page.route("**/rest/v1/glam_reservations?**", emptyReservations);
+        await page.reload();
+        await expect(page.getByText("ما عندك حجوزات إلى الآن", { exact: true })).toBeVisible();
+        await expect(page.getByText(edited, { exact: false })).toHaveCount(0);
+        await page.unroute("**/rest/v1/glam_reservations?**", emptyReservations);
+        pass(`${device}: empty server booking list does not reuse cached bookings`);
+        await login("owner", false);
+        await page.goto(`${appURL}/bookings`);
+        await expect(page.getByText("ما عندك حجوزات إلى الآن", { exact: true })).toBeVisible();
+        await expect(page.getByText(edited, { exact: false })).toHaveCount(0);
+        await page.goto(`${appURL}/profile`);
+        await expect(page.getByLabel("اسمك", { exact: true })).not.toHaveValue(displayName);
+        pass(`${device}: account switch cannot expose another customer's bookings or profile`);
       } catch (error) {
         await shot("failure");
         writeFileSync(join(dir, `${device}-failure.txt`), await page.locator("body").innerText());
