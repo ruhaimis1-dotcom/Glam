@@ -19,8 +19,16 @@ jobs:
         run: npm ci
       - name: Generate routes and production build
         run: |
+          set +e
           npm run build 2>&1 | tee build.log
-          test ${PIPESTATUS[0]} -eq 0
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ] && grep -q "Crawling result not available" build.log; then
+            echo "TanStack route crawler returned its known transient empty result; retrying build once."
+            npm run build 2>&1 | tee build-retry.log
+            code=${PIPESTATUS[0]}
+            cat build-retry.log >> build.log
+          fi
+          exit "$code"
       - name: Upload build diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
