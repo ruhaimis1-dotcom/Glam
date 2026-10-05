@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { UserRound, ArrowRight } from "lucide-react";
+import { UserRound, ArrowRight, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CustomerShell } from "@/components/glam/shells";
 import { EmptyState } from "@/components/glam/ui";
@@ -116,7 +116,22 @@ function ProfilePage() {
         </div>
       )}
       {status === "ready" && (
-        <form onSubmit={submit} className="glam-card max-w-xl space-y-5 p-6">
+        <div className="max-w-xl space-y-4">
+        <section className="glam-card p-6">
+          <div className="flex items-start gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full glam-gradient text-white">
+              <Sparkles className="size-5" />
+            </span>
+            <div className="space-y-2">
+              <h2 className="font-semibold">جواز جمالك</h2>
+              <p className="text-sm text-muted-foreground">
+                ملف خاص بك لتفضيلات الشعر والبشرة والأظافر والحساسيات. لن تتم مشاركته مع أي صالون دون موافقتك الصريحة.
+              </p>
+              <p className="text-xs text-muted-foreground">قريبًا في نسخة الـMVP — المشاركة اختيارية ويمكن سحبها في أي وقت.</p>
+            </div>
+          </div>
+        </section>
+        <form onSubmit={submit} className="glam-card space-y-5 p-6">
           <label className="block text-sm font-medium">
             اسمك
             <input
@@ -141,6 +156,7 @@ function ProfilePage() {
             </p>
           )}
         </form>
+        </div>
       )}
     </CustomerShell>
   );
