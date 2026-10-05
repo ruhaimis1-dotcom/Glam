@@ -1,24 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { BusinessShell, PageHeader } from "@/components/glam/shells";
+import { useBusinessOrganization } from "@/lib/business-context";
+import { supabase } from "@/lib/supabase";
+import { createImportCommitRepository } from "@/repositories/import-commit";
 import { validateCustomerRows, validateServiceRows, type ImportIssue } from "@/domain/import-pipeline";
 import { parseCsv } from "@/lib/csv-import";
 import { parseExcel } from "@/lib/excel-import";
 
 export const Route = createFileRoute("/business/import")({ component: ImportPage });
 
+const commitRepository = createImportCommitRepository(supabase);
+
 function ImportPage() {
+  const organization = useBusinessOrganization();
   const [kind, setKind] = useState<"services" | "customers">("services");
   const [rows, setRows] = useState<Record<string, string>[]>([]);
   const [issues, setIssues] = useState<ImportIssue[]>([]);
   const [fileName, setFileName] = useState("");
   const [message, setMessage] = useState("");
+  const [committing, setCommitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
   async function selectFile(file?: File) {
     setRows([]);
     setIssues([]);
     setMessage("");
     setFileName(file?.name ?? "");
+    setConfirmed(false);
     if (!file) return;
     try {
       const lower = file.name.toLowerCase();
@@ -42,6 +51,34 @@ function ImportPage() {
     }
   }
 
+  async function commitImport() {
+    if (!rows.length || issues.length || !confirmed || committing) return;
+    const validation =
+      kind === "services" ? validateServiceRows(rows) : validateCustomerRows(rows);
+    if (validation.issues.length) {
+      setIssues(validation.issues);
+      setConfirmed(false);
+      return;
+    }
+    setCommitting(true);
+    setMessage("");
+    try {
+      const result = await commitRepository.commit(organization.id, kind, validation.valid);
+      setMessage(
+        `تم تأكيد الدفعة ${result.batchId}: ${result.accepted} ناجح، ${result.rejected} مرفوض.`,
+      );
+      setConfirmed(false);
+    } catch (error) {
+      setMessage(
+        error instanceof Error && error.message === "IMPORT_COMMIT_NOT_ENABLED"
+          ? "الاستيراد الفعلي غير مفعّل قبل بوابة الـMVP. المعاينة والتحقق فقط متاحان الآن."
+          : "لم يتم تأكيد الاستيراد. لم نعتبر أي صف ناجحًا.",
+      );
+    } finally {
+      setCommitting(false);
+    }
+  }
+
   return (
     <BusinessShell>
       <PageHeader
@@ -59,6 +96,7 @@ function ImportPage() {
                 setRows([]);
                 setIssues([]);
                 setFileName("");
+                setConfirmed(false);
               }}
               className="mt-2 w-full rounded-xl border bg-background px-4 py-3"
             >
@@ -99,7 +137,25 @@ function ImportPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm">الملف اجتاز التحقق الأولي. لم يتم استيراده بعد.</p>
+              <div className="space-y-4">
+                <p className="text-sm">الملف اجتاز التحقق الأولي. لم يتم استيراده بعد.</p>
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={confirmed}
+                    onChange={(event) => setConfirmed(event.target.checked)}
+                  />
+                  <span>راجعت الملف وأؤكد استيراد هذه الصفوف إلى المؤسسة الحالية فقط.</span>
+                </label>
+                <button
+                  type="button"
+                  disabled={!confirmed || committing}
+                  onClick={() => void commitImport()}
+                  className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                >
+                  {committing ? "جارٍ التأكيد…" : "تأكيد الاستيراد"}
+                </button>
+              </div>
             )}
           </section>
         )}
