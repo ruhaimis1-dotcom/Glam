@@ -170,14 +170,12 @@ function BeautyPassportPage() {
             </PassportSection>
             <PassportSection title="الحساسيات والمنتجات غير المناسبة">
               <textarea
-                value={passport.sensitivities.join("
-")}
+                value={passport.sensitivities.join("\n")}
                 onChange={(event) =>
                   setPassport({
                     ...passport,
                     sensitivities: event.target.value
-                      .split("
-")
+                      .split("\n")
                       .map((x) => x.trim())
                       .filter(Boolean),
                   })
