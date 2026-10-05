@@ -45,11 +45,12 @@ export function validateServiceRows(rows: Record<string, unknown>[]) {
     if (name && seen.has(key)) issues.push({ row: number, field: "name", code: "duplicate", message: "الخدمة مكررة داخل الملف." });
     seen.add(key);
     if (!issues.some((issue) => issue.row === number)) {
+      const category = String(row["category"] ?? "").trim();
       valid.push({
         name,
         priceSar: price,
         minutes,
-        category: String(row["category"] ?? "").trim() || undefined,
+        ...(category ? { category } : {}),
         active: String(row["active"] ?? "true").toLowerCase() !== "false",
       });
     }
@@ -78,7 +79,11 @@ export function validateCustomerRows(rows: Record<string, unknown>[]) {
     if (!name) issues.push({ row: number, field: "name", code: "required", message: "اسم العميلة مطلوب." });
     if (!email && !phone) issues.push({ row: number, field: "email/phone", code: "required", message: "يلزم بريد أو رقم جوال." });
     if (!issues.some((issue) => issue.row === number)) {
-      valid.push({ name, email: email || undefined, phone: phone || undefined });
+      valid.push({
+        name,
+        ...(email ? { email } : {}),
+        ...(phone ? { phone } : {}),
+      });
     }
   });
   return { valid, issues };
