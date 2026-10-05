@@ -106,6 +106,10 @@ function BeautyPassportPage() {
           </p>
         </section>
 
+        <Link to="/beauty-passport/consents" className="inline-block text-sm font-medium text-primary">
+          إدارة المشاركة والموافقات
+        </Link>
+
         {status === "loading" && <p role="status">جارٍ تحميل جوازك…</p>}
         {status === "anonymous" && <p>سجّلي الدخول أولًا لإنشاء جواز جمالك.</p>}
         {status === "disabled" && (
