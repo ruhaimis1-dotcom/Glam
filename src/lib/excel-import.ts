@@ -12,7 +12,10 @@ export async function parseExcel(
   const rows = await adapter.parse(buffer);
   return rows.map((row) =>
     Object.fromEntries(
-      Object.entries(row).map(([key, value]) => [\n        key.trim().toLowerCase(),\n        String(value ?? "").trim(),\n      ]),
+      Object.entries(row).map(([key, value]) => [
+        key.trim().toLowerCase(),
+        String(value ?? "").trim(),
+      ]),
     ),
   );
 }
