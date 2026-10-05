@@ -10,7 +10,10 @@ export type StaffMember = {
   active: boolean;
 };
 
-export async function listStaff(client: SupabaseClient, organizationId: string): Promise<StaffMember[]> {
+export async function listStaff(
+  client: SupabaseClient,
+  organizationId: string,
+): Promise<StaffMember[]> {
   await requireBusinessOrganization(client, organizationId);
   const { data, error } = await client
     .from("glam_staff")
