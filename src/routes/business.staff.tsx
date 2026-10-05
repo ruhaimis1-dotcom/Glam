@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { UserRoundCheck, UserRoundX, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BusinessShell, PageHeader } from "@/components/glam/shells";
 import { useBusinessOrganization } from "@/lib/business-context";
 import { supabase } from "@/lib/supabase";
@@ -18,7 +18,7 @@ function StaffPage() {
   const [status, setStatus] = useState<"loading" | "ready" | "saving" | "error">("loading");
   const [message, setMessage] = useState("");
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     setStatus("loading");
     setMessage("");
     try {
@@ -28,11 +28,11 @@ function StaffPage() {
       setStatus("error");
       setMessage("تعذر تحميل فريق العمل. أعيدي المحاولة.");
     }
-  };
+  }, [organization.id]);
 
   useEffect(() => {
     void refresh();
-  }, [organization.id]);
+  }, [refresh]);
 
   const save = async () => {
     if (name.trim().length < 2 || specialty.trim().length < 2) {
@@ -43,7 +43,9 @@ function StaffPage() {
     setMessage("");
     try {
       const member = await createStaff(supabase, organization.id, { name, specialty, phone });
-      setStaff((current) => [...current, member].sort((a, b) => a.name.localeCompare(b.name, "ar")));
+      setStaff((current) =>
+        [...current, member].sort((a, b) => a.name.localeCompare(b.name, "ar")),
+      );
       setName("");
       setSpecialty("");
       setPhone("");
@@ -71,24 +73,56 @@ function StaffPage() {
         title="الموظفات"
         desc="إدارة فريق الصالون والتخصصات وحالة التوفر"
         action={
-          <button onClick={() => setAdding(true)} className="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground">
+          <button
+            onClick={() => setAdding(true)}
+            className="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground"
+          >
             إضافة موظفة
           </button>
         }
       />
 
-      {message && <p role="alert" className="mb-4 rounded-xl border bg-card p-3 text-sm">{message}</p>}
+      {message && (
+        <p role="alert" className="mb-4 rounded-xl border bg-card p-3 text-sm">
+          {message}
+        </p>
+      )}
 
       {adding && (
         <section className="glam-card mb-4 space-y-3 p-4">
-          <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3" placeholder="اسم الموظفة" />
-          <input value={specialty} onChange={(e) => setSpecialty(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3" placeholder="التخصص" />
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full rounded-xl border bg-background px-4 py-3" placeholder="رقم الجوال — اختياري" inputMode="tel" />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-xl border bg-background px-4 py-3"
+            placeholder="اسم الموظفة"
+          />
+          <input
+            value={specialty}
+            onChange={(e) => setSpecialty(e.target.value)}
+            className="w-full rounded-xl border bg-background px-4 py-3"
+            placeholder="التخصص"
+          />
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full rounded-xl border bg-background px-4 py-3"
+            placeholder="رقم الجوال — اختياري"
+            inputMode="tel"
+          />
           <div className="flex gap-2">
-            <button disabled={status === "saving"} onClick={() => void save()} className="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50">
+            <button
+              disabled={status === "saving"}
+              onClick={() => void save()}
+              className="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
+            >
               {status === "saving" ? "جارٍ الحفظ…" : "حفظ"}
             </button>
-            <button onClick={() => setAdding(false)} className="rounded-full border px-4 py-2 text-sm">إلغاء</button>
+            <button
+              onClick={() => setAdding(false)}
+              className="rounded-full border px-4 py-2 text-sm"
+            >
+              إلغاء
+            </button>
           </div>
         </section>
       )}
@@ -105,7 +139,11 @@ function StaffPage() {
               <div className="min-w-0 flex-1">
                 <h2 className="font-semibold">{member.name}</h2>
                 <p className="text-sm text-muted-foreground">{member.specialty}</p>
-                {member.phone && <p className="text-xs text-muted-foreground" dir="ltr">{member.phone}</p>}
+                {member.phone && (
+                  <p className="text-xs text-muted-foreground" dir="ltr">
+                    {member.phone}
+                  </p>
+                )}
               </div>
               <button
                 onClick={() => void toggle(member)}
@@ -113,12 +151,18 @@ function StaffPage() {
                 aria-label={member.active ? `تعطيل ${member.name}` : `تفعيل ${member.name}`}
                 title={member.active ? "تعطيل" : "تفعيل"}
               >
-                {member.active ? <UserRoundCheck className="size-4" /> : <UserRoundX className="size-4" />}
+                {member.active ? (
+                  <UserRoundCheck className="size-4" />
+                ) : (
+                  <UserRoundX className="size-4" />
+                )}
               </button>
             </article>
           ))}
           {!staff.length && status !== "error" && (
-            <div className="glam-card p-6 text-sm text-muted-foreground">لا توجد موظفات مضافات بعد.</div>
+            <div className="glam-card p-6 text-sm text-muted-foreground">
+              لا توجد موظفات مضافات بعد.
+            </div>
           )}
         </div>
       )}
