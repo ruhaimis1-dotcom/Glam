@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { requireBusinessOrganization } from "@/lib/business-access";
-import type { CustomerImportRow, ImportKind, ServiceImportRow } from "@/domain/import-pipeline";
+import { requireBusinessOrganization } from "../lib/business-access.ts";
+import type { CustomerImportRow, ImportKind, ServiceImportRow } from "../domain/import-pipeline.ts";
 
 export type ImportCommitResult = {
   batchId: string;
