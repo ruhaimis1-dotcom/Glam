@@ -125,15 +125,15 @@ function BeautyPassportPage() {
         {status === "ready" && passport && (
           <>
             <PassportSection title="الشعر">
-              <TextField label="نوع أو طبيعة الشعر" value={String(passport.hair.type ?? "")} onChange={(value) => setField("hair", "type", value)} />
-              <TextField label="ملاحظات اللون أو الصبغة" value={String(passport.hair.colorNotes ?? "")} onChange={(value) => setField("hair", "colorNotes", value)} />
+              <TextField label="نوع أو طبيعة الشعر" value={String(passport.hair["type"] ?? "")} onChange={(value) => setField("hair", "type", value)} />
+              <TextField label="ملاحظات اللون أو الصبغة" value={String(passport.hair["colorNotes"] ?? "")} onChange={(value) => setField("hair", "colorNotes", value)} />
             </PassportSection>
             <PassportSection title="البشرة">
-              <TextField label="نوع البشرة" value={String(passport.skin.type ?? "")} onChange={(value) => setField("skin", "type", value)} />
-              <TextField label="ملاحظات أو حساسية" value={String(passport.skin.notes ?? "")} onChange={(value) => setField("skin", "notes", value)} />
+              <TextField label="نوع البشرة" value={String(passport.skin["type"] ?? "")} onChange={(value) => setField("skin", "type", value)} />
+              <TextField label="ملاحظات أو حساسية" value={String(passport.skin["notes"] ?? "")} onChange={(value) => setField("skin", "notes", value)} />
             </PassportSection>
             <PassportSection title="الأظافر">
-              <TextField label="تفضيلاتك" value={String(passport.nails.preferences ?? "")} onChange={(value) => setField("nails", "preferences", value)} />
+              <TextField label="تفضيلاتك" value={String(passport.nails["preferences"] ?? "")} onChange={(value) => setField("nails", "preferences", value)} />
             </PassportSection>
             <PassportSection title="الحساسيات والمنتجات غير المناسبة">
               <textarea
@@ -146,8 +146,8 @@ function BeautyPassportPage() {
               />
             </PassportSection>
             <PassportSection title="تفضيلات الزيارة">
-              <TextField label="الخصوصية أو الغرفة الخاصة" value={String(passport.preferences.privacy ?? "")} onChange={(value) => setField("preferences", "privacy", value)} />
-              <TextField label="المدة المفضلة" value={String(passport.preferences.duration ?? "")} onChange={(value) => setField("preferences", "duration", value)} />
+              <TextField label="الخصوصية أو الغرفة الخاصة" value={String(passport.preferences["privacy"] ?? "")} onChange={(value) => setField("preferences", "privacy", value)} />
+              <TextField label="المدة المفضلة" value={String(passport.preferences["duration"] ?? "")} onChange={(value) => setField("preferences", "duration", value)} />
             </PassportSection>
             <button disabled={saving} onClick={() => void save()} className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50">
               {saving ? "جارٍ الحفظ…" : "حفظ جواز الجمال"}
