@@ -49,7 +49,8 @@ export function createPassportConsentRepository(client: SupabaseClient) {
         .order("granted_at", { ascending: false });
       if (schemaUnavailable(error)) throw new Error("CONSENT_NOT_ENABLED");
       if (error) throw error;
-      const rows = (data ?? []) as PassportConsentRow[];\n      return rows.map((row) => ({
+      const rows = (data ?? []) as PassportConsentRow[];
+      return rows.map((row) => ({
         id: row.id,
         organizationId: row.organization_id,
         organizationName: row.glam_organizations?.[0]?.name ?? "صالون",
