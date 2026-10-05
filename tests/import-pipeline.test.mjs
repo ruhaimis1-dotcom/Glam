@@ -4,7 +4,7 @@ import { validateCustomerRows, validateServiceRows } from "../src/domain/import-
 
 test("valid service rows are normalized without trusting organization ids", () => {
   const result = validateServiceRows([
-    { name: "قص شعر", price_sar: "120", minutes: "45", category: "شعر", organization_id: "evil-org" },
+    {\n      name: "قص شعر",\n      price_sar: "120",\n      minutes: "45",\n      category: "شعر",\n      organization_id: "evil-org",\n    },
   ]);
   assert.equal(result.issues.length, 0);
   assert.deepEqual(result.valid[0], {
