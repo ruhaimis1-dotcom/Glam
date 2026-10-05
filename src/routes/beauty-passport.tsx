@@ -63,7 +63,11 @@ function BeautyPassportPage() {
     };
   }, [empty]);
 
-  const setField = (\n    section: "hair" | "skin" | "nails" | "preferences",\n    key: string,\n    value: string,\n  ) =>
+  const setField = (
+    section: "hair" | "skin" | "nails" | "preferences",
+    key: string,
+    value: string,
+  ) =>
     setPassport((current) =>
       current ? { ...current, [section]: { ...current[section], [key]: value } } : current,
     );
@@ -166,12 +170,14 @@ function BeautyPassportPage() {
             </PassportSection>
             <PassportSection title="الحساسيات والمنتجات غير المناسبة">
               <textarea
-                value={passport.sensitivities.join("\n")}
+                value={passport.sensitivities.join("
+")}
                 onChange={(event) =>
                   setPassport({
                     ...passport,
                     sensitivities: event.target.value
-                      .split("\n")
+                      .split("
+")
                       .map((x) => x.trim())
                       .filter(Boolean),
                   })
