@@ -82,5 +82,8 @@ test("consent revoke requires both consent id and current customer id", async ()
 test("photos are a separate explicit consent scope", async () => {
   const source = await import("../src/repositories/passport-consent.ts");
   assert.ok(source.PASSPORT_SCOPES.includes("photos"));
-  assert.notEqual(source.PASSPORT_SCOPES.indexOf("photos"), source.PASSPORT_SCOPES.indexOf("profile"));
+  assert.notEqual(
+    source.PASSPORT_SCOPES.indexOf("photos"),
+    source.PASSPORT_SCOPES.indexOf("profile"),
+  );
 });
