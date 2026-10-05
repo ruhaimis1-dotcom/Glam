@@ -63,7 +63,7 @@ function BeautyPassportPage() {
     };
   }, [empty]);
 
-  const setField = (section: "hair" | "skin" | "nails" | "preferences", key: string, value: string) =>
+  const setField = (\n    section: "hair" | "skin" | "nails" | "preferences",\n    key: string,\n    value: string,\n  ) =>
     setPassport((current) =>
       current ? { ...current, [section]: { ...current[section], [key]: value } } : current,
     );
