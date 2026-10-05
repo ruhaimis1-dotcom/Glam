@@ -89,14 +89,17 @@ function PassportConsentsPage() {
         <section className="glam-card flex gap-3 p-5">
           <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" />
           <p className="text-sm text-muted-foreground">
-            الحجز وحده لا يمنح الصالون صلاحية جوازك. صور قبل وبعد تحتاج موافقة مستقلة ضمن نطاق المشاركة.
+            الحجز وحده لا يمنح الصالون صلاحية جوازك. صور قبل وبعد تحتاج موافقة مستقلة
+            ضمن نطاق المشاركة.
           </p>
         </section>
 
         {status === "loading" && <p role="status">جارٍ تحميل الموافقات…</p>}
         {status === "anonymous" && <p>سجّلي الدخول لإدارة مشاركة جوازك.</p>}
         {status === "disabled" && (
-          <p className="glam-card p-6">إدارة الموافقات قيد التجهيز قبل بوابة الـMVP.</p>
+          <p className="glam-card p-6">
+            إدارة الموافقات قيد التجهيز قبل بوابة الـMVP.
+          </p>
         )}
         {status === "error" && <p role="alert">تعذر تحميل الموافقات.</p>}
 
@@ -135,7 +138,11 @@ function PassportConsentsPage() {
           </div>
         )}
 
-        {notice && <p role="status" className="text-sm">{notice}</p>}
+        {notice && (
+          <p role="status" className="text-sm">
+            {notice}
+          </p>
+        )}
       </div>
     </CustomerShell>
   );
