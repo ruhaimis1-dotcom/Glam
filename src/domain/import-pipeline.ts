@@ -39,10 +39,19 @@ export function validateServiceRows(rows: Record<string, unknown>[]) {
     const price = Number(row["price_sar"]);
     const minutes = Number(row["minutes"]);
     const key = name.toLocaleLowerCase("ar");
-    if (!name)\n      issues.push({ row: number, field: "name", code: "required", message: "اسم الخدمة مطلوب." });
-    if (!Number.isFinite(price) || price < 0)\n      issues.push({ row: number, field: "price_sar", code: "invalid", message: "السعر غير صالح." });
-    if (!Number.isInteger(minutes) || minutes <= 0)\n      issues.push({ row: number, field: "minutes", code: "invalid", message: "المدة غير صالحة." });
-    if (name && seen.has(key))\n      issues.push({\n        row: number,\n        field: "name",\n        code: "duplicate",\n        message: "الخدمة مكررة داخل الملف.",\n      });
+    if (!name)
+      issues.push({ row: number, field: "name", code: "required", message: "اسم الخدمة مطلوب." });
+    if (!Number.isFinite(price) || price < 0)
+      issues.push({ row: number, field: "price_sar", code: "invalid", message: "السعر غير صالح." });
+    if (!Number.isInteger(minutes) || minutes <= 0)
+      issues.push({ row: number, field: "minutes", code: "invalid", message: "المدة غير صالحة." });
+    if (name && seen.has(key))
+      issues.push({
+        row: number,
+        field: "name",
+        code: "duplicate",
+        message: "الخدمة مكررة داخل الملف.",
+      });
     seen.add(key);
     if (!issues.some((issue) => issue.row === number)) {
       const category = String(row["category"] ?? "").trim();
@@ -76,8 +85,15 @@ export function validateCustomerRows(rows: Record<string, unknown>[]) {
     const name = String(row["name"] ?? "").trim();
     const email = String(row["email"] ?? "").trim();
     const phone = String(row["phone"] ?? "").trim();
-    if (!name)\n      issues.push({ row: number, field: "name", code: "required", message: "اسم العميلة مطلوب." });
-    if (!email && !phone)\n      issues.push({\n        row: number,\n        field: "email/phone",\n        code: "required",\n        message: "يلزم بريد أو رقم جوال.",\n      });
+    if (!name)
+      issues.push({ row: number, field: "name", code: "required", message: "اسم العميلة مطلوب." });
+    if (!email && !phone)
+      issues.push({
+        row: number,
+        field: "email/phone",
+        code: "required",
+        message: "يلزم بريد أو رقم جوال.",
+      });
     if (!issues.some((issue) => issue.row === number)) {
       valid.push({
         name,
