@@ -4,7 +4,11 @@ import { BusinessShell, PageHeader } from "@/components/glam/shells";
 import { useBusinessOrganization } from "@/lib/business-context";
 import { supabase } from "@/lib/supabase";
 import { createImportCommitRepository } from "@/repositories/import-commit";
-import {\n  validateCustomerRows,\n  validateServiceRows,\n  type ImportIssue,\n} from "@/domain/import-pipeline";
+import {
+  validateCustomerRows,
+  validateServiceRows,
+  type ImportIssue,
+} from "@/domain/import-pipeline";
 import { parseCsv } from "@/lib/csv-import";
 import { parseExcel } from "@/lib/excel-import";
 
@@ -118,7 +122,11 @@ function ImportPage() {
           </p>
         </section>
 
-        {message && (\n          <p role="alert" className="glam-card p-4 text-sm">\n            {message}\n          </p>\n        )}
+        {message && (
+          <p role="alert" className="glam-card p-4 text-sm">
+            {message}
+          </p>
+        )}
 
         {!!rows.length && (
           <section className="glam-card space-y-4 p-5">
@@ -131,7 +139,10 @@ function ImportPage() {
             {issues.length ? (
               <div className="space-y-2">
                 {issues.map((issue, index) => (
-                  <p\n                    key={`${issue.row}-${issue.field}-${index}`}\n                    className="rounded-xl border p-3 text-sm"\n                  >
+                  <p
+                    key={`${issue.row}-${issue.field}-${index}`}
+                    className="rounded-xl border p-3 text-sm"
+                  >
                     الصف {issue.row} · {issue.field}: {issue.message}
                   </p>
                 ))}
