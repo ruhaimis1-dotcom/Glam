@@ -127,7 +127,10 @@ function ProfilePage() {
               <p className="text-sm text-muted-foreground">
                 ملف خاص بك لتفضيلات الشعر والبشرة والأظافر والحساسيات. لن تتم مشاركته مع أي صالون دون موافقتك الصريحة.
               </p>
-              <p className="text-xs text-muted-foreground">قريبًا في نسخة الـMVP — المشاركة اختيارية ويمكن سحبها في أي وقت.</p>
+              <p className="text-xs text-muted-foreground">المشاركة اختيارية ويمكن سحبها في أي وقت.</p>
+              <Link to="/beauty-passport" className="inline-block text-sm font-medium text-primary">
+                فتح جواز الجمال
+              </Link>
             </div>
           </div>
         </section>
