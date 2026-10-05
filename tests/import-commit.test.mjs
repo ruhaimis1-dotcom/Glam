@@ -10,11 +10,10 @@ function clientFor({ memberships = [], rpcResult = { data: null, error: null } }
       const chain = {
         select: () => chain,
         eq: () => chain,
-        in: () => Promise.resolve(
+        in: () =>
           table === "glam_memberships"
-            ? { data: memberships, error: null }
-            : { data: [{ id: "org-1", name: "صالون" }], error: null },
-        ),
+            ? Promise.resolve({ data: memberships, error: null })
+            : chain,
         order: () => Promise.resolve({ data: [{ id: "org-1", name: "صالون" }], error: null }),
       };
       return chain;
