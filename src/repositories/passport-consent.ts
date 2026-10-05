@@ -9,6 +9,15 @@ export const PASSPORT_SCOPES = [
 ] as const;
 export type PassportScope = (typeof PASSPORT_SCOPES)[number];
 
+type PassportConsentRow = {
+  id: string;
+  organization_id: string;
+  scopes: string[] | null;
+  granted_at: string;
+  expires_at: string | null;
+  glam_organizations: { name: string } | null;
+};
+
 export type PassportConsent = {
   id: string;
   organizationId: string;
@@ -40,7 +49,7 @@ export function createPassportConsentRepository(client: SupabaseClient) {
         .order("granted_at", { ascending: false });
       if (schemaUnavailable(error)) throw new Error("CONSENT_NOT_ENABLED");
       if (error) throw error;
-      return (data ?? []).map((row: any) => ({
+      return (data ?? []).map((row: PassportConsentRow) => ({
         id: row.id,
         organizationId: row.organization_id,
         organizationName: row.glam_organizations?.name ?? "صالون",
