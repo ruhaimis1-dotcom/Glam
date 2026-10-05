@@ -15,7 +15,7 @@ type PassportConsentRow = {
   scopes: string[] | null;
   granted_at: string;
   expires_at: string | null;
-  glam_organizations: { name: string } | null;
+  glam_organizations: { name: string }[] | null;
 };
 
 export type PassportConsent = {
@@ -49,10 +49,10 @@ export function createPassportConsentRepository(client: SupabaseClient) {
         .order("granted_at", { ascending: false });
       if (schemaUnavailable(error)) throw new Error("CONSENT_NOT_ENABLED");
       if (error) throw error;
-      return (data ?? []).map((row: PassportConsentRow) => ({
+      const rows = (data ?? []) as PassportConsentRow[];\n      return rows.map((row) => ({
         id: row.id,
         organizationId: row.organization_id,
-        organizationName: row.glam_organizations?.name ?? "صالون",
+        organizationName: row.glam_organizations?.[0]?.name ?? "صالون",
         scopes: (row.scopes ?? []).filter((scope: string) =>
           PASSPORT_SCOPES.includes(scope as PassportScope),
         ),
