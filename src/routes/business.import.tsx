@@ -3,6 +3,7 @@ import { useState } from "react";
 import { BusinessShell, PageHeader } from "@/components/glam/shells";
 import { validateCustomerRows, validateServiceRows, type ImportIssue } from "@/domain/import-pipeline";
 import { parseCsv } from "@/lib/csv-import";
+import { parseExcel } from "@/lib/excel-import";
 
 export const Route = createFileRoute("/business/import")({ component: ImportPage });
 
@@ -19,18 +20,25 @@ function ImportPage() {
     setMessage("");
     setFileName(file?.name ?? "");
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".csv")) {
-      setMessage("هذه الجولة تدعم CSV للمعاينة. دعم Excel سيستخدم نفس التحقق في الخطوة التالية.");
-      return;
-    }
     try {
-      const parsed = parseCsv(await file.text());
+      const lower = file.name.toLowerCase();
+      const parsedRows = lower.endsWith(".csv")
+        ? parseCsv(await file.text()).rows
+        : lower.endsWith(".xlsx")
+          ? await parseExcel(await file.arrayBuffer())
+          : (() => {
+              throw new Error("UNSUPPORTED_FILE");
+            })();
       const validation =
-        kind === "services" ? validateServiceRows(parsed.rows) : validateCustomerRows(parsed.rows);
-      setRows(parsed.rows);
+        kind === "services" ? validateServiceRows(parsedRows) : validateCustomerRows(parsedRows);
+      setRows(parsedRows);
       setIssues(validation.issues);
     } catch {
-      setMessage("تعذر قراءة الملف. تحققي من تنسيق CSV والعناوين.");
+      setMessage(
+        file.name.toLowerCase().endsWith(".xlsx")
+          ? "Excel مجهز في الواجهة لكنه غير مفعّل حتى اعتماد محرك القراءة ضمن بوابة الـMVP."
+          : "تعذر قراءة الملف. تحققي من تنسيق CSV والعناوين.",
+      );
     }
   }
 
@@ -62,7 +70,7 @@ function ImportPage() {
             ملف CSV
             <input
               type="file"
-              accept=".csv,text/csv"
+              accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               onChange={(event) => void selectFile(event.target.files?.[0])}
               className="mt-2 block w-full text-sm"
             />
