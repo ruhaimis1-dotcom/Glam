@@ -16,7 +16,7 @@ jobs:
           node-version: 22
           cache: npm
       - name: Generate patched dependency lock for review
-        run: npm install --package-lock-only --ignore-scripts --no-save source-map-js@1.2.2
+        run: |\n          npm pkg set overrides.source-map-js=1.2.2\n          npm install --package-lock-only --ignore-scripts
       - name: Upload patched lock
         uses: actions/upload-artifact@v4
         with:
