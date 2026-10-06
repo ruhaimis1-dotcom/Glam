@@ -37,6 +37,9 @@ as $$
   order by m.role, display_name
 $$;
 
+revoke all on function glam_private.business_team_directory(uuid) from public, anon;
+grant execute on function glam_private.business_team_directory(uuid) to authenticated;
+
 create or replace function public.glam_business_team_directory(p_org uuid)
 returns table(
   organization_id uuid,
