@@ -57,6 +57,19 @@ export function createClient360Repository(client: SupabaseClient) {
       return (data as ContactRow[]).map(normalizeContact);
     },
 
+    async get(organizationId: string, contactId: string): Promise<ClientContact> {
+      await requireBusinessOrganization(client, organizationId);
+      const { data, error } = await client
+        .from("glam_client_contacts")
+        .select("id,organization_id,linked_customer_id,display_name,phone,email,source")
+        .eq("organization_id", organizationId)
+        .eq("id", contactId)
+        .single();
+      if (schemaUnavailable(error)) throw new Error("CLIENT_360_NOT_ENABLED");
+      if (error || !data) throw error ?? new Error("CONTACT_NOT_FOUND");
+      return normalizeContact(data as ContactRow);
+    },
+
     async findDuplicateSignals(
       organizationId: string,
       input: ClientContactInput,
