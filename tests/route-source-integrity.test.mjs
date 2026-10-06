@@ -21,7 +21,10 @@ test("P2/P3 source files contain no literal backslash-n formatting corruption", 
 });
 
 test("Beauty Passport keeps intended newline delimiters escaped inside strings", async () => {
-  const source = await readFile(new URL("../src/routes/beauty-passport.tsx", import.meta.url), "utf8");
+  const source = await readFile(
+    new URL("../src/routes/beauty-passport.tsx", import.meta.url),
+    "utf8",
+  );
   assert.match(source, /sensitivities\.join\("\\n"\)/);
   assert.match(source, /\.split\("\\n"\)/);
 });
