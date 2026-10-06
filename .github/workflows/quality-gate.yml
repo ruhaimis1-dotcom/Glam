@@ -5,39 +5,48 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-
 jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: agent-os/mvp-gate-2026-10-06
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - name: Install
         run: npm ci
-      - name: Format current G3 G4 delta
-        run: |
-          npx prettier --write             src/repositories/staff.ts             src/routes/business.staff.tsx             tests/beauty-passport.test.mjs             tests/staff.test.mjs
-          if ! git diff --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add src/repositories/staff.ts src/routes/business.staff.tsx tests/beauty-passport.test.mjs tests/staff.test.mjs
-            git commit -m "style: format G3 G4 candidate delta"
-            git push origin HEAD:agent-os/mvp-gate-2026-10-06
-          fi
       - name: Production dependency security audit
         run: npm audit --omit=dev --audit-level=high
       - name: Generate routes and production build
-        run: npm run build
+        run: |
+          set +e
+          npm run build 2>&1 | tee build.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ] && grep -q "Crawling result not available" build.log; then
+            echo "TanStack route crawler returned its known transient empty result; retrying build once."
+            npm run build 2>&1 | tee build-retry.log
+            code=${PIPESTATUS[0]}
+            cat build-retry.log >> build.log
+          fi
+          exit "$code"
+      - name: Upload build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics
+          path: build.log
       - name: Typecheck generated route tree
-        run: npx tsc --noEmit
+        run: |
+          npx tsc --noEmit 2>&1 | tee typecheck.log
+          test ${PIPESTATUS[0]} -eq 0
+      - name: Upload typecheck diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-diagnostics
+          path: typecheck.log
       - name: Regression tests
         run: npm test
       - name: Lint
