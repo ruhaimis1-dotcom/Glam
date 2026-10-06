@@ -27,7 +27,11 @@ export type PassportConsent = {
   expiresAt: string | null;
 };
 
-function isPassportScope(scope: string): scope is PassportScope {\n  return PASSPORT_SCOPES.some((allowed) => allowed === scope);\n}\n\nfunction schemaUnavailable(error: { code?: string } | null) {
+function isPassportScope(scope: string): scope is PassportScope {
+  return PASSPORT_SCOPES.some((allowed) => allowed === scope);
+}
+
+function schemaUnavailable(error: { code?: string } | null) {
   return error?.code === "42P01" || error?.code === "PGRST205";
 }
 
@@ -49,14 +53,13 @@ export function createPassportConsentRepository(client: SupabaseClient) {
         .order("granted_at", { ascending: false });
       if (schemaUnavailable(error)) throw new Error("CONSENT_NOT_ENABLED");
       if (error) throw error;
+
       const rows = (data ?? []) as PassportConsentRow[];
       return rows.map((row) => ({
         id: row.id,
         organizationId: row.organization_id,
         organizationName: row.glam_organizations?.[0]?.name ?? "صالون",
-        scopes: (row.scopes ?? []).filter((scope: string) =>
-          PASSPORT_SCOPES.includes(scope as PassportScope),
-        ),
+        scopes: (row.scopes ?? []).filter(isPassportScope),
         grantedAt: row.granted_at,
         expiresAt: row.expires_at,
       }));
