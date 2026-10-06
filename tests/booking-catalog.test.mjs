@@ -5,10 +5,13 @@ import {
   startBookingCatalogLoad,
 } from "../src/repositories/booking-catalog.ts";
 
+const organizationId = "00000000-0000-4000-8000-000000000001";
 const serviceId = "10000000-0000-4000-8000-000000000001";
 const variantId = "20000000-0000-4000-8000-000000000001";
 const appointment = {
   id: "30000000-0000-4000-8000-000000000001",
+  organization_id: organizationId,
+  salon_name: "صالون حقيقي",
   service_id: serviceId,
   service_variant_id: null,
   service_name: "Old name must never become identity",
@@ -45,13 +48,13 @@ test("booking channels fail closed for disabled options or unquoted overrides", 
     [{ ...base, minutes: 60 }],
   ]) {
     f.responses.glam_services.data = [{ ...service, glam_service_delivery_options: options }];
-    const result = await loadBookingCatalog(f.client, "Salon");
+    const result = await loadBookingCatalog(f.client, organizationId);
     assert.deepEqual(result.catalog[0].channels, []);
     assert.equal(result.catalog[0].price, 0);
     assert.equal(result.catalog[0].minutes, 45);
   }
   f.responses.glam_services.data = [{ ...service, glam_service_delivery_options: [base] }];
-  assert.deepEqual((await loadBookingCatalog(f.client, "Salon")).catalog[0].channels, ["home"]);
+  assert.deepEqual((await loadBookingCatalog(f.client, organizationId)).catalog[0].channels, ["home"]);
 });
 function fixture() {
   const responses = {
@@ -96,7 +99,7 @@ test("appointment errors stop loading before any catalog read", async () => {
   const f = fixture();
   const error = { code: "42501" };
   f.responses.glam_appointments.error = error;
-  await assert.rejects(loadBookingCatalog(f.client, "Salon"), (e) => e === error);
+  await assert.rejects(loadBookingCatalog(f.client, organizationId), (e) => e === error);
   assert.equal(f.calls.length, 1);
 });
 
@@ -105,16 +108,16 @@ test("catalog permission or relationship errors never become appointment-derived
     const f = fixture();
     const error = { code };
     f.responses.glam_services.error = error;
-    await assert.rejects(loadBookingCatalog(f.client, "Salon"), (e) => e === error);
+    await assert.rejects(loadBookingCatalog(f.client, organizationId), (e) => e === error);
   }
 });
 
 test("retry reads both collections afresh and preserves real identity, zero price and duration", async () => {
   const f = fixture();
   f.responses.glam_services.error = new Error("offline");
-  await assert.rejects(loadBookingCatalog(f.client, "Salon"), /offline/);
+  await assert.rejects(loadBookingCatalog(f.client, organizationId), /offline/);
   f.responses.glam_services.error = null;
-  const result = await loadBookingCatalog(f.client, "Salon");
+  const result = await loadBookingCatalog(f.client, organizationId);
   assert.equal(f.calls.length, 4);
   assert.deepEqual(result.catalog[0], {
     id: serviceId,
@@ -125,9 +128,12 @@ test("retry reads both collections afresh and preserves real identity, zero pric
     categoryName: "خدمات أخرى",
     variants: [],
   });
+  assert.equal(result.organizationId, organizationId);
+  assert.equal(result.salonName, "صالون حقيقي");
   assert.equal(result.appointments[0].service_id, serviceId);
   const query = f.calls.find((call) => call.table === "glam_services");
   assert.deepEqual(query.filters, [
+    ["organization_id", organizationId],
     ["id", [serviceId]],
     ["active", true],
   ]);
@@ -138,10 +144,10 @@ test("retry reads both collections afresh and preserves real identity, zero pric
 test("empty or RLS-hidden catalogs remain empty without synthetic prices or IDs", async () => {
   const f = fixture();
   f.responses.glam_services.data = [];
-  assert.deepEqual(await loadBookingCatalog(f.client, "Salon"), { appointments: [], catalog: [] });
+  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), { organizationId, salonName: "صالون حقيقي", appointments: [], catalog: [] });
   f.responses.glam_appointments.data = [{ ...appointment, service_id: null }];
   f.calls.length = 0;
-  assert.deepEqual(await loadBookingCatalog(f.client, "Salon"), { appointments: [], catalog: [] });
+  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), { organizationId, salonName: "صالون حقيقي", appointments: [], catalog: [] });
   assert.equal(f.calls.length, 1);
 });
 
@@ -156,14 +162,14 @@ test("missing price, duration, UUID or linked category is a load failure, never 
   ]) {
     const f = fixture();
     f.responses.glam_services.data = [{ ...service, ...change }];
-    await assert.rejects(loadBookingCatalog(f.client, "Salon"));
+    await assert.rejects(loadBookingCatalog(f.client, organizationId));
   }
 });
 
 test("inactive services and variants cannot supply bookable appointments", async () => {
   const f = fixture();
   f.responses.glam_services.data = [{ ...service, active: false }];
-  assert.deepEqual(await loadBookingCatalog(f.client, "Salon"), { appointments: [], catalog: [] });
+  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), { organizationId, salonName: "صالون حقيقي", appointments: [], catalog: [] });
   f.responses.glam_services.data = [
     {
       ...service,
@@ -173,7 +179,7 @@ test("inactive services and variants cannot supply bookable appointments", async
     },
   ];
   f.responses.glam_appointments.data = [{ ...appointment, service_variant_id: variantId }];
-  const result = await loadBookingCatalog(f.client, "Salon");
+  const result = await loadBookingCatalog(f.client, organizationId);
   assert.deepEqual(result.catalog[0].variants, []);
   assert.deepEqual(result.appointments, []);
 });
@@ -181,7 +187,7 @@ test("inactive services and variants cannot supply bookable appointments", async
 test("null response data and network rejections are not successful empty results", async () => {
   const f = fixture();
   f.responses.glam_services.data = null;
-  await assert.rejects(loadBookingCatalog(f.client, "Salon"));
+  await assert.rejects(loadBookingCatalog(f.client, organizationId));
   await assert.rejects(
     loadBookingCatalog(
       {
@@ -189,7 +195,7 @@ test("null response data and network rejections are not successful empty results
           throw new Error("network");
         },
       },
-      "Salon",
+      organizationId,
     ),
     /network/,
   );
@@ -201,11 +207,11 @@ test("failed read publishes an explicit error with no data; retry clears it befo
   const f = fixture();
   const states = [];
   f.responses.glam_services.error = { code: "42501" };
-  startBookingCatalogLoad(f.client, "Salon", (state) => states.push(state));
+  startBookingCatalogLoad(f.client, organizationId, (state) => states.push(state));
   await flush();
   assert.deepEqual(states, [{ status: "loading" }, { status: "error" }]);
   f.responses.glam_services.error = null;
-  startBookingCatalogLoad(f.client, "Salon", (state) => states.push(state));
+  startBookingCatalogLoad(f.client, organizationId, (state) => states.push(state));
   assert.deepEqual(states.at(-1), { status: "loading" });
   await flush();
   assert.equal(states.at(-1).status, "ready");
@@ -223,12 +229,12 @@ test("a cancelled request cannot overwrite a retry or another salon with data or
       settle = resolve;
     });
     const states = [];
-    const cancel = startBookingCatalogLoad(old.client, "Old", (state) => states.push(state));
+    const cancel = startBookingCatalogLoad(old.client, organizationId, (state) => states.push(state));
     await flush();
     cancel();
     const next = fixture();
     next.responses.glam_services.data = [];
-    startBookingCatalogLoad(next.client, "Next", (state) => states.push(state));
+    startBookingCatalogLoad(next.client, organizationId, (state) => states.push(state));
     await flush();
     const count = states.length;
     settle(response);
