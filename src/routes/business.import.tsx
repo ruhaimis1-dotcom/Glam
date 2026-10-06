@@ -57,8 +57,7 @@ function ImportPage() {
 
   async function commitImport() {
     if (!rows.length || issues.length || !confirmed || committing) return;
-    const validation =
-      kind === "services" ? validateServiceRows(rows) : validateCustomerRows(rows);
+    const validation = kind === "services" ? validateServiceRows(rows) : validateCustomerRows(rows);
     if (validation.issues.length) {
       setIssues(validation.issues);
       setConfirmed(false);
