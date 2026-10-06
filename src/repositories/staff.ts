@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { requireBusinessOrganization } from "@/lib/business-access";
+import { requireBusinessOrganization } from "../lib/business-access.ts";
 
 export type StaffMember = {
   id: string;
