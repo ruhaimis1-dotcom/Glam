@@ -3,10 +3,7 @@ import { useEffect, useState } from "react";
 import { BusinessShell, PageHeader } from "@/components/glam/shells";
 import { useBusinessOrganization } from "@/lib/business-context";
 import { supabase } from "@/lib/supabase";
-import {
-  createClient360Repository,
-  type ClientContact,
-} from "@/repositories/client-360";
+import { createClient360Repository, type ClientContact } from "@/repositories/client-360";
 
 export const Route = createFileRoute("/business/clients")({ component: ClientsPage });
 const repository = createClient360Repository(supabase);
@@ -41,10 +38,7 @@ function ClientsPage() {
 
   return (
     <BusinessShell>
-      <PageHeader
-        title="العميلات"
-        desc="ملف موحد للحجوزات والخدمات والمتابعة داخل الصالون"
-      />
+      <PageHeader title="العميلات" desc="ملف موحد للحجوزات والخدمات والمتابعة داخل الصالون" />
       <div className="mt-6 space-y-3">
         {status === "loading" && <p role="status">جارٍ تحميل العميلات…</p>}
         {status === "disabled" && (
