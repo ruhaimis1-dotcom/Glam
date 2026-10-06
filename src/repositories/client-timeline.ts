@@ -19,10 +19,7 @@ type TimelineRow = {
 
 export function createClientTimelineRepository(client: SupabaseClient) {
   return {
-    async list(
-      organizationId: string,
-      contactId: string,
-    ): Promise<ClientTimelineItem[]> {
+    async list(organizationId: string, contactId: string): Promise<ClientTimelineItem[]> {
       await requireBusinessOrganization(client, organizationId);
       const { data, error } = await client.rpc("glam_client_timeline", {
         p_org: organizationId,
@@ -33,9 +30,7 @@ export function createClientTimelineRepository(client: SupabaseClient) {
       if (error || data === null) throw error ?? new Error("TIMELINE_NOT_CONFIRMED");
 
       return (data as TimelineRow[])
-        .filter((row) =>
-          ["booking", "note", "followup", "communication"].includes(row.kind),
-        )
+        .filter((row) => ["booking", "note", "followup", "communication"].includes(row.kind))
         .map((row) => ({
           id: row.id,
           kind: row.kind,
