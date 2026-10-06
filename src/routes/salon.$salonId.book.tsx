@@ -53,12 +53,6 @@ function BookingForm({ salonId }: { salonId: string }) {
   );
   const availableDates = [...new Set(serviceAppointments.map((a) => a.starts_at.slice(0, 10)))];
   const dateAppointments = serviceAppointments.filter((a) => a.starts_at.slice(0, 10) === date);
-  if (!salon)
-    return (
-      <CustomerShell title="الحجز" back="/">
-        <div className="glam-card p-8 text-center">الصالون غير موجود</div>
-      </CustomerShell>
-    );
   const confirm = async () => {
     setError("");
     if (catalogStatus !== "ready" || !selectedService) {
