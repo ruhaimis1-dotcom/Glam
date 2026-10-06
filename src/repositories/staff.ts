@@ -10,23 +10,15 @@ export type StaffMember = {
   active: boolean;
 };
 
-type TeamMemberRow = {
-  id: string;
+type TeamDirectoryRow = {
   organization_id: string;
-  name: string;
-  role: string;
-  active: boolean;
+  user_id: string;
+  display_name: string;
+  role: "owner" | "manager" | "specialist";
 };
 
-function normalizeStaff(row: TeamMemberRow): StaffMember {
-  return {
-    id: row.id,
-    organization_id: row.organization_id,
-    name: row.name,
-    specialty: row.role,
-    phone: null,
-    active: row.active,
-  };
+function rpcUnavailable(error: { code?: string } | null) {
+  return error?.code === "PGRST202" || error?.code === "42883";
 }
 
 export async function listStaff(
@@ -34,48 +26,39 @@ export async function listStaff(
   organizationId: string,
 ): Promise<StaffMember[]> {
   await requireBusinessOrganization(client, organizationId);
-  const { data, error } = await client
-    .from("glam_team_members")
-    .select("id,organization_id,name,role,active")
-    .eq("organization_id", organizationId)
-    .order("active", { ascending: false })
-    .order("name");
-  if (error) throw error;
-  return ((data ?? []) as TeamMemberRow[]).map(normalizeStaff);
+  const { data, error } = await client.rpc("glam_business_team_directory", {
+    p_org: organizationId,
+  });
+  if (rpcUnavailable(error)) throw new Error("TEAM_DIRECTORY_NOT_ENABLED");
+  if (error || data === null) throw error ?? new Error("TEAM_READ_NOT_CONFIRMED");
+
+  return (data as TeamDirectoryRow[])
+    .filter((row) => row.organization_id === organizationId && row.role === "specialist")
+    .map((row) => ({
+      id: row.user_id,
+      organization_id: row.organization_id,
+      name: row.display_name,
+      specialty: "أخصائية",
+      phone: null,
+      active: true,
+    }));
 }
 
-export async function createStaff(
+export async function inviteStaff(
   client: SupabaseClient,
   organizationId: string,
-  input: { name: string; specialty: string; phone?: string },
+  email: string,
 ) {
   await requireBusinessOrganization(client, organizationId);
-  const name = input.name.trim();
-  const role = input.specialty.trim();
-  if (name.length < 1 || role.length < 1) throw new Error("INVALID_INPUT");
-  const { data, error } = await client
-    .from("glam_team_members")
-    .insert({ organization_id: organizationId, name, role, active: true })
-    .select("id,organization_id,name,role,active")
-    .single();
-  if (error) throw error;
-  return normalizeStaff(data as TeamMemberRow);
-}
+  const normalized = email.trim().toLowerCase();
+  if (!normalized || !normalized.includes("@")) throw new Error("INVALID_EMAIL");
 
-export async function setStaffActive(
-  client: SupabaseClient,
-  organizationId: string,
-  staffId: string,
-  active: boolean,
-) {
-  await requireBusinessOrganization(client, organizationId);
-  const { data, error } = await client
-    .from("glam_team_members")
-    .update({ active })
-    .eq("organization_id", organizationId)
-    .eq("id", staffId)
-    .select("id,organization_id,name,role,active")
-    .single();
-  if (error) throw error;
-  return normalizeStaff(data as TeamMemberRow);
+  const { data, error } = await client.rpc("glam_create_team_invite", {
+    p_org: organizationId,
+    p_email: normalized,
+    p_role: "specialist",
+  });
+  if (rpcUnavailable(error)) throw new Error("TEAM_INVITE_NOT_ENABLED");
+  if (error || !data) throw error ?? new Error("TEAM_INVITE_NOT_CONFIRMED");
+  return data as string;
 }
