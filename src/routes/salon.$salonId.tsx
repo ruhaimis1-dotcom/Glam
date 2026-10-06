@@ -3,10 +3,7 @@ import { CalendarDays } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CustomerShell } from "@/components/glam/shells";
 import { supabase } from "@/lib/supabase";
-import {
-  startBookingCatalogLoad,
-  type BookingCatalogState,
-} from "@/repositories/booking-catalog";
+import { startBookingCatalogLoad, type BookingCatalogState } from "@/repositories/booking-catalog";
 
 export const Route = createFileRoute("/salon/$salonId")({ component: SalonRoute });
 
@@ -20,15 +17,14 @@ function SalonPage() {
   const [state, setState] = useState<BookingCatalogState>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
 
-  useEffect(
-    () => startBookingCatalogLoad(supabase, salonId, setState),
-    [salonId, attempt],
-  );
+  useEffect(() => startBookingCatalogLoad(supabase, salonId, setState), [salonId, attempt]);
 
   if (state.status === "loading") {
     return (
       <CustomerShell title="الصالون" back="/">
-        <p role="status" className="glam-card p-6">جارٍ تحميل الصالون والخدمات…</p>
+        <p role="status" className="glam-card p-6">
+          جارٍ تحميل الصالون والخدمات…
+        </p>
       </CustomerShell>
     );
   }
@@ -37,7 +33,9 @@ function SalonPage() {
     return (
       <CustomerShell title="الصالون" back="/">
         <div className="glam-card p-6">
-          <p role="alert">تعذر تحميل بيانات الصالون. لا نعرض بيانات تجريبية بدل البيانات الحقيقية.</p>
+          <p role="alert">
+            تعذر تحميل بيانات الصالون. لا نعرض بيانات تجريبية بدل البيانات الحقيقية.
+          </p>
           <button
             type="button"
             onClick={() => setAttempt((value) => value + 1)}

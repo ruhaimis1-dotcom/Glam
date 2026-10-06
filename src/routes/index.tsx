@@ -19,10 +19,7 @@ import { CATEGORIES, INTENTS } from "@/data/mock";
 import { SectionTitle } from "@/components/glam/ui";
 import { bookingDate, bookingTime } from "@/lib/booking-time";
 import { supabase } from "@/lib/supabase";
-import {
-  loadPublicSalons,
-  type PublicSalonSummary,
-} from "@/repositories/public-salons";
+import { loadPublicSalons, type PublicSalonSummary } from "@/repositories/public-salons";
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -88,9 +85,15 @@ function Index() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
           <img src="/glam/glam-wordmark-berry.png" alt="Glam" className="h-8 w-auto" />
           <nav className="hidden items-center gap-7 text-sm text-[#745e70] md:flex">
-            <a href="#discover" className="hover:text-[#541B35]">اكتشفي</a>
-            <a href="#salons" className="hover:text-[#541B35]">الصالونات</a>
-            <a href="#how" className="hover:text-[#541B35]">كيف تعمل قلام؟</a>
+            <a href="#discover" className="hover:text-[#541B35]">
+              اكتشفي
+            </a>
+            <a href="#salons" className="hover:text-[#541B35]">
+              الصالونات
+            </a>
+            <a href="#how" className="hover:text-[#541B35]">
+              كيف تعمل قلام؟
+            </a>
           </nav>
           <Link
             to="/login"
@@ -209,10 +212,16 @@ function Index() {
 
         <section id="salons" className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           <SectionTitle title="المتاح للحجز الآن" />
-          {salonState === "loading" && <p className="mt-6" role="status">جارٍ تحميل المواعيد المتاحة…</p>}
+          {salonState === "loading" && (
+            <p className="mt-6" role="status">
+              جارٍ تحميل المواعيد المتاحة…
+            </p>
+          )}
           {salonState === "error" && (
             <div className="mt-6 rounded-2xl border p-6">
-              <p role="alert">تعذر تحميل الصالونات الآن. لا نعرض بيانات تجريبية بدل البيانات الحقيقية.</p>
+              <p role="alert">
+                تعذر تحميل الصالونات الآن. لا نعرض بيانات تجريبية بدل البيانات الحقيقية.
+              </p>
               <button
                 type="button"
                 onClick={() => setAttempt((value) => value + 1)}

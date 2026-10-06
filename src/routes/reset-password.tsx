@@ -31,8 +31,7 @@ function ResetPasswordPage() {
         redirectTo: `${window.location.origin}/reset-password`,
       },
     );
-    if (resetError)
-      return setError("تعذر إرسال رابط الاستعادة. تحققي من البريد وحاولي مرة أخرى.");
+    if (resetError) return setError("تعذر إرسال رابط الاستعادة. تحققي من البريد وحاولي مرة أخرى.");
     setMessage("تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.");
   }
 
@@ -50,10 +49,7 @@ function ResetPasswordPage() {
   return (
     <main dir="rtl" className="min-h-screen bg-[#fbf8f5] px-4 py-8 text-[#2c1725]">
       <div className="mx-auto max-w-md">
-        <Link
-          to="/login"
-          className="mb-10 inline-flex items-center gap-2 text-sm text-[#745e70]"
-        >
+        <Link to="/login" className="mb-10 inline-flex items-center gap-2 text-sm text-[#745e70]">
           <ArrowRight className="size-4" /> العودة للدخول
         </Link>
         <section className="rounded-3xl border border-[#eadfda] bg-white p-6 shadow-sm sm:p-8">

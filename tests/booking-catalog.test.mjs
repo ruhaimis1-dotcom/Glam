@@ -54,7 +54,9 @@ test("booking channels fail closed for disabled options or unquoted overrides", 
     assert.equal(result.catalog[0].minutes, 45);
   }
   f.responses.glam_services.data = [{ ...service, glam_service_delivery_options: [base] }];
-  assert.deepEqual((await loadBookingCatalog(f.client, organizationId)).catalog[0].channels, ["home"]);
+  assert.deepEqual((await loadBookingCatalog(f.client, organizationId)).catalog[0].channels, [
+    "home",
+  ]);
 });
 function fixture() {
   const responses = {
@@ -144,10 +146,20 @@ test("retry reads both collections afresh and preserves real identity, zero pric
 test("empty or RLS-hidden catalogs remain empty without synthetic prices or IDs", async () => {
   const f = fixture();
   f.responses.glam_services.data = [];
-  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), { organizationId, salonName: "صالون حقيقي", appointments: [], catalog: [] });
+  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), {
+    organizationId,
+    salonName: "صالون حقيقي",
+    appointments: [],
+    catalog: [],
+  });
   f.responses.glam_appointments.data = [{ ...appointment, service_id: null }];
   f.calls.length = 0;
-  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), { organizationId, salonName: "صالون حقيقي", appointments: [], catalog: [] });
+  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), {
+    organizationId,
+    salonName: "صالون حقيقي",
+    appointments: [],
+    catalog: [],
+  });
   assert.equal(f.calls.length, 1);
 });
 
@@ -169,7 +181,12 @@ test("missing price, duration, UUID or linked category is a load failure, never 
 test("inactive services and variants cannot supply bookable appointments", async () => {
   const f = fixture();
   f.responses.glam_services.data = [{ ...service, active: false }];
-  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), { organizationId, salonName: "صالون حقيقي", appointments: [], catalog: [] });
+  assert.deepEqual(await loadBookingCatalog(f.client, organizationId), {
+    organizationId,
+    salonName: "صالون حقيقي",
+    appointments: [],
+    catalog: [],
+  });
   f.responses.glam_services.data = [
     {
       ...service,
@@ -229,7 +246,9 @@ test("a cancelled request cannot overwrite a retry or another salon with data or
       settle = resolve;
     });
     const states = [];
-    const cancel = startBookingCatalogLoad(old.client, organizationId, (state) => states.push(state));
+    const cancel = startBookingCatalogLoad(old.client, organizationId, (state) =>
+      states.push(state),
+    );
     await flush();
     cancel();
     const next = fixture();

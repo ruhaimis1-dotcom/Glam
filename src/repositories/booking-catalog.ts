@@ -49,9 +49,7 @@ export type BookingCatalog = {
   catalog: BookingService[];
 };
 export type BookingCatalogState =
-  | { status: "loading" }
-  | { status: "error" }
-  | { status: "ready"; data: BookingCatalog };
+  { status: "loading" } | { status: "error" } | { status: "ready"; data: BookingCatalog };
 
 export function startBookingCatalogLoad(
   client: SupabaseClient,
@@ -81,9 +79,7 @@ export async function loadBookingCatalog(
 
   const appointmentsResult = await client
     .from("glam_appointments")
-    .select(
-      "id,organization_id,salon_name,service_id,service_variant_id,service_name,starts_at",
-    )
+    .select("id,organization_id,salon_name,service_id,service_variant_id,service_name,starts_at")
     .eq("organization_id", organizationId)
     .gte("starts_at", new Date().toISOString())
     .order("starts_at");

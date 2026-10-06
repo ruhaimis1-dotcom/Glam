@@ -38,7 +38,8 @@ export async function loadPublicSalons(client: SupabaseClient): Promise<PublicSa
       continue;
     }
     if (current.name !== appointment.salon_name) throw new Error("SALON_IDENTITY_CONFLICT");
-    if (!current.services.includes(appointment.service_name)) current.services.push(appointment.service_name);
+    if (!current.services.includes(appointment.service_name))
+      current.services.push(appointment.service_name);
   }
   return [...salons.values()];
 }

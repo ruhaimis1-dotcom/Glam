@@ -40,10 +40,13 @@ function BookingForm({ salonId }: { salonId: string }) {
     setDone(false);
     return startBookingCatalogLoad(supabase, salonId, setCatalogState);
   }, [salonId, attempt]);
-  const { appointments, catalog: serviceOptions, salonName } =
-    catalogState.status === "ready"
-      ? catalogState.data
-      : { appointments: [], catalog: [], salonName: "" };
+  const {
+    appointments,
+    catalog: serviceOptions,
+    salonName,
+  } = catalogState.status === "ready"
+    ? catalogState.data
+    : { appointments: [], catalog: [], salonName: "" };
   const categories = [...new Set(serviceOptions.map((item) => item.categoryName))];
   const categoryServices = serviceOptions.filter((item) => item.categoryName === category);
   const selectedService = serviceOptions.find((item) => item.id === service);
@@ -323,11 +326,7 @@ function BookingForm({ salonId }: { salonId: string }) {
               onChange={(e) => {
                 const selected = dateAppointments.find((a) => a.id === e.target.value);
                 setAppointmentId(selected?.id ?? null);
-                setTime(
-                  selected
-                    ? bookingTime(selected.starts_at)
-                    : "",
-                );
+                setTime(selected ? bookingTime(selected.starts_at) : "");
               }}
               className="mt-2 w-full rounded-xl border bg-background px-4 py-3"
             >
@@ -347,8 +346,9 @@ function BookingForm({ salonId }: { salonId: string }) {
               </p>
               {(!selectedService.variants.length || selectedVariant) && (
                 <p className="mt-1 text-muted-foreground">
-                  السعر {(selectedVariant ?? selectedService).price.toLocaleString("ar-SA-u-nu-latn")} ر.س · المدة{" "}
-                  {(selectedVariant ?? selectedService).minutes} دقيقة
+                  السعر{" "}
+                  {(selectedVariant ?? selectedService).price.toLocaleString("ar-SA-u-nu-latn")} ر.س
+                  · المدة {(selectedVariant ?? selectedService).minutes} دقيقة
                 </p>
               )}
             </div>

@@ -106,7 +106,10 @@ function fixture({ memberships = [{ organization_id: "org-a", role: "manager" }]
 test("staff reads are scoped to the selected authorized organization", async () => {
   const f = fixture();
   const rows = await listStaff(f.client, "org-a");
-  assert.deepEqual(rows.map((row) => row.id), ["staff-a"]);
+  assert.deepEqual(
+    rows.map((row) => row.id),
+    ["staff-a"],
+  );
   const staffRead = f.calls.find((call) => call.table === "glam_staff");
   assert.deepEqual(staffRead.filters[0], ["organization_id", "org-a"]);
 });
@@ -117,7 +120,10 @@ test("staff creation rejects a forged organization before write", async () => {
     createStaff(f.client, "org-b", { name: "نورة", specialty: "مكياج" }),
     /FORBIDDEN/,
   );
-  assert.equal(f.calls.some((call) => call.table === "glam_staff" && call.inserted), false);
+  assert.equal(
+    f.calls.some((call) => call.table === "glam_staff" && call.inserted),
+    false,
+  );
 });
 
 test("staff creation always writes the authorized organization id", async () => {
