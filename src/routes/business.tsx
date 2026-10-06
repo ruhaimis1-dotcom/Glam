@@ -31,6 +31,10 @@ function BusinessHome() {
           <h2 className="font-bold">فريق العمل</h2>
           <p className="mt-1 text-sm text-muted-foreground">إدارة الموظفات والتخصصات</p>
         </Link>
+        <Link to="/business/clients" className="glam-card p-5 hover:border-primary">
+          <h2 className="font-bold">العميلات</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Client 360 والمتابعة</p>
+        </Link>
       </div>
     </BusinessShell>
   );
