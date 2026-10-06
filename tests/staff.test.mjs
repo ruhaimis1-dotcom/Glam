@@ -9,7 +9,7 @@ function fixture({ memberships = [{ organization_id: "org-a", role: "manager" }]
       id: "staff-a",
       organization_id: "org-a",
       name: "سارة",
-      specialty: "شعر",
+      role: "شعر",
       phone: null,
       active: true,
     },
@@ -17,7 +17,7 @@ function fixture({ memberships = [{ organization_id: "org-a", role: "manager" }]
       id: "staff-b",
       organization_id: "org-b",
       name: "ريم",
-      specialty: "أظافر",
+      role: "أظافر",
       phone: null,
       active: true,
     },
@@ -55,7 +55,7 @@ function fixture({ memberships = [{ organization_id: "org-a", role: "manager" }]
               reject,
             );
           }
-          if (table === "glam_staff") {
+          if (table === "glam_team_members") {
             const org = call.filters.find(([column]) => column === "organization_id")?.[1];
             return Promise.resolve({
               data: staff.filter((row) => row.organization_id === org),
@@ -110,7 +110,7 @@ test("staff reads are scoped to the selected authorized organization", async () 
     rows.map((row) => row.id),
     ["staff-a"],
   );
-  const staffRead = f.calls.find((call) => call.table === "glam_staff");
+  const staffRead = f.calls.find((call) => call.table === "glam_team_members");
   assert.deepEqual(staffRead.filters[0], ["organization_id", "org-a"]);
 });
 
@@ -121,7 +121,7 @@ test("staff creation rejects a forged organization before write", async () => {
     /FORBIDDEN/,
   );
   assert.equal(
-    f.calls.some((call) => call.table === "glam_staff" && call.inserted),
+    f.calls.some((call) => call.table === "glam_team_members" && call.inserted),
     false,
   );
 });
@@ -134,16 +134,17 @@ test("staff creation always writes the authorized organization id", async () => 
     phone: " 0500000000 ",
   });
   assert.equal(row.organization_id, "org-a");
-  const write = f.calls.find((call) => call.table === "glam_staff" && call.inserted);
+  const write = f.calls.find((call) => call.table === "glam_team_members" && call.inserted);
   assert.equal(write.inserted.organization_id, "org-a");
   assert.equal(write.inserted.name, "نورة");
+  assert.equal(write.inserted.role, "مكياج");
 });
 
 test("staff status update requires organization and staff id together", async () => {
   const f = fixture();
   const row = await setStaffActive(f.client, "org-a", "staff-a", false);
   assert.equal(row.active, false);
-  const write = f.calls.find((call) => call.table === "glam_staff" && call.updated);
+  const write = f.calls.find((call) => call.table === "glam_team_members" && call.updated);
   assert.deepEqual(
     write.filters.filter(([column]) => column === "organization_id" || column === "id"),
     [
