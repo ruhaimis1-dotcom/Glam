@@ -152,6 +152,13 @@ as $$
   order by a.starts_at desc
 $$;
 
+revoke all on function glam_private.find_client_contact_duplicates(uuid,text,text) from public, anon;
+revoke all on function glam_private.create_client_contact(uuid,text,text,text) from public, anon;
+revoke all on function glam_private.client_timeline(uuid,uuid) from public, anon;
+grant execute on function glam_private.find_client_contact_duplicates(uuid,text,text) to authenticated;
+grant execute on function glam_private.create_client_contact(uuid,text,text,text) to authenticated;
+grant execute on function glam_private.client_timeline(uuid,uuid) to authenticated;
+
 create or replace function public.glam_find_client_contact_duplicates(
   p_org uuid, p_phone text, p_email text
 )
