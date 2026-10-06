@@ -3,6 +3,8 @@ import { z } from "zod";
 
 const appointmentSchema = z.object({
   id: z.string().uuid(),
+  organization_id: z.string().uuid(),
+  salon_name: z.string().trim().min(1),
   service_id: z.string().uuid().nullable(),
   service_variant_id: z.string().uuid().nullable(),
   service_name: z.string(),
@@ -40,19 +42,24 @@ export type BookingService = {
   channels: Array<"salon" | "home">;
   variants: Array<{ id: string; name: string; price: number; minutes: number }>;
 };
-export type BookingCatalog = { appointments: BookingAppointment[]; catalog: BookingService[] };
+export type BookingCatalog = {
+  organizationId: string;
+  salonName: string;
+  appointments: BookingAppointment[];
+  catalog: BookingService[];
+};
 export type BookingCatalogState =
-  { status: "loading" | "error" } | { status: "ready"; data: BookingCatalog };
+  | { status: "loading" | "error" }
+  | { status: "ready"; data: BookingCatalog };
 
-// Cleanup prevents an older salon/retry request from publishing into a new view.
 export function startBookingCatalogLoad(
   client: SupabaseClient,
-  salonName: string,
+  organizationId: string,
   publish: (state: BookingCatalogState) => void,
 ): () => void {
   let cancelled = false;
   publish({ status: "loading" });
-  void loadBookingCatalog(client, salonName).then(
+  void loadBookingCatalog(client, organizationId).then(
     (data) => {
       if (!cancelled) publish({ status: "ready", data });
     },
@@ -65,28 +72,38 @@ export function startBookingCatalogLoad(
   };
 }
 
-// Publish a complete result only. A failed or malformed read must never become
-// a partial catalog or a price/identity inferred from an appointment.
 export async function loadBookingCatalog(
   client: SupabaseClient,
-  salonName: string,
+  organizationId: string,
 ): Promise<BookingCatalog> {
+  if (!z.string().uuid().safeParse(organizationId).success) throw new Error("INVALID_ORGANIZATION");
+
   const appointmentsResult = await client
     .from("glam_appointments")
-    .select("id,service_id,service_variant_id,service_name,starts_at")
-    .eq("salon_name", salonName)
+    .select(
+      "id,organization_id,salon_name,service_id,service_variant_id,service_name,starts_at",
+    )
+    .eq("organization_id", organizationId)
     .gte("starts_at", new Date().toISOString())
     .order("starts_at");
   if (appointmentsResult.error) throw appointmentsResult.error;
   const appointments = z.array(appointmentSchema).parse(appointmentsResult.data);
+  if (appointments.some((row) => row.organization_id !== organizationId))
+    throw new Error("CROSS_ORGANIZATION_APPOINTMENT");
+
+  const salonNames = [...new Set(appointments.map((row) => row.salon_name))];
+  if (salonNames.length > 1) throw new Error("SALON_IDENTITY_CONFLICT");
+  const salonName = salonNames[0] ?? "";
+
   const ids = [...new Set(appointments.flatMap((row) => (row.service_id ? [row.service_id] : [])))];
-  if (!ids.length) return { appointments: [], catalog: [] };
+  if (!ids.length) return { organizationId, salonName, appointments: [], catalog: [] };
 
   const servicesResult = await client
     .from("glam_services")
     .select(
       "id,name,price_sar,minutes,active,category_id,glam_service_categories!glam_services_category_id_fkey(name),glam_service_variants!glam_service_variants_service_id_fkey(id,name,price_sar,minutes,active),glam_service_delivery_options!glam_service_delivery_options_service_id_fkey(channel,enabled,price_sar,minutes,travel_fee_sar)",
     )
+    .eq("organization_id", organizationId)
     .in("id", ids)
     .eq("active", true);
   if (servicesResult.error) throw servicesResult.error;
@@ -123,6 +140,8 @@ export async function loadBookingCatalog(
       };
     });
   return {
+    organizationId,
+    salonName,
     catalog,
     appointments: appointments.filter((appointment) =>
       catalog.some(
