@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, CalendarDays, CheckCircle2 } from "lucide-react";
 import { CustomerShell } from "@/components/glam/shells";
-import { byId, formatSAR } from "@/data/mock";
+import { bookingDate, bookingTime } from "@/lib/booking-time";
 import { readStored, writeStored } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { startBookingCatalogLoad, type BookingCatalogState } from "@/repositories/booking-catalog";
@@ -15,7 +15,6 @@ function BookSalonPage() {
 }
 
 function BookingForm({ salonId }: { salonId: string }) {
-  const salon = byId.salon(salonId);
   const [service, setService] = useState("");
   const [variantId, setVariantId] = useState("");
   const [channel, setChannel] = useState("");
@@ -39,10 +38,12 @@ function BookingForm({ salonId }: { salonId: string }) {
     setAppointmentId(null);
     setError("");
     setDone(false);
-    return startBookingCatalogLoad(supabase, salon?.name ?? "", setCatalogState);
-  }, [salon?.name, attempt]);
-  const { appointments, catalog: serviceOptions } =
-    catalogState.status === "ready" ? catalogState.data : { appointments: [], catalog: [] };
+    return startBookingCatalogLoad(supabase, salonId, setCatalogState);
+  }, [salonId, attempt]);
+  const { appointments, catalog: serviceOptions, salonName } =
+    catalogState.status === "ready"
+      ? catalogState.data
+      : { appointments: [], catalog: [], salonName: "" };
   const categories = [...new Set(serviceOptions.map((item) => item.categoryName))];
   const categoryServices = serviceOptions.filter((item) => item.categoryName === category);
   const selectedService = serviceOptions.find((item) => item.id === service);
@@ -124,7 +125,7 @@ function BookingForm({ salonId }: { salonId: string }) {
         id: `GL-${Date.now().toString().slice(-6)}`,
         customer_id: user.id,
         salonId,
-        salon: salon.name,
+        salon: salonName,
         service,
         date,
         time,
@@ -167,7 +168,7 @@ function BookingForm({ salonId }: { salonId: string }) {
           <ArrowRight className="size-4" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">احجزي في {salon.name}</h1>
+          <h1 className="text-2xl font-bold">احجزي في {salonName || "الصالون"}</h1>
           <p className="text-sm text-muted-foreground">اختاري خدمة وموعدًا متاحًا فعليًا</p>
         </div>
       </div>
@@ -316,9 +317,7 @@ function BookingForm({ salonId }: { salonId: string }) {
               )}
               {availableDates.map((availableDate) => (
                 <option key={availableDate} value={availableDate}>
-                  {new Date(`${availableDate}T00:00:00`).toLocaleDateString("ar-SA", {
-                    dateStyle: "medium",
-                  })}
+                  {bookingDate(availableDate)}
                 </option>
               ))}
             </select>
@@ -332,10 +331,7 @@ function BookingForm({ salonId }: { salonId: string }) {
                 setAppointmentId(selected?.id ?? null);
                 setTime(
                   selected
-                    ? new Date(selected.starts_at).toLocaleTimeString("ar-SA", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })
+                    ? bookingTime(selected.starts_at)
                     : "",
                 );
               }}
@@ -344,10 +340,7 @@ function BookingForm({ salonId }: { salonId: string }) {
               <option value="">اختاري الوقت</option>
               {dateAppointments.map((appointment) => (
                 <option key={appointment.id} value={appointment.id}>
-                  {new Date(appointment.starts_at).toLocaleTimeString("ar-SA", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
+                  {bookingTime(appointment.starts_at)}
                 </option>
               ))}
             </select>
@@ -356,11 +349,11 @@ function BookingForm({ salonId }: { salonId: string }) {
             <div className="rounded-xl bg-muted/50 p-4 text-sm">
               <CalendarDays className="mb-2 size-5 text-primary" />
               <p>
-                {selectedService.name} {selectedVariant?.name} في {salon.name}
+                {selectedService.name} {selectedVariant?.name} في {salonName}
               </p>
               {(!selectedService.variants.length || selectedVariant) && (
                 <p className="mt-1 text-muted-foreground">
-                  السعر {formatSAR((selectedVariant ?? selectedService).price)} · المدة{" "}
+                  السعر {(selectedVariant ?? selectedService).price.toLocaleString("ar-SA-u-nu-latn")} ر.س · المدة{" "}
                   {(selectedVariant ?? selectedService).minutes} دقيقة
                 </p>
               )}
