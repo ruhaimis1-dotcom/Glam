@@ -240,6 +240,14 @@ test("a cancelled request cannot overwrite a retry or another salon with data or
     settle(response);
     await flush();
     assert.equal(states.length, count);
-    assert.deepEqual(states.at(-1), { status: "ready", data: { catalog: [], appointments: [] } });
+    assert.deepEqual(states.at(-1), {
+      status: "ready",
+      data: {
+        organizationId,
+        salonName: "صالون حقيقي",
+        catalog: [],
+        appointments: [],
+      },
+    });
   }
 });
