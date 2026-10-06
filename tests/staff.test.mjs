@@ -46,17 +46,23 @@ function fixture({ memberships = [{ organization_id: "org-a", role: "manager" }]
           return chain;
         },
         order() {
+          return chain;
+        },
+        then(resolve, reject) {
           if (table === "glam_organizations") {
-            return Promise.resolve({ data: [{ id: "org-a", name: "صالون أ" }], error: null });
+            return Promise.resolve({ data: [{ id: "org-a", name: "صالون أ" }], error: null }).then(
+              resolve,
+              reject,
+            );
           }
           if (table === "glam_staff") {
             const org = call.filters.find(([column]) => column === "organization_id")?.[1];
             return Promise.resolve({
               data: staff.filter((row) => row.organization_id === org),
               error: null,
-            });
+            }).then(resolve, reject);
           }
-          return chain;
+          return Promise.resolve({ data: [], error: null }).then(resolve, reject);
         },
         insert(value) {
           inserted = value;
