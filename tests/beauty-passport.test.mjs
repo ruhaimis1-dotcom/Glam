@@ -46,14 +46,16 @@ test("consent list uses customer-only RPC after authenticating", async () => {
     rpc: async (name, args) => {
       calls.push([name, args]);
       return {
-        data: [{
-          id: "consent-1",
-          organization_id: "org-a",
-          organization_name: "صالون أ",
-          scopes: ["profile", "photos"],
-          granted_at: "2030-01-01T10:00:00Z",
-          expires_at: null,
-        }],
+        data: [
+          {
+            id: "consent-1",
+            organization_id: "org-a",
+            organization_name: "صالون أ",
+            scopes: ["profile", "photos"],
+            granted_at: "2030-01-01T10:00:00Z",
+            expires_at: null,
+          },
+        ],
         error: null,
       };
     },

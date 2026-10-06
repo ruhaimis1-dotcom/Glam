@@ -44,11 +44,7 @@ export async function listStaff(
     }));
 }
 
-export async function inviteStaff(
-  client: SupabaseClient,
-  organizationId: string,
-  email: string,
-) {
+export async function inviteStaff(client: SupabaseClient, organizationId: string, email: string) {
   await requireBusinessOrganization(client, organizationId);
   const normalized = email.trim().toLowerCase();
   if (!normalized || !normalized.includes("@")) throw new Error("INVALID_EMAIL");

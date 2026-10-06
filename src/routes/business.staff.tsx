@@ -100,7 +100,10 @@ function StaffPage() {
             >
               {status === "saving" ? "جارٍ إنشاء الدعوة…" : "إرسال الدعوة"}
             </button>
-            <button onClick={() => setAdding(false)} className="rounded-full border px-4 py-2 text-sm">
+            <button
+              onClick={() => setAdding(false)}
+              className="rounded-full border px-4 py-2 text-sm"
+            >
               إلغاء
             </button>
           </div>
