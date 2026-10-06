@@ -7,12 +7,9 @@ function query(result) {
   const chain = {
     select: () => chain,
     eq: () => chain,
-    is: () => chain,
-    order: () => Promise.resolve(result),
     maybeSingle: () => Promise.resolve(result),
     single: () => Promise.resolve(result),
     upsert: () => chain,
-    update: () => chain,
   };
   return chain;
 }
@@ -42,41 +39,50 @@ test("passport save rejects a switched account before any write", async () => {
   assert.equal(writes, 0);
 });
 
-test("consent list is always filtered to the signed-in customer", async () => {
-  const filters = [];
+test("consent list uses customer-only RPC after authenticating", async () => {
+  const calls = [];
   const client = {
     auth: { getUser: async () => ({ data: { user: { id: "customer-a" } }, error: null }) },
-    from: () => {
-      const chain = query({ data: [], error: null });
-      chain.eq = (column, value) => {
-        filters.push([column, value]);
-        return chain;
+    rpc: async (name, args) => {
+      calls.push([name, args]);
+      return {
+        data: [{
+          id: "consent-1",
+          organization_id: "org-a",
+          organization_name: "صالون أ",
+          scopes: ["profile", "photos"],
+          granted_at: "2030-01-01T10:00:00Z",
+          expires_at: null,
+        }],
+        error: null,
       };
-      return chain;
     },
   };
-  await createPassportConsentRepository(client).list();
-  assert.deepEqual(filters[0], ["customer_id", "customer-a"]);
+  const result = await createPassportConsentRepository(client).list();
+  assert.deepEqual(calls, [["glam_my_passport_consents", undefined]]);
+  assert.equal(result[0].organizationName, "صالون أ");
+  assert.deepEqual(result[0].scopes, ["profile", "photos"]);
 });
 
-test("consent revoke requires both consent id and current customer id", async () => {
-  const filters = [];
+test("consent revoke uses reviewed RPC with only the consent id", async () => {
+  const calls = [];
   const client = {
     auth: { getUser: async () => ({ data: { user: { id: "customer-a" } }, error: null }) },
-    from: () => {
-      const chain = query({ data: { id: "consent-1" }, error: null });
-      chain.eq = (column, value) => {
-        filters.push([column, value]);
-        return chain;
-      };
-      return chain;
+    rpc: async (name, args) => {
+      calls.push([name, args]);
+      return { data: "consent-1", error: null };
     },
   };
   await createPassportConsentRepository(client).revoke("consent-1");
-  assert.deepEqual(filters, [
-    ["id", "consent-1"],
-    ["customer_id", "customer-a"],
-  ]);
+  assert.deepEqual(calls, [["glam_revoke_passport_consent", { p_id: "consent-1" }]]);
+});
+
+test("missing consent RPC fails closed", async () => {
+  const client = {
+    auth: { getUser: async () => ({ data: { user: { id: "customer-a" } }, error: null }) },
+    rpc: async () => ({ data: null, error: { code: "PGRST202" } }),
+  };
+  await assert.rejects(createPassportConsentRepository(client).list(), /CONSENT_NOT_ENABLED/);
 });
 
 test("photos are a separate explicit consent scope", async () => {
