@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import { BusinessShell } from "@/components/glam/shells";
 import { useBusinessOrganization } from "@/lib/business-context";
 import { supabase } from "@/lib/supabase";
-import {
-  createClient360Repository,
-  type ClientContact,
-} from "@/repositories/client-360";
+import { createClient360Repository, type ClientContact } from "@/repositories/client-360";
 import {
   createClientTimelineRepository,
   type ClientTimelineItem,
@@ -29,7 +26,10 @@ function Client360Page() {
   useEffect(() => {
     let active = true;
     setStatus("loading");
-    void Promise.all([contacts.get(organization.id, clientId), timeline.list(organization.id, clientId)])
+    void Promise.all([
+      contacts.get(organization.id, clientId),
+      timeline.list(organization.id, clientId),
+    ])
       .then(([client, events]) => {
         if (!active) return;
         setContact(client);
@@ -82,10 +82,7 @@ function Client360Page() {
             <section className="glam-card grid gap-4 p-6 md:grid-cols-3">
               <Info label="الجوال" value={contact.phone ?? "غير مسجل"} dir="ltr" />
               <Info label="البريد" value={contact.email ?? "غير مسجل"} dir="ltr" />
-              <Info
-                label="حساب قلام"
-                value={contact.linkedCustomerId ? "مرتبط" : "غير مرتبط"}
-              />
+              <Info label="حساب قلام" value={contact.linkedCustomerId ? "مرتبط" : "غير مرتبط"} />
             </section>
 
             <section className="glam-card flex gap-3 p-5">
@@ -104,7 +101,10 @@ function Client360Page() {
                 <h2 className="font-semibold">السجل</h2>
                 <div className="mt-4 space-y-4">
                   {items.map((item) => (
-                    <article key={`${item.kind}-${item.id}`} className="border-b pb-4 last:border-0">
+                    <article
+                      key={`${item.kind}-${item.id}`}
+                      className="border-b pb-4 last:border-0"
+                    >
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="font-medium">{item.title}</p>
@@ -137,15 +137,7 @@ function Client360Page() {
   );
 }
 
-function Info({
-  label,
-  value,
-  dir,
-}: {
-  label: string;
-  value: string;
-  dir?: "ltr" | "rtl";
-}) {
+function Info({ label, value, dir }: { label: string; value: string; dir?: "ltr" | "rtl" }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
