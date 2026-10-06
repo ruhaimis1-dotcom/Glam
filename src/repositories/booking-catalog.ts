@@ -49,7 +49,8 @@ export type BookingCatalog = {
   catalog: BookingService[];
 };
 export type BookingCatalogState =
-  | { status: "loading" | "error" }
+  | { status: "loading" }
+  | { status: "error" }
   | { status: "ready"; data: BookingCatalog };
 
 export function startBookingCatalogLoad(
