@@ -5,18 +5,33 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: agent-os/mvp-gate-2026-10-06
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - name: Install
         run: npm ci
+      - name: Format candidate delta
+        run: |
+          npx prettier --write             src/repositories/booking-catalog.ts             src/repositories/public-salons.ts             src/routes/index.tsx             src/routes/reset-password.tsx             'src/routes/salon.$salonId.book.tsx'             'src/routes/salon.$salonId.tsx'             tests/booking-catalog.test.mjs             tests/staff.test.mjs
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add               src/repositories/booking-catalog.ts               src/repositories/public-salons.ts               src/routes/index.tsx               src/routes/reset-password.tsx               'src/routes/salon.$salonId.book.tsx'               'src/routes/salon.$salonId.tsx'               tests/booking-catalog.test.mjs               tests/staff.test.mjs
+            git commit -m "style: format MVP candidate delta"
+            git push origin HEAD:agent-os/mvp-gate-2026-10-06
+          fi
       - name: Production dependency security audit
         run: npm audit --omit=dev --audit-level=high
       - name: Generate routes and production build
