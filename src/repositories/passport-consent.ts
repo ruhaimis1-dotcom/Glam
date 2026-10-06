@@ -12,10 +12,10 @@ export type PassportScope = (typeof PASSPORT_SCOPES)[number];
 type PassportConsentRow = {
   id: string;
   organization_id: string;
+  organization_name: string;
   scopes: string[] | null;
   granted_at: string;
   expires_at: string | null;
-  glam_organizations: { name: string }[] | null;
 };
 
 export type PassportConsent = {
@@ -31,8 +31,8 @@ function isPassportScope(scope: string): scope is PassportScope {
   return PASSPORT_SCOPES.some((allowed) => allowed === scope);
 }
 
-function schemaUnavailable(error: { code?: string } | null) {
-  return error?.code === "42P01" || error?.code === "PGRST205";
+function rpcUnavailable(error: { code?: string } | null) {
+  return error?.code === "PGRST202" || error?.code === "42883";
 }
 
 export function createPassportConsentRepository(client: SupabaseClient) {
@@ -44,21 +44,15 @@ export function createPassportConsentRepository(client: SupabaseClient) {
 
   return {
     async list(): Promise<PassportConsent[]> {
-      const userId = await currentUserId();
-      const { data, error } = await client
-        .from("glam_passport_consents")
-        .select("id,organization_id,scopes,granted_at,expires_at,glam_organizations(name)")
-        .eq("customer_id", userId)
-        .is("revoked_at", null)
-        .order("granted_at", { ascending: false });
-      if (schemaUnavailable(error)) throw new Error("CONSENT_NOT_ENABLED");
-      if (error) throw error;
+      await currentUserId();
+      const { data, error } = await client.rpc("glam_my_passport_consents");
+      if (rpcUnavailable(error)) throw new Error("CONSENT_NOT_ENABLED");
+      if (error || data === null) throw error ?? new Error("CONSENT_READ_NOT_CONFIRMED");
 
-      const rows = (data ?? []) as PassportConsentRow[];
-      return rows.map((row) => ({
+      return (data as PassportConsentRow[]).map((row) => ({
         id: row.id,
         organizationId: row.organization_id,
-        organizationName: row.glam_organizations?.[0]?.name ?? "صالون",
+        organizationName: row.organization_name,
         scopes: (row.scopes ?? []).filter(isPassportScope),
         grantedAt: row.granted_at,
         expiresAt: row.expires_at,
@@ -66,18 +60,13 @@ export function createPassportConsentRepository(client: SupabaseClient) {
     },
 
     async revoke(consentId: string) {
-      const userId = await currentUserId();
-      const { data, error } = await client
-        .from("glam_passport_consents")
-        .update({ revoked_at: new Date().toISOString() })
-        .eq("id", consentId)
-        .eq("customer_id", userId)
-        .is("revoked_at", null)
-        .select("id")
-        .single();
-      if (schemaUnavailable(error)) throw new Error("CONSENT_NOT_ENABLED");
+      await currentUserId();
+      const { data, error } = await client.rpc("glam_revoke_passport_consent", {
+        p_id: consentId,
+      });
+      if (rpcUnavailable(error)) throw new Error("CONSENT_NOT_ENABLED");
       if (error || !data) throw error ?? new Error("CONSENT_NOT_CONFIRMED");
-      return data.id as string;
+      return data as string;
     },
   };
 }
