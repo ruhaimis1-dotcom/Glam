@@ -5,7 +5,8 @@
       "agent-os/p1.2-business-operations": false,
       "agent-os/p1.3-staff-operations": false,
       "agent-os/p2-beauty-passport": false,
-      "agent-os/p3-import-pipeline": false
+      "agent-os/p3-import-pipeline": false,
+      "agent-os/p4-client-360": false
     }
   }
 }
