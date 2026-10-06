@@ -63,7 +63,11 @@ function BeautyPassportPage() {
     };
   }, [empty]);
 
-  const setField = (section: "hair" | "skin" | "nails" | "preferences", key: string, value: string) =>
+  const setField = (
+    section: "hair" | "skin" | "nails" | "preferences",
+    key: string,
+    value: string,
+  ) =>
     setPassport((current) =>
       current ? { ...current, [section]: { ...current[section], [key]: value } } : current,
     );
@@ -106,8 +110,8 @@ function BeautyPassportPage() {
         <section className="glam-card flex gap-3 p-5">
           <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" />
           <p className="text-sm text-muted-foreground">
-            لا تتم مشاركة هذا الملف مع أي صالون تلقائيًا عند الحجز. أنتِ تختارين ما تتم
-            مشاركته ويمكنك سحب الموافقة لاحقًا.
+            لا تتم مشاركة هذا الملف مع أي صالون تلقائيًا عند الحجز. أنتِ تختارين ما تتم مشاركته
+            ويمكنك سحب الموافقة لاحقًا.
           </p>
         </section>
 
@@ -124,8 +128,8 @@ function BeautyPassportPage() {
           <section className="glam-card p-6">
             <h2 className="font-semibold">الميزة قيد التجهيز</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              جهزنا رحلة جواز الجمال، لكن لن نحفظ أي بيانات قبل اعتماد طبقة الخصوصية
-              والأمان ضمن بوابة الـMVP.
+              جهزنا رحلة جواز الجمال، لكن لن نحفظ أي بيانات قبل اعتماد طبقة الخصوصية والأمان ضمن
+              بوابة الـMVP.
             </p>
           </section>
         )}

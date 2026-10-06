@@ -117,48 +117,54 @@ function ProfilePage() {
       )}
       {status === "ready" && (
         <div className="max-w-xl space-y-4">
-        <section className="glam-card p-6">
-          <div className="flex items-start gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-full glam-gradient text-white">
-              <Sparkles className="size-5" />
-            </span>
-            <div className="space-y-2">
-              <h2 className="font-semibold">جواز جمالك</h2>
-              <p className="text-sm text-muted-foreground">
-                ملف خاص بك لتفضيلات الشعر والبشرة والأظافر والحساسيات. لن تتم مشاركته مع أي صالون دون موافقتك الصريحة.
-              </p>
-              <p className="text-xs text-muted-foreground">المشاركة اختيارية ويمكن سحبها في أي وقت.</p>
-              <Link to="/beauty-passport" className="inline-block text-sm font-medium text-primary">
-                فتح جواز الجمال
-              </Link>
+          <section className="glam-card p-6">
+            <div className="flex items-start gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full glam-gradient text-white">
+                <Sparkles className="size-5" />
+              </span>
+              <div className="space-y-2">
+                <h2 className="font-semibold">جواز جمالك</h2>
+                <p className="text-sm text-muted-foreground">
+                  ملف خاص بك لتفضيلات الشعر والبشرة والأظافر والحساسيات. لن تتم مشاركته مع أي صالون
+                  دون موافقتك الصريحة.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  المشاركة اختيارية ويمكن سحبها في أي وقت.
+                </p>
+                <Link
+                  to="/beauty-passport"
+                  className="inline-block text-sm font-medium text-primary"
+                >
+                  فتح جواز الجمال
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
-        <form onSubmit={submit} className="glam-card space-y-5 p-6">
-          <label className="block text-sm font-medium">
-            اسمك
-            <input
-              required
-              maxLength={80}
-              autoComplete="name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="mt-2 w-full rounded-2xl border bg-background px-4 py-3"
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={saving || !name.trim()}
-            className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
-          >
-            {saving ? "جارٍ الحفظ…" : "حفظ الاسم"}
-          </button>
-          {notice && (
-            <p role="status" className="text-sm">
-              {notice}
-            </p>
-          )}
-        </form>
+          </section>
+          <form onSubmit={submit} className="glam-card space-y-5 p-6">
+            <label className="block text-sm font-medium">
+              اسمك
+              <input
+                required
+                maxLength={80}
+                autoComplete="name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className="mt-2 w-full rounded-2xl border bg-background px-4 py-3"
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={saving || !name.trim()}
+              className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+            >
+              {saving ? "جارٍ الحفظ…" : "حفظ الاسم"}
+            </button>
+            {notice && (
+              <p role="status" className="text-sm">
+                {notice}
+              </p>
+            )}
+          </form>
         </div>
       )}
     </CustomerShell>
