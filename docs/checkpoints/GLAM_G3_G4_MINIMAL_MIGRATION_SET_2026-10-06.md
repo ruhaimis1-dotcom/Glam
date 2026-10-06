@@ -6,7 +6,7 @@ Status: **PREPARED ONLY — NOT APPLIED**
 Project: `tevqysdswqkgqartpzdg`
 
 ### G3 — Staff operations
-**Database migration required: NO**
+**Database migration required: ONE SMALL COMPATIBILITY RPC**
 
 The live database already provides the authoritative staff-assignment path:
 - `glam_memberships(role='specialist')`
@@ -17,8 +17,9 @@ The live database already provides the authoritative staff-assignment path:
 - `glam_set_schedule` / `glam_remove_schedule`
 - `glam_team_directory`
 
-Candidate code must consume this existing contract. Do not create `glam_staff`,
-`glam_staff_services`, or `glam_staff_availability`.
+The only missing piece for the current staff UI is a role-aware business team directory. The prepared G3 migration adds `glam_business_team_directory(p_org)` only. It does not add or replace any staff table.
+
+Candidate code consumes the existing invite/membership contract. Do not create `glam_staff`, `glam_staff_services`, or `glam_staff_availability`.
 
 ### G4 — Beauty Passport
 Required for current customer UI:
@@ -44,8 +45,9 @@ Deferred because current UI marks them as future/placeholder:
 - salon-side passport read scopes.
 
 ## Candidate files
-1. `docs/sql/mvp/20261006_001_beauty_passport_minimal.sql`
-2. `docs/sql/mvp/20261006_002_client_360_minimal.sql`
+1. `docs/sql/mvp/20261006_000_g3_team_directory_compat.sql`
+2. `docs/sql/mvp/20261006_001_beauty_passport_minimal.sql`
+3. `docs/sql/mvp/20261006_002_client_360_minimal.sql`
 
 ## Release rule
 These files are not production migrations yet. Before moving them into
