@@ -12,7 +12,10 @@ test("G3 candidate reuses the live staff architecture and adds no parallel staff
   const source = await sql("20261006_000_g3_team_directory_compat.sql");
   assert.match(source, /glam_business_team_directory/);
   assert.match(source, /m\.role in \('owner','manager','specialist'\)/);
-  assert.doesNotMatch(source, /create table\s+public\.glam_(staff|staff_services|staff_availability)/i);
+  assert.doesNotMatch(
+    source,
+    /create table\s+public\.glam_(staff|staff_services|staff_availability)/i,
+  );
   assert.match(source, /security definer/i);
   assert.match(source, /set search_path = ''/i);
   assert.match(
@@ -26,10 +29,7 @@ test("Beauty Passport candidate remains customer-owned and consent access is RPC
   assert.match(source, /alter table public\.glam_beauty_passports enable row level security/i);
   assert.match(source, /customer_id = \(select auth\.uid\(\)\)/i);
   assert.match(source, /alter table public\.glam_passport_consents enable row level security/i);
-  assert.match(
-    source,
-    /revoke all on public\.glam_passport_consents from anon, authenticated/i,
-  );
+  assert.match(source, /revoke all on public\.glam_passport_consents from anon, authenticated/i);
   assert.match(source, /glam_my_passport_consents/);
   assert.match(source, /glam_revoke_passport_consent/);
   assert.doesNotMatch(source, /grant\s+select[^;]*glam_passport_consents[^;]*authenticated/i);
