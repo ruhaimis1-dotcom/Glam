@@ -46,8 +46,10 @@ export function parseCsv(text: string): CsvParseResult {
   if (headers.some((header) => !header)) throw new Error("CSV_EMPTY_HEADER");
   if (new Set(headers).size !== headers.length) throw new Error("CSV_DUPLICATE_HEADER");
 
-  const rows = records.slice(1).map((values) =>
-    Object.fromEntries(headers.map((header, index) => [header, values[index]?.trim() ?? ""])),
-  );
+  const rows = records
+    .slice(1)
+    .map((values) =>
+      Object.fromEntries(headers.map((header, index) => [header, values[index]?.trim() ?? ""])),
+    );
   return { headers, rows };
 }
