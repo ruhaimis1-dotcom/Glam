@@ -27,7 +27,7 @@ export type PassportConsent = {
   expiresAt: string | null;
 };
 
-function schemaUnavailable(error: { code?: string } | null) {
+function isPassportScope(scope: string): scope is PassportScope {\n  return PASSPORT_SCOPES.some((allowed) => allowed === scope);\n}\n\nfunction schemaUnavailable(error: { code?: string } | null) {
   return error?.code === "42P01" || error?.code === "PGRST205";
 }
 
