@@ -110,8 +110,14 @@ begin
     'glam_private.client_timeline(uuid,uuid)'::regprocedure
   ]
   loop
-    if has_function_privilege('PUBLIC', sig, 'EXECUTE')
-       or has_function_privilege('anon', sig, 'EXECUTE') then
+    if exists (
+      select 1
+      from pg_proc p
+      cross join lateral aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
+      where p.oid = sig
+        and a.grantee = 0
+        and a.privilege_type = 'EXECUTE'
+    ) or has_function_privilege('anon', sig, 'EXECUTE') then
       raise exception 'PRIVATE_FUNCTION_EXECUTE_EXPOSED: %', sig::text;
     end if;
     if not has_function_privilege('authenticated', sig, 'EXECUTE') then
