@@ -112,6 +112,11 @@ begin
 end
 $$;
 
+revoke all on function glam_private.my_passport_consents() from public, anon;
+revoke all on function glam_private.revoke_passport_consent(uuid) from public, anon;
+grant execute on function glam_private.my_passport_consents() to authenticated;
+grant execute on function glam_private.revoke_passport_consent(uuid) to authenticated;
+
 create or replace function public.glam_my_passport_consents()
 returns table(
   id uuid,
