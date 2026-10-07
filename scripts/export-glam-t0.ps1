@@ -156,8 +156,21 @@ try {
     Set-Content -LiteralPath $hashFile -Encoding ASCII
 
   Write-Host 'Verifying encrypted artifact can be parsed by GnuPG...'
-  & $gpg --list-packets $encrypted *> $null
-  if ($LASTEXITCODE -ne 0) {
+  $previousNativePreference = $null
+  $nativePreferenceSupported = Test-Path variable:PSNativeCommandUseErrorActionPreference
+  if ($nativePreferenceSupported) {
+    $previousNativePreference = $PSNativeCommandUseErrorActionPreference
+    $PSNativeCommandUseErrorActionPreference = $false
+  }
+  try {
+    & $gpg --batch --list-packets $encrypted 1>$null 2>$null
+    $gpgVerifyExit = $LASTEXITCODE
+  } finally {
+    if ($nativePreferenceSupported) {
+      $PSNativeCommandUseErrorActionPreference = $previousNativePreference
+    }
+  }
+  if ($gpgVerifyExit -ne 0) {
     throw 'Encrypted artifact packet verification failed.'
   }
 
