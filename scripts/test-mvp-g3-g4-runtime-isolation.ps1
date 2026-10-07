@@ -75,10 +75,22 @@ union all
 select org_b,owner_b,'owner' from runtime_iso_fixture;
 
 insert into public.glam_beauty_passports(customer_id,hair,skin,nails,sensitivities,preferences,customer_notes)
-select customer_a,'{"type":"A"}','{}','{}','["A-only"]','{"pref":"A"}','A private passport'
+select customer_a,
+       '{"type":"A"}'::jsonb,
+       '{}'::jsonb,
+       '{}'::jsonb,
+       '["A-only"]'::jsonb,
+       '{"pref":"A"}'::jsonb,
+       'A private passport'
 from runtime_iso_fixture
 union all
-select customer_b,'{"type":"B"}','{}','{}','["B-only"]','{"pref":"B"}','B private passport'
+select customer_b,
+       '{"type":"B"}'::jsonb,
+       '{}'::jsonb,
+       '{}'::jsonb,
+       '["B-only"]'::jsonb,
+       '{"pref":"B"}'::jsonb,
+       'B private passport'
 from runtime_iso_fixture;
 
 insert into public.glam_passport_consents(
