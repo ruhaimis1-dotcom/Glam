@@ -192,3 +192,28 @@ No destructive rollback SQL is pre-authorized.
 2. merge/deploy approval after migration verification.
 
 Nothing in this package grants either approval.
+
+
+## Domain and environment plan
+
+Approved public routing:
+
+- Production: `https://glam.hexa16.sa`
+- Staging: `https://staging.glam.hexa16.sa`
+
+Rules:
+- staging remains the pre-production validation environment;
+- customer-facing launch uses `glam.hexa16.sa`;
+- no direct production release should bypass staging after launch;
+- GLAM remains visually and operationally independent from HEXA despite using a HEXA-owned subdomain.
+
+Before activation:
+1. create the required DNS records for both subdomains;
+2. verify TLS/SSL issuance and HTTPS redirect;
+3. point staging to the approved candidate environment;
+4. add both domains to the hosting configuration;
+5. add the required Supabase Auth Site URL / Redirect URLs for the final domain set;
+6. verify sign-in/sign-up callbacks, booking flow, and authenticated business access from the custom domain;
+7. after production deploy, run the post-deploy smoke checklist on `glam.hexa16.sa`.
+
+No DNS, Auth URL, hosting, or production-domain change is authorized merely by this document; activation requires the separate release execution approval.
