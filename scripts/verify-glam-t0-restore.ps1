@@ -126,7 +126,7 @@ try {
   $storageSetvalLines = 0
 
   foreach ($line in $inputLines) {
-    if (-not $skippingStorageCopy -and $line -match '^COPY\s+storage\.') {
+    if (-not $skippingStorageCopy -and $line -match '^\s*COPY\s+(?:"storage"|storage)\.') {
       $skippingStorageCopy = $true
       $storageCopyBlocks++
       continue
@@ -137,7 +137,7 @@ try {
       continue
     }
 
-    if ($line -match "^SELECT\s+(?:pg_catalog\.)?setval\('storage\.") {
+    if ($line -match "^\s*SELECT\s+(?:pg_catalog\.)?setval\('\"?storage\"?\.") {
       $storageSetvalLines++
       continue
     }
@@ -152,9 +152,16 @@ try {
   $outputLines | Set-Content -LiteralPath $filteredData -Encoding UTF8
   $filteredText = Get-Content -LiteralPath $filteredData -Raw
 
-  if ($filteredText -match '(?m)^COPY\s+storage\.' -or
-      $filteredText -match "(?m)^SELECT\s+(?:pg_catalog\.)?setval\('storage\.") {
-    throw 'Managed Storage executable data remained after filtering.'
+  $remainingStorageExec = @(
+    [regex]::Matches(
+      $filteredText,
+      '(?im)^\s*(?:COPY\s+(?:"storage"|storage)\.|SELECT\s+(?:pg_catalog\.)?setval\(''\"?storage\"?\.)[^\r\n]*'
+    ) | ForEach-Object { $_.Value.Trim() }
+  )
+  if ($remainingStorageExec.Count -gt 0) {
+    Write-Host 'Remaining managed Storage statements:' -ForegroundColor Yellow
+    $remainingStorageExec | Select-Object -First 10 | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
+    throw 'Managed Storage executable data remained after filtering; restore was not attempted.'
   }
 
   Write-Output ('INFO: excluded managed Storage COPY blocks: ' + $storageCopyBlocks)
