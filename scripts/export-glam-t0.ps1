@@ -35,12 +35,18 @@ function Invoke-Supabase([string[]]$Arguments) {
   } else {
     & $supabase --no-install supabase @Arguments
   }
-  return $LASTEXITCODE
+  $code = $LASTEXITCODE
+  if ($null -eq $code) { $code = 0 }
+  return [int]$code
 }
 
 # Fail before reading credentials if the required local tooling is unavailable.
-$versionExit = Invoke-Supabase @('--version')
-if ($versionExit -ne 0) { throw 'Supabase CLI is unavailable.' }
+if ($supabaseMode -eq 'global') {
+  & $supabase --version | Out-Host
+} else {
+  & $supabase --no-install supabase --version | Out-Host
+}
+if ($LASTEXITCODE -ne 0) { throw 'Supabase CLI is unavailable.' }
 & $gpg --version | Select-Object -First 1
 if ($LASTEXITCODE -ne 0) { throw 'GnuPG is unavailable.' }
 
