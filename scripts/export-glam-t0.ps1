@@ -156,21 +156,12 @@ try {
     Set-Content -LiteralPath $hashFile -Encoding ASCII
 
   Write-Host 'Verifying encrypted artifact can be parsed by GnuPG...'
-  $previousNativePreference = $null
-  $nativePreferenceSupported = Test-Path variable:PSNativeCommandUseErrorActionPreference
-  if ($nativePreferenceSupported) {
-    $previousNativePreference = $PSNativeCommandUseErrorActionPreference
-    $PSNativeCommandUseErrorActionPreference = $false
-  }
-  try {
-    & $gpg --batch --list-packets $encrypted 1>$null 2>$null
-    $gpgVerifyExit = $LASTEXITCODE
-  } finally {
-    if ($nativePreferenceSupported) {
-      $PSNativeCommandUseErrorActionPreference = $previousNativePreference
-    }
-  }
-  if ($gpgVerifyExit -ne 0) {
+  $gpgVerifyOut = Join-Path $work 'gpg-verify.out.txt'
+  $gpgVerifyErr = Join-Path $work 'gpg-verify.err.txt'
+  $gpgVerify = Start-Process -FilePath $gpg -ArgumentList @('--batch','--list-packets',$encrypted) `
+    -RedirectStandardOutput $gpgVerifyOut -RedirectStandardError $gpgVerifyErr `
+    -Wait -PassThru -NoNewWindow
+  if ($gpgVerify.ExitCode -ne 0) {
     throw 'Encrypted artifact packet verification failed.'
   }
 
