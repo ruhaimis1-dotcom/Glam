@@ -69,6 +69,7 @@ $runId = [Guid]::NewGuid().ToString('N')
 $tempRoot = Join-Path $repo ('supabase/.temp/t0-restore-' + $runId)
 $zip = Join-Path $tempRoot 't0.zip'
 $extract = Join-Path $tempRoot 'extract'
+$filteredData = Join-Path $tempRoot 'application-data.sql'
 $wrapper = Join-Path $tempRoot 'data-wrapper.sql'
 New-Item -ItemType Directory -Force -Path $extract | Out-Null
 
@@ -114,11 +115,55 @@ try {
   Write-Host ('Restoring reviewed GLAM baseline schema into isolated database ' + $database)
   Invoke-PsqlFile -Path $snapshotPath -Database $database -User 'supabase_admin' -SingleTransaction
 
-  $dataText = Get-Content -LiteralPath $data -Raw
+  # The Supabase CLI data dump can contain managed Storage table COPY blocks even
+  # though this Application T0 intentionally does not restore the managed Storage
+  # schema or Storage objects. Remove only executable storage COPY/setval entries;
+  # preserve every application row exactly as exported.
+  $inputLines = Get-Content -LiteralPath $data
+  $outputLines = [System.Collections.Generic.List[string]]::new()
+  $skippingStorageCopy = $false
+  $storageCopyBlocks = 0
+  $storageSetvalLines = 0
+
+  foreach ($line in $inputLines) {
+    if (-not $skippingStorageCopy -and $line -match '^COPY\s+storage\.') {
+      $skippingStorageCopy = $true
+      $storageCopyBlocks++
+      continue
+    }
+
+    if ($skippingStorageCopy) {
+      if ($line -eq '\.') { $skippingStorageCopy = $false }
+      continue
+    }
+
+    if ($line -match "^SELECT\s+(?:pg_catalog\.)?setval\('storage\.") {
+      $storageSetvalLines++
+      continue
+    }
+
+    $outputLines.Add($line)
+  }
+
+  if ($skippingStorageCopy) {
+    throw 'Malformed data dump: unterminated storage COPY block.'
+  }
+
+  $outputLines | Set-Content -LiteralPath $filteredData -Encoding UTF8
+  $filteredText = Get-Content -LiteralPath $filteredData -Raw
+
+  if ($filteredText -match '(?m)^COPY\s+storage\.' -or
+      $filteredText -match "(?m)^SELECT\s+(?:pg_catalog\.)?setval\('storage\.") {
+    throw 'Managed Storage executable data remained after filtering.'
+  }
+
+  Write-Output ('INFO: excluded managed Storage COPY blocks: ' + $storageCopyBlocks)
+  Write-Output ('INFO: excluded managed Storage setval statements: ' + $storageSetvalLines)
+
   $wrapped = @"
 BEGIN;
 SET LOCAL session_replication_role = replica;
-$dataText
+$filteredText
 SET LOCAL session_replication_role = origin;
 COMMIT;
 "@
