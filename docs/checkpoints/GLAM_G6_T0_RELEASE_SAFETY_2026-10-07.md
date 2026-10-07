@@ -133,17 +133,91 @@ The T0 gate passes only when all are true:
 
 ## Current blocker
 
-The current Supabase connector account cannot read project `tevqysdswqkgqartpzdg`.
-Until access to that exact GLAM project is restored, G6 remains **BLOCKED BEFORE LIVE READ**.
-
-Do not use KFO or another project as a substitute and do not request or paste database passwords into chat.
+Live read-only access is now available and the comparison is complete. The remaining G6 blocker is a current T0 export plus successful isolated restore/integrity proof. The export must run in an environment that can securely use the GLAM database credential without exposing it in chat or Git.
 
 ## Next safe action
 
-Restore connector access to the GLAM Supabase project, or use the already-authorized local environment with an existing secure database credential file/path that is never pasted into chat.
+Run the supported local T0 export from the approved local environment using a secure credential source, verify hashes/decryption, restore into a fresh isolated database, and compare exact protected ID sets/counts. Stop before any production migration and request a separate explicit production-write approval.
 
-Once access is available:
-1. perform the live read-only comparison;
-2. prepare the exact T0 export command for the environment actually available;
-3. execute T0 only under the existing explicit authorization for this G6 task if no new paid service/cost is introduced;
-4. stop before any production migration and request a separate explicit production-write approval.
+
+## Live production re-check — 2026-10-07
+
+Supabase connector access to the exact GLAM project was restored and the following checks were executed read-only.
+
+Project:
+- ref: `tevqysdswqkgqartpzdg`
+- status: ACTIVE_HEALTHY
+- region: eu-central-1
+- Postgres: 17.6.1.166
+- organization plan: Free
+
+Current migration ledger:
+- latest recorded migration: `20260923214630_seed_initial_service_catalog_categories`
+- none of the four reviewed PR4 migrations are recorded;
+- none of the prepared G3/G4 files are production migrations or recorded as applied.
+
+Current production counts observed:
+- organizations: 4
+- memberships: 2
+- services: 5
+- appointments: 37
+- reservations: 6
+- service-specialist links: 3
+- schedule windows: 6
+
+G3/G4 production absence confirmed:
+- `public.glam_business_team_directory(uuid)`: absent
+- `public.glam_beauty_passports`: absent
+- `public.glam_passport_consents`: absent
+- `public.glam_client_contacts`: absent
+- G4 list/revoke/duplicate/create/timeline public RPCs: absent
+- parallel `glam_staff` / `glam_staff_services` / `glam_staff_availability`: absent
+
+PR4 marker check:
+- `glam_reservations.delivery_channel`: absent
+- `glam_00_booking_concurrency`: absent
+- `glam_delivery_booking`: absent
+- `catalog_*` policies: absent
+- only the legacy public booking RPC signatures are present:
+  - `glam_reserve(uuid,uuid)`
+  - `glam_reserve_direct(text,uuid,uuid)`
+  - `glam_reschedule(uuid,uuid,uuid)`
+
+This supports an expected release delta of the four reviewed PR4 migrations followed by the three prepared G3/G4 changes, subject to conversion of the G3/G4 prepared SQL into formal migrations using the supported Supabase CLI workflow and a final pre-window live re-check. Nothing has been applied.
+
+The previously documented `supabase_admin` public-schema default-privilege difference is still present in production for relations, functions and sequences. Do not silently normalize it as part of the MVP release.
+
+### Security Advisor snapshot
+
+Current production advisor findings:
+- INFO: RLS enabled with no policy on six tables:
+  - `glam_private.attendance_events`
+  - `glam_private.platform_admins`
+  - `glam_private.salon_approvals`
+  - `glam_private.team_invites`
+  - `public.glam_payment_webhook_events`
+  - `public.glam_reviews`
+- WARN: leaked password protection is disabled in Supabase Auth.
+
+These findings pre-date the G3/G4 migration because those relations are absent in production. They require explicit review before the Human MVP Gate; do not change them automatically as part of the database release.
+
+Supabase remediation references:
+- RLS enabled/no policy: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+- leaked password protection: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+### Current T0 path
+
+Current Supabase documentation confirms:
+- Free projects should regularly create manual logical exports using `supabase db dump`;
+- Storage API objects themselves are not contained in a database backup;
+- a supported portable backup can be separated into roles, schema and data dumps.
+
+The production database export itself has **not** been started from this agent session because the Supabase MCP exposes SQL/metadata operations, not a safe downloadable `db dump` artifact path. The T0 export must therefore run in the approved local environment using a secure connection string/password source that is not pasted into chat or committed.
+
+G6 state after this re-check:
+- live read-only comparison: PASS
+- exact expected migration delta: IDENTIFIED, final pre-window re-check still required
+- security advisor review: CAPTURED
+- T0 export: NOT YET EXECUTED
+- T0 restore/integrity proof: NOT YET EXECUTED
+- production migration/write: NOT AUTHORIZED
