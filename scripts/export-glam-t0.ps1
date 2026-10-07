@@ -31,13 +31,13 @@ if ($supabaseGlobal) {
 
 function Invoke-Supabase([string[]]$Arguments) {
   if ($supabaseMode -eq 'global') {
-    & $supabase @Arguments
+    & $supabase @Arguments | Out-Host
   } else {
-    & $supabase --no-install supabase @Arguments
+    & $supabase --no-install supabase @Arguments | Out-Host
   }
   $code = $LASTEXITCODE
   if ($null -eq $code) { $code = 0 }
-  return [int]$code
+  Write-Output ([int]$code)
 }
 
 # Fail before reading credentials if the required local tooling is unavailable.
@@ -47,8 +47,10 @@ if ($supabaseMode -eq 'global') {
   & $supabase --no-install supabase --version | Out-Host
 }
 if ($LASTEXITCODE -ne 0) { throw 'Supabase CLI is unavailable.' }
-& $gpg --version | Select-Object -First 1
-if ($LASTEXITCODE -ne 0) { throw 'GnuPG is unavailable.' }
+$gpgVersionOutput = & $gpg --version
+$gpgVersionExit = $LASTEXITCODE
+if ($gpgVersionExit -ne 0) { throw 'GnuPG is unavailable.' }
+$gpgVersionOutput | Select-Object -First 1 | Out-Host
 
 Write-Host 'GLAM T0 logical export (read-only against production).'
 Write-Host 'This uses Supabase CLI filtering. It DOES NOT claim a full managed-project backup.'
