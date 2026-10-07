@@ -23,6 +23,25 @@ function Invoke-LocalDocker([string[]]$Arguments) {
   if ($LASTEXITCODE -ne 0) { throw ('Local Docker command failed: ' + $Arguments[0]) }
 }
 
+function Invoke-PsqlFile(
+  [string]$Path,
+  [string]$Database,
+  [string]$User,
+  [switch]$SingleTransaction
+) {
+  $resolved = (Resolve-Path -LiteralPath $Path).Path
+  $arguments = @('exec','-i',$container,'psql','-X','-U',$User,'-d',$Database,'-v','ON_ERROR_STOP=1')
+  if ($SingleTransaction) { $arguments += '-1' }
+
+  # Do not use docker cp here. The reviewed recovery path streams SQL over stdin
+  # directly into psql, avoiding the previously failed container-copy path.
+  $process = Start-Process -FilePath $docker -ArgumentList $arguments `
+    -RedirectStandardInput $resolved -Wait -PassThru -NoNewWindow
+  if ($process.ExitCode -ne 0) {
+    throw ('Local psql stream failed for: ' + $resolved)
+  }
+}
+
 $names = & $docker ps -a --format '{{.Names}}'
 if ($LASTEXITCODE -ne 0) { throw 'Docker is unavailable.' }
 if ($container -notin $names) { throw 'Expected isolated container glam-pr4-review was not found.' }
@@ -46,22 +65,26 @@ if (-not $ready) { throw 'Isolated GLAM PostgreSQL did not become ready.' }
 
 $database = 'mvp_g3g4_' + [Guid]::NewGuid().ToString('N')
 Invoke-LocalDocker @('exec',$container,'createdb','-U','supabase_admin','-O','postgres','-T','template0',$database)
-Invoke-LocalDocker @('cp',$snapshotPath,($container + ':/tmp/glam-schema-only.sql'))
-Invoke-LocalDocker @('cp',(Join-Path $repo 'docs/sql/mvp/20261006_000_g3_team_directory_compat.sql'),($container + ':/tmp/000.sql'))
-Invoke-LocalDocker @('cp',(Join-Path $repo 'docs/sql/mvp/20261006_001_beauty_passport_minimal.sql'),($container + ':/tmp/001.sql'))
-Invoke-LocalDocker @('cp',(Join-Path $repo 'docs/sql/mvp/20261006_002_client_360_minimal.sql'),($container + ':/tmp/002.sql'))
-Invoke-LocalDocker @('cp',(Join-Path $repo 'docs/sql/mvp/20261006_negative_security_rehearsal.sql'),($container + ':/tmp/negative.sql'))
 
 Write-Output ('Restoring reviewed GLAM snapshot into isolated database ' + $database)
-Invoke-LocalDocker @('exec',$container,'psql','-X','-U','supabase_admin','-d',$database,'-v','ON_ERROR_STOP=1','-1','-f','/tmp/glam-schema-only.sql')
+Invoke-PsqlFile -Path $snapshotPath -Database $database -User 'supabase_admin' -SingleTransaction
 
-foreach ($file in @('/tmp/000.sql','/tmp/001.sql','/tmp/002.sql')) {
+$migrations = @(
+  'docs/sql/mvp/20261006_000_g3_team_directory_compat.sql',
+  'docs/sql/mvp/20261006_001_beauty_passport_minimal.sql',
+  'docs/sql/mvp/20261006_002_client_360_minimal.sql'
+)
+foreach ($file in $migrations) {
   Write-Output ('Applying rehearsal SQL only: ' + $file)
-  Invoke-LocalDocker @('exec',$container,'psql','-X','-U','postgres','-d',$database,'-v','ON_ERROR_STOP=1','-f',$file)
+  Invoke-PsqlFile -Path (Join-Path $repo $file) -Database $database -User 'postgres'
 }
+Write-Output 'PASS: isolated G3/G4 migration rehearsal completed.'
 
-Write-Output 'Running negative RLS / tenant / RPC privilege assertions'
-Invoke-LocalDocker @('exec',$container,'psql','-X','-U','postgres','-d',$database,'-v','ON_ERROR_STOP=1','-1','-f','/tmp/negative.sql')
+Write-Output 'Running schema / RLS / ACL / RPC configuration assertions.'
+Invoke-PsqlFile `
+  -Path (Join-Path $repo 'docs/sql/mvp/20261006_negative_security_rehearsal.sql') `
+  -Database $database -User 'postgres' -SingleTransaction
+Write-Output 'PASS: static database security configuration assertions completed.'
 
 $summary = & $docker exec $container psql -X -U supabase_admin -d $database -At -c @'
 select json_build_object(
@@ -81,6 +104,7 @@ select json_build_object(
 '@
 if ($LASTEXITCODE -ne 0) { throw 'Unable to read rehearsal summary.' }
 
-Write-Output ('PASS: isolated G3/G4 migration rehearsal and negative security assertions.')
+Write-Output 'NOT RUN: runtime authenticated cross-tenant / cross-customer isolation.'
+Write-Output 'Runtime isolation requires two authenticated test identities and must be evidenced separately before G4 can be closed.'
 Write-Output ('Database retained for inspection: ' + $database)
 Write-Output $summary
