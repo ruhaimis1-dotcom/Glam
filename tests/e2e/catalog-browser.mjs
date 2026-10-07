@@ -424,7 +424,7 @@ export async function runBrowserContract({ baseURL, anon, admin, sql, dir }) {
         pass(`${device}: account switch removes owner management access`);
         await page.goto(`${appURL}/salon/${org}`);
         await page.getByRole("link", { name: "اختاري الخدمة والموعد" }).click();
-        ));
+));
         await expect(page.getByRole("heading", { name: "احجزي في لوميير ستوديو" })).toBeVisible();
         await page
           .getByRole("combobox", { name: /^التصنيف الرئيسي/ })
