@@ -137,7 +137,10 @@ try {
       continue
     }
 
-    if ($line -match "^\s*SELECT\s+(?:pg_catalog\.)?setval\('\"?storage\"?\.") {
+    $trimmedLower = $line.TrimStart().ToLowerInvariant()
+    if ($trimmedLower.StartsWith('select ') -and
+        $trimmedLower.Contains('setval(') -and
+        ($trimmedLower.Contains("storage.") -or $trimmedLower.Contains('"storage".'))) {
       $storageSetvalLines++
       continue
     }
@@ -152,12 +155,18 @@ try {
   $outputLines | Set-Content -LiteralPath $filteredData -Encoding UTF8
   $filteredText = Get-Content -LiteralPath $filteredData -Raw
 
-  $remainingStorageExec = @(
-    [regex]::Matches(
-      $filteredText,
-      '(?im)^\s*(?:COPY\s+(?:"storage"|storage)\.|SELECT\s+(?:pg_catalog\.)?setval\(''\"?storage\"?\.)[^\r\n]*'
-    ) | ForEach-Object { $_.Value.Trim() }
-  )
+  $remainingStorageExec = [System.Collections.Generic.List[string]]::new()
+  foreach ($checkLine in (Get-Content -LiteralPath $filteredData)) {
+    $checkTrimmed = $checkLine.TrimStart()
+    $checkLower = $checkTrimmed.ToLowerInvariant()
+    if ($checkLower.StartsWith('copy storage.') -or
+        $checkLower.StartsWith('copy "storage".') -or
+        ($checkLower.StartsWith('select ') -and
+         $checkLower.Contains('setval(') -and
+         ($checkLower.Contains('storage.') -or $checkLower.Contains('"storage".')))) {
+      $remainingStorageExec.Add($checkTrimmed)
+    }
+  }
   if ($remainingStorageExec.Count -gt 0) {
     Write-Host 'Remaining managed Storage statements:' -ForegroundColor Yellow
     $remainingStorageExec | Select-Object -First 10 | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
