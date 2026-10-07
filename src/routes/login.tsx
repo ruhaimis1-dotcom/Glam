@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Mail, LockKeyhole } from "lucide-react";
+import { ArrowRight, LockKeyhole } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { listBusinessOrganizations } from "@/lib/business-access";
@@ -134,9 +134,6 @@ function LoginPage() {
               {register ? "لديك حساب؟ سجّلي الدخول" : "عميلة جديدة؟ أنشئي حسابًا"}
             </button>
           </form>
-          <p className="mt-5 text-center text-xs text-[#745e70]">
-            <Mail className="mr-1 inline size-3.5" /> نسخة تجريبية للربط الأولي
-          </p>
         </section>
       </div>
     </main>
