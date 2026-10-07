@@ -89,6 +89,9 @@ test("only reviewed live-baseline migrations are runnable; historical SQL is arc
       "20260926150009_booking_catalog_visibility.sql",
       "20260927141701_catalog_delivery_booking.sql",
       "20260927155514_reservation_delivery_compatibility.sql",
+      "20261007180000_g3_team_directory_compat.sql",
+      "20261007180100_beauty_passport_minimal.sql",
+      "20261007180200_client_360_minimal.sql",
     ],
   );
   assert.match(
