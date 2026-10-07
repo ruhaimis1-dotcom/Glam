@@ -14,13 +14,33 @@ function Require-Command([string]$Name) {
   return $cmd.Source
 }
 
-$supabase = Require-Command 'supabase'
 $gpg = Require-Command 'gpg'
 $tar = Require-Command 'tar'
 
+$supabaseGlobal = Get-Command supabase -ErrorAction SilentlyContinue
+$npx = Get-Command npx -ErrorAction SilentlyContinue
+if ($supabaseGlobal) {
+  $supabaseMode = 'global'
+  $supabase = $supabaseGlobal.Source
+} elseif ($npx -and (Test-Path -LiteralPath (Join-Path $repo 'node_modules/supabase'))) {
+  $supabaseMode = 'npx'
+  $supabase = $npx.Source
+} else {
+  throw 'Supabase CLI not found. Install locally with: npm install supabase --save-dev'
+}
+
+function Invoke-Supabase([string[]]$Arguments) {
+  if ($supabaseMode -eq 'global') {
+    & $supabase @Arguments
+  } else {
+    & $supabase --no-install supabase @Arguments
+  }
+  return $LASTEXITCODE
+}
+
 # Fail before reading credentials if the required local tooling is unavailable.
-& $supabase --version
-if ($LASTEXITCODE -ne 0) { throw 'Supabase CLI is unavailable.' }
+$versionExit = Invoke-Supabase @('--version')
+if ($versionExit -ne 0) { throw 'Supabase CLI is unavailable.' }
 & $gpg --version | Select-Object -First 1
 if ($LASTEXITCODE -ne 0) { throw 'GnuPG is unavailable.' }
 
@@ -59,8 +79,8 @@ $encrypted = $archive + '.gpg'
 $hashFile = $encrypted + '.sha256.txt'
 
 function Invoke-Dump([string[]]$Arguments) {
-  & $supabase db dump --db-url $dbUrl @Arguments
-  if ($LASTEXITCODE -ne 0) {
+  $exitCode = Invoke-Supabase (@('db','dump','--db-url',$dbUrl) + $Arguments)
+  if ($exitCode -ne 0) {
     throw ('Supabase db dump failed: ' + ($Arguments -join ' '))
   }
 }
