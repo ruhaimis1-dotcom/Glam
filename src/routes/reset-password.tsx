@@ -14,6 +14,14 @@ function ResetPasswordPage() {
   const [recovery, setRecovery] = useState(false);
 
   useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const errorCode = hashParams.get("error_code");
+    if (errorCode === "otp_expired") {
+      setError("انتهت صلاحية رابط الاستعادة أو تم استخدامه. اطلبي رابطًا جديدًا.");
+    } else if (hashParams.get("error")) {
+      setError("تعذر التحقق من رابط الاستعادة. اطلبي رابطًا جديدًا.");
+    }
+
     supabase.auth.getSession().then(({ data }) => setRecovery(Boolean(data.session)));
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || session) setRecovery(true);
