@@ -2,14 +2,32 @@ import { Link, type LinkProps } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  Home, CalendarDays, UserRound, Store, LayoutDashboard, Clock, Scissors, Users, ShieldCheck,
-  Building2, BookOpenCheck, Gavel, ArrowLeftRight, type LucideIcon,
+  Home,
+  CalendarDays,
+  UserRound,
+  Store,
+  LayoutDashboard,
+  Clock,
+  Scissors,
+  Users,
+  ShieldCheck,
+  Building2,
+  BookOpenCheck,
+  Gavel,
+  ArrowLeftRight,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { GlamLogo } from "./ui";
+import { useBusinessOrganization } from "@/lib/business-context";
 
-type NavItem = { to: NonNullable<LinkProps["to"]>; label: string; icon: LucideIcon; exact?: boolean };
+type NavItem = {
+  to: NonNullable<LinkProps["to"]>;
+  label: string;
+  icon: LucideIcon;
+  exact?: boolean;
+};
 
 /* ---------------- Customer app ---------------- */
 
@@ -19,21 +37,35 @@ const CUSTOMER_NAV: NavItem[] = [
   { to: "/profile", label: "ملفي", icon: UserRound },
 ];
 
-export function CustomerShell({ children, title, back }: { children: ReactNode; title?: string; back?: NonNullable<LinkProps["to"]> }) {
+export function CustomerShell({
+  children,
+  title,
+  back,
+}: {
+  children: ReactNode;
+  title?: string;
+  back?: NonNullable<LinkProps["to"]>;
+}) {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
           <div className="flex items-center gap-3">
             {back ? (
-              <Link to={back} className="grid size-9 place-items-center rounded-full border bg-card hover:bg-accent" aria-label="رجوع">
+              <Link
+                to={back}
+                className="grid size-9 place-items-center rounded-full border bg-card hover:bg-accent"
+                aria-label="رجوع"
+              >
                 <ArrowLeftRight className="size-4 rotate-180" />
               </Link>
             ) : null}
             <Link to="/" aria-label="Glam الرئيسية">
               <GlamLogo className="text-2xl" />
             </Link>
-            {title && <span className="hidden text-sm text-muted-foreground sm:inline">/ {title}</span>}
+            {title && (
+              <span className="hidden text-sm text-muted-foreground sm:inline">/ {title}</span>
+            )}
           </div>
           <nav className="hidden items-center gap-1 md:flex" aria-label="التنقل الرئيسي">
             {CUSTOMER_NAV.map((n) => (
@@ -47,10 +79,16 @@ export function CustomerShell({ children, title, back }: { children: ReactNode; 
               </Link>
             ))}
             <span className="mx-2 h-5 w-px bg-border" />
-            <Link to="/business" className="rounded-full px-3 py-2 text-sm font-medium text-primary hover:bg-accent">
+            <Link
+              to="/business"
+              className="rounded-full px-3 py-2 text-sm font-medium text-primary hover:bg-accent"
+            >
               Glam Business
             </Link>
-            <Link to="/admin" className="rounded-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent">
+            <Link
+              to="/admin"
+              className="rounded-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent"
+            >
               الإدارة
             </Link>
           </nav>
@@ -76,7 +114,10 @@ export function CustomerShell({ children, title, back }: { children: ReactNode; 
             </li>
           ))}
           <li>
-            <Link to="/business" className="flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground data-[status=active]:text-primary">
+            <Link
+              to="/business"
+              className="flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground data-[status=active]:text-primary"
+            >
               <Store className="size-5" />
               الأعمال
             </Link>
@@ -104,8 +145,20 @@ const ADMIN_NAV: NavItem[] = [
 ];
 
 function SidebarShell({
-  children, nav, brand, subtitle, switchTo, switchLabel,
-}: { children: ReactNode; nav: NavItem[]; brand: ReactNode; subtitle: string; switchTo: NonNullable<LinkProps["to"]>; switchLabel: string }) {
+  children,
+  nav,
+  brand,
+  subtitle,
+  switchTo,
+  switchLabel,
+}: {
+  children: ReactNode;
+  nav: NavItem[];
+  brand: ReactNode;
+  subtitle: string;
+  switchTo: NonNullable<LinkProps["to"]>;
+  switchLabel: string;
+}) {
   return (
     <div className="min-h-screen bg-background md:grid md:grid-cols-[260px_1fr]">
       <aside className="hidden border-e bg-sidebar md:flex md:flex-col">
@@ -127,10 +180,16 @@ function SidebarShell({
           ))}
         </nav>
         <div className="border-t p-3">
-          <Link to={switchTo} className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-primary hover:bg-sidebar-accent">
+          <Link
+            to={switchTo}
+            className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-primary hover:bg-sidebar-accent"
+          >
             <ArrowLeftRight className="size-3.5" /> {switchLabel}
           </Link>
-          <Link to="/" className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted-foreground hover:bg-sidebar-accent">
+          <Link
+            to="/"
+            className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted-foreground hover:bg-sidebar-accent"
+          >
             <Home className="size-3.5" /> تطبيق العميلة
           </Link>
         </div>
@@ -138,7 +197,9 @@ function SidebarShell({
       <div className="flex min-h-screen flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b bg-background/85 px-4 backdrop-blur-md md:hidden">
           {brand}
-          <Link to="/" className="text-xs text-muted-foreground">تطبيق العميلة</Link>
+          <Link to="/" className="text-xs text-muted-foreground">
+            تطبيق العميلة
+          </Link>
         </header>
         <div className="no-scrollbar flex gap-1 overflow-x-auto border-b px-3 py-2 md:hidden">
           {nav.map((n) => (
@@ -159,17 +220,19 @@ function SidebarShell({
 }
 
 export function BusinessShell({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email !== "ruhaimi.s1@gmail.com") navigate({ to: "/bookings", replace: true });
-    });
-  }, [navigate]);
+  const organization = useBusinessOrganization();
   return (
     <SidebarShell
       nav={BUSINESS_NAV}
-      brand={<span className="flex items-center gap-2"><GlamLogo className="text-xl" /><span className="rounded-full bg-rose-gold/20 px-2 py-0.5 text-[10px] font-bold text-rose-gold-foreground">BUSINESS</span></span>}
-      subtitle="لوميير ستوديو · حي الملقا"
+      brand={
+        <span className="flex items-center gap-2">
+          <GlamLogo className="text-xl" />
+          <span className="rounded-full bg-rose-gold/20 px-2 py-0.5 text-[10px] font-bold text-rose-gold-foreground">
+            BUSINESS
+          </span>
+        </span>
+      }
+      subtitle={organization.name}
       switchTo="/admin"
       switchLabel="لوحة إدارة Glam"
     >
@@ -188,7 +251,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   return (
     <SidebarShell
       nav={ADMIN_NAV}
-      brand={<span className="flex items-center gap-2"><GlamLogo className="text-xl" /><span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground"><ShieldCheck className="size-3" />ADMIN</span></span>}
+      brand={
+        <span className="flex items-center gap-2">
+          <GlamLogo className="text-xl" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+            <ShieldCheck className="size-3" />
+            ADMIN
+          </span>
+        </span>
+      }
       subtitle="عمليات المنصة · الرياض"
       switchTo="/business"
       switchLabel="Glam Business"
@@ -198,7 +269,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageHeader({ title, desc, action }: { title: string; desc?: string; action?: ReactNode }) {
+export function PageHeader({
+  title,
+  desc,
+  action,
+}: {
+  title: string;
+  desc?: string;
+  action?: ReactNode;
+}) {
   return (
     <div className={cn("mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3")}>
       <div className="min-w-0">
