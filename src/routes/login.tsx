@@ -103,6 +103,16 @@ function LoginPage() {
                 />
               </div>
             </label>
+            {!register && (
+              <div className="-mt-1 flex justify-start">
+                <Link
+                  to="/reset-password"
+                  className="text-sm font-semibold text-[#8c285d] hover:text-[#5A1835]"
+                >
+                  نسيت كلمة المرور؟
+                </Link>
+              </div>
+            )}
             {notice && (
               <p role="status" className="text-sm text-[#5A1835]">
                 {notice}
