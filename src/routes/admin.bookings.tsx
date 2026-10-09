@@ -12,7 +12,9 @@ type BookingRow = {
   created_at: string;
   appointment_id: string;
   delivery_channel: string | null;
-  label: string;
+  salon_name: string | null;
+  service_name: string | null;
+  starts_at: string | null;
 };
 
 function AdminBookingsPage() {
@@ -21,44 +23,15 @@ function AdminBookingsPage() {
 
   useEffect(() => {
     let active = true;
-    void (async () => {
-      const { data: reservations, error } = await supabase
-        .from("glam_reservations")
-        .select("id,status,created_at,appointment_id,delivery_channel")
-        .order("created_at", { ascending: false })
-        .limit(50);
-
+    void supabase.rpc("glam_admin_bookings").then(({ data, error }) => {
       if (!active) return;
-      if (error) {
+      if (error || data === null) {
         setStatus("error");
         return;
       }
-
-      const appointmentIds = (reservations ?? []).map((row) => row.appointment_id);
-      const { data: appointments } = appointmentIds.length
-        ? await supabase
-            .from("glam_appointments")
-            .select("id,salon_name,service_name,starts_at")
-            .in("id", appointmentIds)
-        : { data: [] as Array<Record<string, unknown>> };
-
-      const appointmentMap = new Map((appointments ?? []).map((row) => [row.id, row]));
-      setRows(
-        (reservations ?? []).map((row) => {
-          const appointment = appointmentMap.get(row.appointment_id) as
-            | { salon_name?: string; service_name?: string; starts_at?: string }
-            | undefined;
-          return {
-            ...row,
-            label: appointment
-              ? `${appointment.salon_name ?? "صالون"} · ${appointment.service_name ?? "خدمة"} · ${appointment.starts_at ? new Date(appointment.starts_at).toLocaleString("ar-SA") : "موعد"}`
-              : `حجز ${row.id.slice(0, 8)}`,
-          };
-        }),
-      );
+      setRows(data as BookingRow[]);
       setStatus("ready");
-    })();
-
+    });
     return () => {
       active = false;
     };
@@ -69,7 +42,9 @@ function AdminBookingsPage() {
       <PageHeader title="الحجوزات" desc="سجل الحجوزات الفعلي في المنصة" />
       {status === "loading" && <p role="status">جارٍ تحميل الحجوزات…</p>}
       {status === "error" && (
-        <p role="alert" className="glam-card p-5">تعذر تحميل الحجوزات بصلاحيات الإدارة الحالية.</p>
+        <p role="alert" className="glam-card p-5">
+          تعذر تحميل الحجوزات بصلاحيات الإدارة الحالية.
+        </p>
       )}
       {status === "ready" && !rows.length && (
         <p className="glam-card p-5 text-muted-foreground">لا توجد حجوزات متاحة للعرض.</p>
@@ -79,7 +54,10 @@ function AdminBookingsPage() {
           <div className="flex flex-wrap items-center gap-3 p-4" key={row.id}>
             <CalendarCheck className="size-5 text-primary" />
             <div className="min-w-0 flex-1">
-              <p>{row.label}</p>
+              <p>
+                {row.salon_name ?? "صالون"} · {row.service_name ?? "خدمة"} ·{" "}
+                {row.starts_at ? new Date(row.starts_at).toLocaleString("ar-SA") : "موعد"}
+              </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {row.delivery_channel === "home"
                   ? "خدمة منزلية"

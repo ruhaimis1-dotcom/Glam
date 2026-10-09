@@ -92,6 +92,7 @@ test("only reviewed live-baseline migrations are runnable; historical SQL is arc
       "20261007180000_g3_team_directory_compat.sql",
       "20261007180100_beauty_passport_minimal.sql",
       "20261007180200_client_360_minimal.sql",
+      "20261009183000_admin_read_model.sql",
     ],
   );
   assert.match(

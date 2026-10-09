@@ -23,20 +23,15 @@ function AdminDisputesPage() {
 
   useEffect(() => {
     let active = true;
-    void supabase
-      .from("glam_disputes")
-      .select("id,organization_id,summary,status,resolution_note,created_at,resolved_at")
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data, error }) => {
-        if (!active) return;
-        if (error) {
-          setStatus("error");
-          return;
-        }
-        setRows((data ?? []) as Dispute[]);
-        setStatus("ready");
-      });
+    void supabase.rpc("glam_admin_disputes").then(({ data, error }) => {
+      if (!active) return;
+      if (error || data === null) {
+        setStatus("error");
+        return;
+      }
+      setRows(data as Dispute[]);
+      setStatus("ready");
+    });
     return () => {
       active = false;
     };
@@ -47,7 +42,9 @@ function AdminDisputesPage() {
       <PageHeader title="النزاعات" desc="الحالات التشغيلية المسجلة فعليًا" />
       {status === "loading" && <p role="status">جارٍ تحميل النزاعات…</p>}
       {status === "error" && (
-        <p role="alert" className="glam-card p-5">تعذر تحميل النزاعات بصلاحيات الإدارة الحالية.</p>
+        <p role="alert" className="glam-card p-5">
+          تعذر تحميل النزاعات بصلاحيات الإدارة الحالية.
+        </p>
       )}
       {status === "ready" && !rows.length && (
         <p className="glam-card p-5 text-muted-foreground">لا توجد نزاعات مسجلة حاليًا.</p>
@@ -77,7 +74,10 @@ function AdminDisputesPage() {
           {selected.resolution_note && (
             <p className="text-sm">ملاحظة المعالجة: {selected.resolution_note}</p>
           )}
-          <button onClick={() => setSelected(null)} className="rounded-full border px-4 py-2 text-sm">
+          <button
+            onClick={() => setSelected(null)}
+            className="rounded-full border px-4 py-2 text-sm"
+          >
             إغلاق
           </button>
         </section>

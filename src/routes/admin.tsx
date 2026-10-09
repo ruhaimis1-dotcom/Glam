@@ -6,66 +6,55 @@ import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
-type AdminStats = {
-  organizations: number | null;
-  bookings: number | null;
-  disputes: number | null;
-  customers: number | null;
+type Overview = {
+  organizations: number;
+  bookings: number;
+  open_disputes: number;
+  accounts: number;
 };
 
 function AdminPage() {
-  const [stats, setStats] = useState<AdminStats>({
-    organizations: null,
-    bookings: null,
-    disputes: null,
-    customers: null,
-  });
-  const [status, setStatus] = useState<"loading" | "ready" | "partial">("loading");
+  const [stats, setStats] = useState<Overview | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
     let active = true;
-    void Promise.all([
-      supabase.from("glam_organizations").select("id", { count: "exact", head: true }),
-      supabase.from("glam_reservations").select("id", { count: "exact", head: true }),
-      supabase
-        .from("glam_disputes")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "open"),
-      supabase.from("glam_profiles").select("user_id", { count: "exact", head: true }),
-    ]).then((results) => {
+    void supabase.rpc("glam_admin_overview").then(({ data, error }) => {
       if (!active) return;
-      const [organizations, bookings, disputes, customers] = results;
-      setStats({
-        organizations: organizations.error ? null : (organizations.count ?? 0),
-        bookings: bookings.error ? null : (bookings.count ?? 0),
-        disputes: disputes.error ? null : (disputes.count ?? 0),
-        customers: customers.error ? null : (customers.count ?? 0),
-      });
-      setStatus(results.some((result) => result.error) ? "partial" : "ready");
+      if (error || !data) {
+        setStatus("error");
+        return;
+      }
+      setStats(data as Overview);
+      setStatus("ready");
     });
     return () => {
       active = false;
     };
   }, []);
 
-  const value = (count: number | null) => (count === null ? "غير متاح" : String(count));
-
   return (
     <AdminShell>
       <PageHeader title="مؤشرات المنصة" desc="بيانات تشغيلية مباشرة من Glam" />
-      {status === "loading" && <p role="status" className="mb-4">جارٍ تحميل المؤشرات…</p>}
-      {status === "partial" && (
-        <p role="alert" className="glam-card mb-4 p-4 text-sm text-muted-foreground">
-          بعض المؤشرات غير متاحة بسبب صلاحيات القراءة الحالية. لا يتم عرض بيانات تجريبية بديلة.
+      {status === "loading" && (
+        <p role="status" className="mb-4">
+          جارٍ تحميل المؤشرات…
+        </p>
+      )}
+      {status === "error" && (
+        <p role="alert" className="glam-card mb-4 p-4 text-sm text-destructive">
+          تعذر تحميل مؤشرات الإدارة. تحققي من صلاحية Platform Admin.
         </p>
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {([
-          ["الجهات المسجلة", value(stats.organizations), Building2],
-          ["الحجوزات", value(stats.bookings), CalendarCheck],
-          ["النزاعات المفتوحة", value(stats.disputes), AlertTriangle],
-          ["الحسابات", value(stats.customers), Users],
-        ] as const).map(([label, metric, Icon]) => (
+        {(
+          [
+            ["الجهات المسجلة", stats?.organizations ?? "—", Building2],
+            ["الحجوزات", stats?.bookings ?? "—", CalendarCheck],
+            ["النزاعات المفتوحة", stats?.open_disputes ?? "—", AlertTriangle],
+            ["الحسابات", stats?.accounts ?? "—", Users],
+          ] as const
+        ).map(([label, metric, Icon]) => (
           <div className="glam-card p-4" key={label}>
             <Icon className="size-5 text-primary" />
             <p className="mt-4 text-sm text-muted-foreground">{label}</p>
@@ -77,8 +66,8 @@ function AdminPage() {
       <div className="glam-card mt-5 flex items-start gap-3 p-4 text-sm text-muted-foreground">
         <TrendingUp className="mt-0.5 size-4 shrink-0 text-primary" />
         <p>
-          مؤشر الإيراد غير معروض في هذه النسخة لأن الدفع خارج نطاق MVP الحالي، لذلك لن نعرض رقمًا
-          تقديريًا أو تجريبيًا.
+          الإيراد غير معروض في MVP لأن الدفع غير مفعّل كمسار إنتاجي حتى الآن، لذلك لا نعرض رقمًا
+          تقديريًا.
         </p>
       </div>
 
