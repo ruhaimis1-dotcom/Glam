@@ -23,20 +23,15 @@ function AdminDisputesPage() {
 
   useEffect(() => {
     let active = true;
-    void supabase
-      .from("glam_disputes")
-      .select("id,organization_id,summary,status,resolution_note,created_at,resolved_at")
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data, error }) => {
-        if (!active) return;
-        if (error) {
-          setStatus("error");
-          return;
-        }
-        setRows((data ?? []) as Dispute[]);
-        setStatus("ready");
-      });
+    void supabase.rpc("glam_admin_disputes").then(({ data, error }) => {
+      if (!active) return;
+      if (error || data === null) {
+        setStatus("error");
+        return;
+      }
+      setRows(data as Dispute[]);
+      setStatus("ready");
+    });
     return () => {
       active = false;
     };
