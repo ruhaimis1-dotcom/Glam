@@ -42,7 +42,9 @@ function AdminDisputesPage() {
       <PageHeader title="النزاعات" desc="الحالات التشغيلية المسجلة فعليًا" />
       {status === "loading" && <p role="status">جارٍ تحميل النزاعات…</p>}
       {status === "error" && (
-        <p role="alert" className="glam-card p-5">تعذر تحميل النزاعات بصلاحيات الإدارة الحالية.</p>
+        <p role="alert" className="glam-card p-5">
+          تعذر تحميل النزاعات بصلاحيات الإدارة الحالية.
+        </p>
       )}
       {status === "ready" && !rows.length && (
         <p className="glam-card p-5 text-muted-foreground">لا توجد نزاعات مسجلة حاليًا.</p>
@@ -72,7 +74,10 @@ function AdminDisputesPage() {
           {selected.resolution_note && (
             <p className="text-sm">ملاحظة المعالجة: {selected.resolution_note}</p>
           )}
-          <button onClick={() => setSelected(null)} className="rounded-full border px-4 py-2 text-sm">
+          <button
+            onClick={() => setSelected(null)}
+            className="rounded-full border px-4 py-2 text-sm"
+          >
             إغلاق
           </button>
         </section>
