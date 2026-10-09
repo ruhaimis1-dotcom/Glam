@@ -42,7 +42,9 @@ function AdminBookingsPage() {
       <PageHeader title="الحجوزات" desc="سجل الحجوزات الفعلي في المنصة" />
       {status === "loading" && <p role="status">جارٍ تحميل الحجوزات…</p>}
       {status === "error" && (
-        <p role="alert" className="glam-card p-5">تعذر تحميل الحجوزات بصلاحيات الإدارة الحالية.</p>
+        <p role="alert" className="glam-card p-5">
+          تعذر تحميل الحجوزات بصلاحيات الإدارة الحالية.
+        </p>
       )}
       {status === "ready" && !rows.length && (
         <p className="glam-card p-5 text-muted-foreground">لا توجد حجوزات متاحة للعرض.</p>
