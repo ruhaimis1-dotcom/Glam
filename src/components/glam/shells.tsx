@@ -135,6 +135,7 @@ const BUSINESS_NAV: NavItem[] = [
   { to: "/business/schedule", label: "جدول اليوم", icon: Clock },
   { to: "/business/services", label: "الخدمات", icon: Scissors },
   { to: "/business/staff", label: "الموظفات", icon: Users },
+  { to: "/business/clients", label: "العميلات", icon: UserRound },
 ];
 
 const ADMIN_NAV: NavItem[] = [
