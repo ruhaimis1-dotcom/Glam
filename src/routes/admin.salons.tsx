@@ -11,12 +11,10 @@ type SalonRow = {
   name: string;
   status: string;
   created_at: string;
-  page?: {
-    title: string | null;
-    address: string | null;
-    slug: string | null;
-    published: boolean | null;
-  } | null;
+  page_title: string | null;
+  address: string | null;
+  slug: string | null;
+  published: boolean | null;
 };
 
 function AdminSalonsPage() {
@@ -27,43 +25,13 @@ function AdminSalonsPage() {
   const load = useCallback(async () => {
     setStatus("loading");
     setMessage("");
-    const { data: organizations, error } = await supabase
-      .from("glam_organizations")
-      .select("id,name,status,created_at")
-      .order("created_at", { ascending: false });
-
-    if (error) {
+    const { data, error } = await supabase.rpc("glam_admin_salons");
+    if (error || data === null) {
       setStatus("error");
       setMessage("تعذر تحميل الجهات بصلاحيات الإدارة الحالية.");
       return;
     }
-
-    const ids = (organizations ?? []).map((row) => row.id);
-    const { data: pages } = ids.length
-      ? await supabase
-          .from("glam_salon_pages")
-          .select("organization_id,title,address,slug,published")
-          .in("organization_id", ids)
-      : { data: [] as Array<Record<string, unknown>> };
-
-    const pageMap = new Map(
-      (pages ?? []).map((page) => [
-        page.organization_id,
-        {
-          title: page.title,
-          address: page.address,
-          slug: page.slug,
-          published: page.published,
-        },
-      ]),
-    );
-
-    setRows(
-      (organizations ?? []).map((row) => ({
-        ...row,
-        page: pageMap.get(row.id) ?? null,
-      })),
-    );
+    setRows(data as SalonRow[]);
     setStatus("ready");
   }, []);
 
@@ -111,13 +79,13 @@ function AdminSalonsPage() {
               <div className="min-w-0 flex-1">
                 <p className="font-bold">{row.name}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {row.page?.title || "لا توجد صفحة عامة"}{row.page?.address ? ` · ${row.page.address}` : ""}
+                  {row.page_title || "لا توجد صفحة عامة"}{row.address ? ` · ${row.address}` : ""}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2 text-xs">
                   <span className="rounded-full border px-2.5 py-1">الحالة: {row.status}</span>
                   <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1">
                     <Globe2 className="size-3" />
-                    {row.page?.published ? "الصفحة منشورة" : "الصفحة غير منشورة"}
+                    {row.published ? "الصفحة منشورة" : "الصفحة غير منشورة"}
                   </span>
                 </div>
               </div>
