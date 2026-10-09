@@ -266,7 +266,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
     return (
       <main dir="rtl" className="mx-auto max-w-xl p-8">
         <p role="status">
-          {access === "checking" ? "جارٍ التحقق من صلاحية إدارة المنصة…" : "لا توجد صلاحية لإدارة المنصة."}
+          {access === "checking"
+            ? "جارٍ التحقق من صلاحية إدارة المنصة…"
+            : "لا توجد صلاحية لإدارة المنصة."}
         </p>
       </main>
     );
