@@ -1,29 +1,70 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { AdminShell, PageHeader } from "@/components/glam/shells";
+import { supabase } from "@/lib/supabase";
+
 export const Route = createFileRoute("/admin/disputes")({ component: AdminDisputesPage });
+
+type Dispute = {
+  id: string;
+  organization_id: string;
+  summary: string;
+  status: string;
+  resolution_note: string | null;
+  created_at: string;
+  resolved_at: string | null;
+};
+
 function AdminDisputesPage() {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [resolved, setResolved] = useState<string[]>([]);
-  const disputes = [
-    "النتيجة لا تطابق الصورة المتفق عليها · نور بيوتي لاونج",
-    "إلغاء من الصالون قبل ساعة بدون إشعار · نيل بار الرياض",
-    "خلاف على استرداد العربون · لوميير ستوديو",
-  ];
+  const [rows, setRows] = useState<Dispute[]>([]);
+  const [selected, setSelected] = useState<Dispute | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  useEffect(() => {
+    let active = true;
+    void supabase
+      .from("glam_disputes")
+      .select("id,organization_id,summary,status,resolution_note,created_at,resolved_at")
+      .order("created_at", { ascending: false })
+      .limit(50)
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) {
+          setStatus("error");
+          return;
+        }
+        setRows((data ?? []) as Dispute[]);
+        setStatus("ready");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <AdminShell>
-      <PageHeader title="النزاعات" desc="الحالات التي تحتاج مراجعة" />
+      <PageHeader title="النزاعات" desc="الحالات التشغيلية المسجلة فعليًا" />
+      {status === "loading" && <p role="status">جارٍ تحميل النزاعات…</p>}
+      {status === "error" && (
+        <p role="alert" className="glam-card p-5">تعذر تحميل النزاعات بصلاحيات الإدارة الحالية.</p>
+      )}
+      {status === "ready" && !rows.length && (
+        <p className="glam-card p-5 text-muted-foreground">لا توجد نزاعات مسجلة حاليًا.</p>
+      )}
       <div className="grid gap-3">
-        {disputes.map((x) => (
-          <div className="glam-card flex items-center gap-3 p-4" key={x}>
+        {rows.map((row) => (
+          <div className="glam-card flex items-center gap-3 p-4" key={row.id}>
             <AlertTriangle className="size-5 text-warning" />
-            <span className={resolved.includes(x) ? "line-through opacity-50" : ""}>{x}</span>
+            <div className="min-w-0 flex-1">
+              <p>{row.summary}</p>
+              <p className="mt-1 text-xs text-muted-foreground">الحالة: {row.status}</p>
+            </div>
             <button
-              onClick={() => setSelected(x)}
-              className="mr-auto rounded-full border px-3 py-1.5 text-xs"
+              onClick={() => setSelected(row)}
+              className="rounded-full border px-3 py-1.5 text-xs"
             >
-              {resolved.includes(x) ? "تمت المعالجة" : "مراجعة"}
+              التفاصيل
             </button>
           </div>
         ))}
@@ -31,25 +72,12 @@ function AdminDisputesPage() {
       {selected && (
         <section className="glam-card mt-4 space-y-3 p-5">
           <h2 className="font-bold">تفاصيل النزاع</h2>
-          <p className="text-sm text-muted-foreground">{selected}</p>
-          <p className="text-sm">
-            الحالة: {resolved.includes(selected) ? "تمت المعالجة" : "بانتظار قرار الإدارة"}
-          </p>
-          {!resolved.includes(selected) && (
-            <button
-              onClick={() => {
-                setResolved([...resolved, selected]);
-                setSelected(null);
-              }}
-              className="rounded-full bg-primary px-4 py-2 text-sm text-primary-foreground"
-            >
-              اعتماد المعالجة
-            </button>
+          <p>{selected.summary}</p>
+          <p className="text-sm text-muted-foreground">الحالة: {selected.status}</p>
+          {selected.resolution_note && (
+            <p className="text-sm">ملاحظة المعالجة: {selected.resolution_note}</p>
           )}
-          <button
-            onClick={() => setSelected(null)}
-            className="mr-2 rounded-full border px-4 py-2 text-sm"
-          >
+          <button onClick={() => setSelected(null)} className="rounded-full border px-4 py-2 text-sm">
             إغلاق
           </button>
         </section>
