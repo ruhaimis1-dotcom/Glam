@@ -51,8 +51,13 @@ function AuthConfirmPage() {
           <h1 className="mt-2 text-2xl font-bold">التحقق من رابط الاستعادة</h1>
           {error ? (
             <div className="mt-5 space-y-4">
-              <p role="alert" className="text-sm text-red-700">{error}</p>
-              <a href="/reset-password" className="inline-block rounded-2xl bg-[#5A1835] px-5 py-3 font-semibold text-white">
+              <p role="alert" className="text-sm text-red-700">
+                {error}
+              </p>
+              <a
+                href="/reset-password"
+                className="inline-block rounded-2xl bg-[#5A1835] px-5 py-3 font-semibold text-white"
+              >
                 طلب رابط جديد
               </a>
             </div>
