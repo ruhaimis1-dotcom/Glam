@@ -36,19 +36,25 @@ function AdminPage() {
   return (
     <AdminShell>
       <PageHeader title="مؤشرات المنصة" desc="بيانات تشغيلية مباشرة من Glam" />
-      {status === "loading" && <p role="status" className="mb-4">جارٍ تحميل المؤشرات…</p>}
+      {status === "loading" && (
+        <p role="status" className="mb-4">
+          جارٍ تحميل المؤشرات…
+        </p>
+      )}
       {status === "error" && (
         <p role="alert" className="glam-card mb-4 p-4 text-sm text-destructive">
           تعذر تحميل مؤشرات الإدارة. تحققي من صلاحية Platform Admin.
         </p>
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {([
-          ["الجهات المسجلة", stats?.organizations ?? "—", Building2],
-          ["الحجوزات", stats?.bookings ?? "—", CalendarCheck],
-          ["النزاعات المفتوحة", stats?.open_disputes ?? "—", AlertTriangle],
-          ["الحسابات", stats?.accounts ?? "—", Users],
-        ] as const).map(([label, metric, Icon]) => (
+        {(
+          [
+            ["الجهات المسجلة", stats?.organizations ?? "—", Building2],
+            ["الحجوزات", stats?.bookings ?? "—", CalendarCheck],
+            ["النزاعات المفتوحة", stats?.open_disputes ?? "—", AlertTriangle],
+            ["الحسابات", stats?.accounts ?? "—", Users],
+          ] as const
+        ).map(([label, metric, Icon]) => (
           <div className="glam-card p-4" key={label}>
             <Icon className="size-5 text-primary" />
             <p className="mt-4 text-sm text-muted-foreground">{label}</p>
@@ -60,7 +66,8 @@ function AdminPage() {
       <div className="glam-card mt-5 flex items-start gap-3 p-4 text-sm text-muted-foreground">
         <TrendingUp className="mt-0.5 size-4 shrink-0 text-primary" />
         <p>
-          الإيراد غير معروض في MVP لأن الدفع غير مفعّل كمسار إنتاجي حتى الآن، لذلك لا نعرض رقمًا تقديريًا.
+          الإيراد غير معروض في MVP لأن الدفع غير مفعّل كمسار إنتاجي حتى الآن، لذلك لا نعرض رقمًا
+          تقديريًا.
         </p>
       </div>
 
