@@ -58,7 +58,11 @@ function AdminSalonsPage() {
   return (
     <AdminShell>
       <PageHeader title="الصالونات والاعتماد" desc="الجهات الفعلية المسجلة في Glam" />
-      {message && <p role="status" className="glam-card mb-4 p-4 text-sm">{message}</p>}
+      {message && (
+        <p role="status" className="glam-card mb-4 p-4 text-sm">
+          {message}
+        </p>
+      )}
       {status === "loading" && <p role="status">جارٍ تحميل الجهات…</p>}
       {status === "error" && (
         <div className="glam-card space-y-3 p-5">
@@ -69,7 +73,9 @@ function AdminSalonsPage() {
         </div>
       )}
       {status === "ready" && !rows.length && (
-        <div className="glam-card p-5 text-sm text-muted-foreground">لا توجد جهات مسجلة حاليًا.</div>
+        <div className="glam-card p-5 text-sm text-muted-foreground">
+          لا توجد جهات مسجلة حاليًا.
+        </div>
       )}
       <div className="grid gap-3">
         {rows.map((row) => (
@@ -79,7 +85,8 @@ function AdminSalonsPage() {
               <div className="min-w-0 flex-1">
                 <p className="font-bold">{row.name}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {row.page_title || "لا توجد صفحة عامة"}{row.address ? ` · ${row.address}` : ""}
+                  {row.page_title || "لا توجد صفحة عامة"}
+                  {row.address ? ` · ${row.address}` : ""}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2 text-xs">
                   <span className="rounded-full border px-2.5 py-1">الحالة: {row.status}</span>
