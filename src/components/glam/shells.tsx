@@ -1,5 +1,5 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Home,
@@ -244,11 +244,34 @@ export function BusinessShell({ children }: { children: ReactNode }) {
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const [access, setAccess] = useState<"checking" | "allowed" | "denied">("checking");
+
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email !== "saud@hirely.sa") navigate({ to: "/bookings", replace: true });
+    let active = true;
+    void supabase.rpc("glam_admin_overview").then(({ error }) => {
+      if (!active) return;
+      if (error) {
+        setAccess("denied");
+        navigate({ to: "/bookings", replace: true });
+        return;
+      }
+      setAccess("allowed");
     });
+    return () => {
+      active = false;
+    };
   }, [navigate]);
+
+  if (access !== "allowed") {
+    return (
+      <main dir="rtl" className="mx-auto max-w-xl p-8">
+        <p role="status">
+          {access === "checking" ? "جارٍ التحقق من صلاحية إدارة المنصة…" : "لا توجد صلاحية لإدارة المنصة."}
+        </p>
+      </main>
+    );
+  }
+
   return (
     <SidebarShell
       nav={ADMIN_NAV}
