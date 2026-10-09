@@ -58,8 +58,8 @@ function StaffPage() {
   return (
     <BusinessShell>
       <PageHeader
-        title="الموظفات"
-        desc="إدارة الأخصائيات المرتبطات فعليًا بحسابات الفريق"
+        title="فريق العمل"
+        desc="الأخصائيات والدعوات المرتبطة بحسابات Glam الفعلية"
         action={
           <button
             onClick={() => setAdding(true)}
@@ -126,8 +126,9 @@ function StaffPage() {
             </article>
           ))}
           {!staff.length && status !== "error" && (
-            <div className="glam-card p-6 text-sm text-muted-foreground">
-              لا توجد أخصائيات مقبولات في الفريق بعد.
+            <div className="glam-card space-y-2 p-6 text-sm text-muted-foreground">
+              <p className="font-semibold text-foreground">لا توجد أخصائيات مفعّلات بعد.</p>
+              <p>أرسلي دعوة من الزر أعلاه. تظهر الأخصائية هنا بعد قبول الدعوة وتسجيل الدخول بالحساب نفسه.</p>
             </div>
           )}
         </div>
@@ -136,8 +137,9 @@ function StaffPage() {
       <section className="glam-card mt-5 flex gap-3 p-4 text-sm text-muted-foreground">
         <MailPlus className="mt-0.5 size-4 shrink-0 text-primary" />
         <p>
-          ربط الأخصائية بالخدمات وأوقات الدوام يستخدم بنية قلام الحالية بعد قبول الدعوة، ولا يتم
-          إنشاء موظفة محلية منفصلة عن حساب الفريق.
+          هذه الصفحة تغطي عضوية الفريق والدعوات فقط في الـMVP الحالي. ربط الخدمات والجداول يعتمد
+          على بنية قلام الحالية بعد قبول الدعوة. الحضور والانصراف والغياب والعلاوات ليست مفعّلة بعد،
+          لذلك لا يتم عرض عناصر غير تشغيلية على أنها جاهزة.
         </p>
       </section>
     </BusinessShell>
