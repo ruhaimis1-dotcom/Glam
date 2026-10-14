@@ -1,4 +1,4 @@
-name: GLAM R01 isolated validation
+name: GLAM W03 recovery and booking-date validation
 on:
   push:
     branches: [agent-os/glam-r01-validation-2026-10-14]
@@ -24,270 +24,98 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify base, disable deployment, apply exact audited bundle
+      - name: Prepare exact combined unpublished source
         id: prepare
-        shell: bash
         run: |
           set -euo pipefail
-          test "${GITHUB_REF}" = 'refs/heads/agent-os/glam-r01-validation-2026-10-14'
+          test "$GITHUB_REF" = 'refs/heads/agent-os/glam-r01-validation-2026-10-14'
           node -e 'if(JSON.parse(require("fs").readFileSync("vercel.json")).git.deploymentEnabled!==false)throw Error("STOP: deployment is not disabled")'
-          git diff --exit-code 7f170d211d7ef95556df343a4dd462b2b6e2b0db -- src tests scripts supabase package.json package-lock.json
-          python3 - <<'PY'
-          import base64,gzip,hashlib,pathlib,subprocess,tempfile
-          data=''.join(pathlib.Path('validation/repair.part'+str(i)).read_text().strip() for i in (1,2,3))
-          patch=gzip.decompress(base64.b64decode(data,validate=True))
-          assert len(patch)==50923
-          assert hashlib.sha256(patch).hexdigest()=='45f12b58b990589bda5433bbbe8c06eef4884dfb4d49c299b46ef54cae0e1851'
-          p=pathlib.Path(tempfile.gettempdir())/'glam-r01-reviewed.patch'
-          p.write_bytes(patch)
-          subprocess.run(['git','apply','--check',str(p)],check=True)
-          subprocess.run(['git','apply',str(p)],check=True)
-          print('AUDITED_BUNDLE_APPLIED_TO_DISPOSABLE_RUNNER_ONLY')
-          PY
-      - name: Apply five strict TypeScript fixes and format-neutral guards
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          def replace_exact(p, old, new):
-              path=Path(p); text=path.read_text(encoding='utf-8')
-              assert text.count(old)==1, 'Unexpected refinement baseline: '+p
-              path.write_text(text.replace(old,new),encoding='utf-8')
-
-          replace_exact('src/lib/admin-access-state.ts',
-           'export type AdminReadError = { code?: string; status?: number; message?: string };',
-           'export type AdminReadError = { code?: string | undefined; status?: number | undefined; message?: string | undefined };')
-          for key in ('organizations','bookings','open_disputes','accounts'):
-              replace_exact('src/lib/admin-access-state.ts','value.'+key+' as number','value["'+key+'"] as number')
-          replace_exact('tests/repair-r01/sql-preparation.test.mjs',
-           r"/args\.length!==2/", r"/args\.length\s*!==\s*2/")
-          replace_exact('tests/repair-r01/sql-preparation.test.mjs',
-           r"/args\[0\]!=='--pg-bin'/", r"/args\[0\]\s*!==\s*[\"']--pg-bin[\"']/")
-          print('R01_EXACT_TYPE_AND_FORMAT_NEUTRAL_TEST_CORRECTIONS_APPLIED')
-          PY
-      - name: Install exact locked dependencies (no cache or artifacts)
+          python3 validation/prepare-w03.py
+      - name: Install locked dependencies without artifacts or cache
         id: install
         run: npm ci --no-audit --no-fund
-      - name: Enforce and prove loopback-only Node application traffic
+      - name: Prove application network restrictions
         id: network
-        if: steps.prepare.outcome == 'success'
-        shell: bash
-        run: |
-          cat > "$RUNNER_TEMP/glam-r01-network.cjs" <<'JS'
-          const net = require('node:net');
-          const original = net.Socket.prototype.connect;
-          function target(args) {
-            if (Array.isArray(args[0])) return target(args[0]);
-            if (args[0] && typeof args[0] === 'object') return args[0];
-            if (typeof args[0] === 'number' || /^\d+$/.test(String(args[0])))
-              return {host: typeof args[1] === 'string' ? args[1] : 'localhost'};
-            if (typeof args[0] === 'string') return {path: args[0]};
-            return {};
-          }
-          net.Socket.prototype.connect = function (...args) {
-            const options = target(args);
-            const host = String(options.host || options.hostname || 'localhost');
-            if (!options.path && !['localhost','127.0.0.1','::1','[::1]'].includes(host))
-              throw Error('R01_BLOCKED_EXTERNAL_CONNECTION: '+host);
-            return original.apply(this,args);
-          };
-          const originalFetch = globalThis.fetch;
-          if (originalFetch) globalThis.fetch = function(input,...args) {
-            const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url);
-            if (!['localhost','127.0.0.1','::1','[::1]'].includes(url.hostname))
-              throw Error('R01_BLOCKED_EXTERNAL_FETCH: '+url.hostname);
-            return originalFetch.call(this,input,...args);
-          };
-          JS
-          export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
-          node --input-type=module - <<'JS'
-          import assert from 'node:assert/strict';
-          import net from 'node:net';
-          assert.throws(()=>fetch('https://r01-network-probe.invalid'),/R01_BLOCKED_EXTERNAL_FETCH/);
-          assert.throws(()=>net.connect({host:'r01-network-probe.invalid',port:443}),/R01_BLOCKED_EXTERNAL_CONNECTION/);
-          console.log('PASS: external fetch and socket blocked before DNS/network request');
-          JS
-      - name: Format only R01 files using locked project Prettier and record exact source
+        run: bash "$RUNNER_TEMP/glam-network-setup.sh"
+      - name: Format touched files and record verified-source manifest
         id: format
-        if: steps.install.outcome == 'success' && steps.network.outcome == 'success'
         run: |
           export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
           node --input-type=module - <<'JS'
           import fs from 'node:fs';
           import crypto from 'node:crypto';
-          import { gzipSync } from 'node:zlib';
+          import {execFileSync} from 'node:child_process';
+          import {gzipSync} from 'node:zlib';
           import * as prettier from 'prettier';
-          const files = ["docs/checkpoints/GLAM_REPAIR_R01_2026-10-14.md", "docs/sql/repair/20261014_admin_execute_chain_PREPARED.sql", "scripts/test-glam-admin-r01-postgres.mjs", "src/components/glam/admin-access.tsx", "src/components/glam/shells.tsx", "src/lib/admin-access-state.ts", "src/lib/admin-context.ts", "src/routes/admin.tsx", "src/routes/beauty-passport.tsx", "src/routes/business.clients.tsx", "tests/admin-repair-static.test.mjs", "tests/repair-r01/admin-access-state.test.mjs", "tests/repair-r01/admin-execute-chain.sql", "tests/repair-r01/route-wiring.test.mjs", "tests/repair-r01/sql-preparation.test.mjs", "tests/repair-r01.test.mjs"];
-          const changed = {};
-          const manifest = {};
-          for(const path of files) {
-            const original=fs.readFileSync(path,'utf8');
-            let result=original;
-            if(/\.(?:mjs|ts|tsx)$/.test(path)) {
-              result=await prettier.format(original,{...(await prettier.resolveConfig(path)),filepath:path});
-              fs.writeFileSync(path,result);
+          const base='7f170d211d7ef95556df343a4dd462b2b6e2b0db';
+          const files=[...new Set([
+            ...execFileSync('git',['diff','--name-only',base,'--','src','tests','scripts','docs'],{encoding:'utf8'}).trim().split('\n'),
+            ...execFileSync('git',['ls-files','--others','--exclude-standard','src','tests','scripts','docs'],{encoding:'utf8'}).trim().split('\n'),
+          ].filter(Boolean))].sort();
+          const manifest={}; const newSources={};
+          for(const path of files){
+            let source=fs.readFileSync(path,'utf8');
+            if(/\.(mjs|ts|tsx)$/.test(path)){
+              source=await prettier.format(source,{...(await prettier.resolveConfig(path)),filepath:path});
+              fs.writeFileSync(path,source);
             }
-            if(result!==original || path==='src/lib/admin-access-state.ts' || path==='tests/repair-r01/sql-preparation.test.mjs') changed[path]=result;
-            manifest[path]=crypto.createHash('sha256').update(result).digest('hex');
+            manifest[path]=crypto.createHash('sha256').update(source).digest('hex');
+            if(/recovery|post-login|supabase\.ts|auth\.confirm|reset-password|login\.tsx|salon\.\$salonId\.book/.test(path))newSources[path]=source;
           }
-          console.log('FORMATTER_VERSION: '+prettier.version);
-          console.log('R01_VALIDATED_SOURCE_MANIFEST: '+JSON.stringify(manifest));
-          const payload=Buffer.from(JSON.stringify(changed));
-          console.log('R01_FORMATTED_SOURCE_SHA256: '+crypto.createHash('sha256').update(payload).digest('hex'));
-          const encoded=gzipSync(payload).toString('base64');
-          for(let i=0;i<encoded.length;i+=3000)console.log('R01_FORMATTED_SOURCE_CHUNK_'+(i/3000)+': '+encoded.slice(i,i+3000));
+          console.log('W03_SOURCE_MANIFEST: '+JSON.stringify(manifest));
+          console.log('PRETTIER_VERSION: '+prettier.version);
+          const raw=Buffer.from(JSON.stringify(newSources));
+          console.log('W03_SOURCE_PAYLOAD_SHA256: '+crypto.createHash('sha256').update(raw).digest('hex'));
+          const payload=gzipSync(raw).toString('base64');
+          for(let i=0;i<payload.length;i+=2500)console.log('W03_SOURCE_CHUNK_'+(i/2500)+': '+payload.slice(i,i+2500));
           JS
-      - name: Full regression and R01 unit tests
-        if: always() && steps.install.outcome == 'success' && steps.network.outcome == 'success' && steps.format.outcome == 'success'
+      - name: All regression and recovery unit tests
+        if: always() && steps.format.outcome == 'success'
         run: |
           export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
           npm test
-      - name: Full production build with synthetic loopback configuration
+      - name: Full application build
         id: build
-        if: always() && steps.install.outcome == 'success' && steps.network.outcome == 'success' && steps.format.outcome == 'success'
+        if: always() && steps.format.outcome == 'success'
         run: |
           export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
           npm run build
       - name: Full TypeScript check
-        if: always() && steps.install.outcome == 'success' && steps.network.outcome == 'success' && steps.format.outcome == 'success' && steps.build.outcome == 'success'
+        if: always() && steps.build.outcome == 'success'
         run: |
           export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
           npm run typecheck
       - name: Full lint
-        if: always() && steps.install.outcome == 'success' && steps.network.outcome == 'success' && steps.format.outcome == 'success'
+        if: always() && steps.format.outcome == 'success'
         run: |
           export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
           npm run lint
-      - name: Real PostgreSQL isolated-cluster rehearsal
-        if: always() && steps.format.outcome == 'success' && steps.network.outcome == 'success'
-        shell: bash
+      - name: Real isolated PostgreSQL admin regression
+        if: always() && steps.format.outcome == 'success'
         run: |
           set -euo pipefail
           pg_bin=''
           for candidate in /usr/lib/postgresql/*/bin; do
             if test -x "$candidate/initdb" && test -x "$candidate/pg_ctl" && test -x "$candidate/psql"; then pg_bin="$candidate"; fi
           done
-          test -n "$pg_bin" || { echo 'BLOCKED: no preinstalled PostgreSQL; no package installation attempted'; exit 1; }
-          "$pg_bin/psql" --version
+          test -n "$pg_bin" || { echo 'BLOCKED: no preinstalled PostgreSQL'; exit 1; }
           export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
           node scripts/test-glam-admin-r01-postgres.mjs --pg-bin "$pg_bin"
-      - name: Real browser nested routes with synthetic local HTTP only
-        if: always() && steps.build.outcome == 'success' && steps.network.outcome == 'success' && steps.format.outcome == 'success'
+      - name: R02 admin and navigation real-browser regression
+        if: always() && steps.build.outcome == 'success'
+        timeout-minutes: 3
+        run: |
+          export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
+          node tests/e2e/r02-validation-browser.mjs
+      - name: W03 recovery, identity isolation, role routes and Riyadh date in real browser
+        if: always() && steps.build.outcome == 'success'
         timeout-minutes: 4
         run: |
           export NODE_OPTIONS="--require $RUNNER_TEMP/glam-r01-network.cjs"
-          node --input-type=module - <<'JS'
-          // Real browser + actual app/router; synthetic HTTP responses. No live Auth/database.
-          import { chromium, expect } from '@playwright/test';
-          import fs from 'node:fs';
-          import assert from 'node:assert/strict';
-          import { spawn } from 'node:child_process';
-          import { setTimeout as delay } from 'node:timers/promises';
-
-          const app = 'http://127.0.0.1:43177';
-          const api = 'http://127.0.0.1:54321';
-          const admin = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-          const org = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
-          const contactId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
-          const user = { id: admin, aud: 'authenticated', role: 'authenticated', email: 'r01@glam.invalid', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, identities: [], created_at: '2026-10-14T00:00:00Z' };
-          const encode = (x) => Buffer.from(JSON.stringify(x)).toString('base64url');
-          const token = encode({alg:'HS256',typ:'JWT'})+'.'+encode({sub:admin,aud:'authenticated',role:'authenticated',exp:4102444800,iat:1791936000})+'.synthetic_test_signature';
-          const session = { access_token: token, refresh_token: 'synthetic_refresh_never_live', token_type:'bearer', expires_at:4102444800, expires_in:999999, user };
-          const contact = { id:contactId, organization_id:org, linked_customer_id:null, display_name:'عميلة اختبار معزول', phone:null, email:'client@glam.invalid', source:'manual' };
-          const executablePath = ['/usr/bin/google-chrome','/usr/bin/google-chrome-stable','/usr/bin/chromium','/usr/bin/chromium-browser'].find((p)=>fs.existsSync(p));
-          if (!executablePath) throw Error('BLOCKED: no installed browser; no download attempted');
-          const processHandle=spawn(process.execPath,['node_modules/vite/bin/vite.js','dev','--host','127.0.0.1','--port','43177','--strictPort'],{env:process.env,stdio:['ignore','pipe','pipe']});
-          let diagnostic='';
-          for (const stream of [processHandle.stdout,processHandle.stderr]) stream.on('data',(b)=>{diagnostic=(diagnostic+b.toString()).slice(-4000);});
-          let browser;
-          let passed=0;
-          try {
-            let ready=false;
-            for(let i=0;i<90;i++) {
-              if(processHandle.exitCode!==null)throw Error('Local Vite exited: '+diagnostic);
-              try {const r=await fetch(app+'/login');if(r.ok){ready=true;break;}}catch{}
-              await delay(500);
-            }
-            if(!ready)throw Error('Local Vite did not become ready: '+diagnostic);
-            browser=await chromium.launch({executablePath,headless:true,args:['--disable-background-networking','--disable-component-update']});
-            console.log('BROWSER_VERSION: '+browser.version());
-            for(const [name,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
-              const context=await browser.newContext({viewport,serviceWorkers:'block'});
-              const apiCalls=[];const unknown=[];const errors=[];let deny=false;
-              await context.addInitScript((value)=>localStorage.setItem('sb-127-auth-token',JSON.stringify(value)),session);
-              await context.route('**/*',async(route)=>{
-                const request=route.request();const u=new URL(request.url());
-                if(u.origin===app)return route.continue();
-                if(u.origin!==api)return route.abort('blockedbyclient');
-                apiCalls.push(u.pathname);
-                const reply=(body,status=200)=>route.fulfill({status,contentType:'application/json',headers:{'Access-Control-Allow-Origin':app,'Access-Control-Allow-Headers':'*'},body:JSON.stringify(body)});
-                if(request.method()==='OPTIONS')return reply({});
-                if(u.pathname==='/auth/v1/user')return reply(user);
-                if(u.pathname==='/auth/v1/token')return reply(session);
-                const key=u.pathname.replace('/rest/v1/','');
-                if(key==='rpc/glam_admin_overview')return deny?reply({code:'42501',message:'FORBIDDEN'},403):reply({organizations:1,bookings:0,open_disputes:0,accounts:1});
-                if(key==='rpc/glam_admin_salons')return reply([{id:org,name:'صالون اختبار معزول',status:'active',created_at:'2026-10-14T00:00:00Z',page_title:null,address:null,slug:null,published:false}]);
-                if(key==='rpc/glam_admin_bookings'||key==='rpc/glam_admin_disputes'||key==='rpc/glam_client_timeline'||key==='rpc/glam_my_passport_consents')return reply([]);
-                if(key==='glam_memberships')return reply([{organization_id:org,user_id:admin,role:'owner'}]);
-                if(key==='glam_organizations')return reply([{id:org,name:'صالون اختبار معزول'}]);
-                if(key==='glam_client_contacts')return reply((request.headers()['accept']||'').includes('object')?contact:[contact]);
-                if(key==='glam_beauty_passports')return reply([{customer_id:admin,hair:{},skin:{},nails:{},sensitivities:[],preferences:{},customer_notes:''}]);
-                unknown.push(u.pathname);return reply({code:'R01_UNHANDLED_FIXTURE',message:'not configured'},500);
-              });
-              await context.routeWebSocket(/.*/,ws=>{
-                if(new URL(ws.url()).host===new URL(app).host)ws.connectToServer();else ws.close();
-              });
-              const page=await context.newPage();
-              page.on('pageerror',(e)=>errors.push(e.message));
-              async function check(label,action) {await action();passed++;console.log('PASS BROWSER '+name+': '+label);}
-              await check('admin index renders verified overview',async()=>{
-                await page.goto(app+'/admin');await expect(page.getByRole('heading',{name:'مؤشرات المنصة',exact:true})).toBeVisible();
-              });
-              for(const [path,title,empty] of [
-                ['/admin/salons','الصالونات والاعتماد', 'صالون اختبار معزول'],
-                ['/admin/bookings','الحجوزات','لا توجد حجوزات متاحة للعرض.'],
-                ['/admin/disputes','النزاعات','لا توجد نزاعات مسجلة حاليًا.'],
-              ]) await check(path+' actual nested route',async()=>{
-                await page.getByRole('link',{name:title,exact:true}).first().click();
-                await expect(page).toHaveURL(app+path);
-                await expect(page.getByRole('heading',{name:title,exact:true})).toBeVisible();
-                await expect(page.getByRole('heading',{name:'مؤشرات المنصة',exact:true})).toHaveCount(0);
-                await expect(page.getByText(empty,{exact:true})).toBeVisible();
-              });
-              await check('client list opens actual child details',async()=>{
-                await page.goto(app+'/business/clients');
-                await expect(page.getByRole('heading',{name:'العميلات',exact:true})).toBeVisible();
-                await page.getByRole('link',{name:/عميلة اختبار معزول/}).click();
-                await expect(page).toHaveURL(app+'/business/clients/'+contactId);
-                await expect(page.getByRole('heading',{name:'عميلة اختبار معزول',exact:true})).toBeVisible();
-                await expect(page.getByText('لا يوجد نشاط مسجل حتى الآن.',{exact:true})).toBeVisible();
-              });
-              await check('consent child route renders, parent editor absent',async()=>{
-                await page.goto(app+'/beauty-passport/consents');
-                await expect(page.getByRole('heading',{name:'إدارة المشاركة',exact:true})).toBeVisible();
-                await expect(page.getByText('لا توجد مشاركات نشطة لجواز جمالك.',{exact:true})).toBeVisible();
-                await expect(page.getByRole('button',{name:'حفظ جواز الجمال',exact:true})).toHaveCount(0);
-              });
-              await check('denied admin cannot mount child data',async()=>{
-                deny=true;apiCalls.length=0;
-                await page.goto(app+'/admin/salons');
-                await expect(page.getByText('هذا الحساب غير مخوّل لإدارة المنصة.',{exact:true})).toBeVisible();
-                await expect(page.getByRole('heading',{name:'الصالونات والاعتماد',exact:true})).toHaveCount(0);
-                assert(!apiCalls.includes('/rest/v1/rpc/glam_admin_salons'));
-              });
-              assert.deepEqual(unknown,[], 'unexpected API calls');
-              assert.deepEqual(errors,[], 'uncaught browser exceptions');
-              await context.close();
-            }
-            console.log(JSON.stringify({scope:'real browser, real router, mocked local HTTP; no live authentication, persistence or RLS proof',passed,viewports:2}));
-          } finally {
-            if(browser)await browser.close();
-            processHandle.kill('SIGTERM');
-          }
-          JS
-      - name: Record scope (logs only; no artifact upload)
+          node tests/e2e/recovery-w03.mjs
+      - name: Record limitations
         if: always()
         run: |
-          echo 'SCOPE: exact R01 bundle; public standard runner; synthetic local SQL only.'
-          echo 'NOT TESTED: live hosted Auth/PostgREST, browser DB persistence, production or SCCC. Browser HTTP is synthetic.'
-          echo 'NO MERGE, NO DEPLOY, NO PRODUCTION DATABASE ACCESS, NO CACHES, NO ARTIFACT UPLOAD.'
+          echo 'Synthetic local Auth/HTTP only. No emails delivered or real passwords changed.'
+          echo 'No hosted Supabase, production writes, deploy, merge, SCCC, artifacts or cache.'
+          echo 'Browser tests and SQL tests are separate; NOT an end-to-end hosted persistence test.'
