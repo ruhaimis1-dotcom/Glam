@@ -14,12 +14,14 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [register, setRegister] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [interactive, setInteractive] = useState(false);
   const [notice, setNotice] = useState("");
   const [retryUserId, setRetryUserId] = useState<string | null>(null);
   const alive = useRef(false);
   const lock = useRef(false);
   useEffect(() => {
     alive.current = true;
+    setInteractive(true);
     return () => { alive.current = false; };
   }, []);
 
@@ -40,7 +42,7 @@ function LoginPage() {
   }
 
   async function retryAccess() {
-    if (!retryUserId || lock.current) return;
+    if (!interactive || !retryUserId || lock.current) return;
     lock.current = true; setBusy(true); setError("");
     try { await openAccount(retryUserId); }
     finally { lock.current = false; if (alive.current) setBusy(false); }
@@ -51,7 +53,7 @@ function LoginPage() {
     const normalized = email.trim().toLowerCase();
     if (!normalized || !password)
       return void setError("أدخلي البريد الإلكتروني وكلمة المرور للمتابعة.");
-    if (lock.current) return;
+    if (!interactive || lock.current) return;
     lock.current = true;
     setError(""); setBusy(true); setNotice(""); setRetryUserId(null);
     try {
@@ -96,11 +98,12 @@ function LoginPage() {
             <h1 className="mt-2 text-3xl font-bold">{register ? "إنشاء حساب عميلة" : "تسجيل الدخول"}</h1>
             <p className="mt-2 text-sm text-[#745e70]">ادخلي إلى حسابك لمتابعة حجوزاتك وإدارتها.</p>
           </div>
-          <form onSubmit={submit} className="space-y-4">
+          <form onSubmit={submit} aria-busy={!interactive || busy} className="space-y-4">
+            {!interactive && <p role="status" className="text-sm text-[#745e70]">جارٍ تجهيز تسجيل الدخول…</p>}
             <label className="block text-sm font-medium">
               البريد الإلكتروني
               <input value={email} onChange={(event) => { setEmail(event.target.value); setRetryUserId(null); }}
-                required autoComplete="email" type="email" placeholder="name@example.com" disabled={busy}
+                required autoComplete="email" type="email" placeholder="name@example.com" disabled={!interactive || busy}
                 className="mt-2 w-full rounded-2xl border border-[#eadfda] bg-[#fbf8f5] px-4 py-3 outline-none focus:border-[#8c285d]" />
             </label>
             <label className="block text-sm font-medium">
@@ -109,7 +112,7 @@ function LoginPage() {
                 <LockKeyhole className="absolute right-4 top-3.5 size-4 text-[#9b8795]" />
                 <input value={password} onChange={(event) => setPassword(event.target.value)} required
                   minLength={register ? 8 : undefined} autoComplete={register ? "new-password" : "current-password"}
-                  type="password" disabled={busy}
+                  type="password" disabled={!interactive || busy}
                   className="w-full rounded-2xl border border-[#eadfda] bg-[#fbf8f5] py-3 pl-4 pr-11 outline-none focus:border-[#8c285d]" />
               </div>
             </label>
@@ -118,12 +121,12 @@ function LoginPage() {
             </div>}
             {notice && <p role="status" className="text-sm text-[#5A1835]">{notice}</p>}
             {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-            {retryUserId && <button type="button" onClick={() => void retryAccess()} disabled={busy}
+            {retryUserId && <button type="button" onClick={() => void retryAccess()} disabled={!interactive || busy}
               className="w-full rounded-2xl border border-[#8c285d] px-5 py-3 font-semibold text-[#8c285d]">إعادة محاولة فتح الحساب</button>}
-            <button disabled={busy} type="submit" className="w-full rounded-2xl bg-[#5A1835] px-5 py-3.5 font-semibold text-white hover:bg-[#3D0F26]">
+            <button disabled={!interactive || busy} type="submit" className="w-full rounded-2xl bg-[#5A1835] px-5 py-3.5 font-semibold text-white hover:bg-[#3D0F26]">
               {busy ? "جارٍ المتابعة…" : register ? "إنشاء الحساب" : "دخول"}
             </button>
-            <button type="button" disabled={busy} onClick={() => {
+            <button type="button" disabled={!interactive || busy} onClick={() => {
               setRegister(!register); setError(""); setNotice(""); setPassword(""); setRetryUserId(null);
             }} className="w-full py-2 text-sm font-semibold text-[#8c285d]">
               {register ? "لديك حساب؟ سجّلي الدخول" : "عميلة جديدة؟ أنشئي حسابًا"}
