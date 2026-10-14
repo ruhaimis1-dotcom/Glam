@@ -64,3 +64,42 @@ assert text.count(old) == 1
 text = text.replace(old, '"Access-Control-Allow-Headers": "*", "X-Supabase-Api-Version": "2024-01-01", "Access-Control-Expose-Headers": "X-Supabase-Api-Version"')
 fixture.write_text(text)
 print('PASS: synthetic Auth response uses visible provider API-version header; assertions unchanged')
+
+# Labels wrap <select> options: target their accessible combobox names, not
+# an exact label textContent including all descendant options. Date assertions stay exact.
+fixture = Path('tests/e2e/recovery-w03.mjs')
+text = fixture.read_text()
+for label in ('التصنيف الرئيسي', 'الخدمة', 'الموعد', 'الوقت'):
+    old = f'getByLabel("{label}", {{ exact: true }})'
+    assert text.count(old) >= 1
+    text = text.replace(old, f'getByRole("combobox", {{ name: /^{label}/ }})')
+old = 'let browser, passed = 0, output = "";'
+assert text.count(old) == 1
+text = text.replace(old, 'let browser, diagnosticPage, passed = 0, output = "";')
+old = '  const page = await context.newPage();'
+assert text.count(old) == 1
+text = text.replace(old, old + '\n  diagnosticPage = page;')
+old = 'async function check(name, run) { await run(); passed++; console.log("PASS W03 BROWSER: " + name); }'
+assert text.count(old) == 1
+text = text.replace(old, '''async function check(name, run) {
+  try { await run(); passed++; console.log("PASS W03 BROWSER: " + name); }
+  catch (error) {
+    // Synthetic loopback fixtures only; never print input values/passwords/tokens.
+    if (diagnosticPage && !diagnosticPage.isClosed())
+      console.log("W03_SYNTHETIC_DOM_DIAGNOSTIC: " + (await diagnosticPage.locator("body").innerText()).slice(0, 1800));
+    throw error;
+  }
+}''')
+fixture.write_text(text)
+
+# Explicit operation invalidation, not a DOM-ref read in effect cleanup.
+component = Path('src/components/glam/password-recovery.tsx')
+text = component.read_text()
+old = '    function applyLink(link: RecoveryLink) {'
+assert text.count(old) == 1
+text = text.replace(old, '    function invalidatePending() { generation.current++; }\n\n' + old)
+old = '      generation.current++;\n      window.removeEventListener'
+assert text.count(old) == 1
+text = text.replace(old, '      invalidatePending();\n      window.removeEventListener')
+component.write_text(text)
+print('PASS: accessible selector correction and explicit async invalidation; test expectations unchanged')
