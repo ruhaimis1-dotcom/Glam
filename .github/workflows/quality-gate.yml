@@ -1,53 +1,111 @@
-name: GLAM Quality Gate
-
+name: GLAM R01 isolated validation
 on:
-  pull_request:
   push:
-    branches: [main]
-
+    branches: [agent-os/glam-r01-validation-2026-10-14]
+permissions:
+  contents: read
+concurrency:
+  group: glam-r01-isolated-validation
+  cancel-in-progress: true
 jobs:
-  quality:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  validate:
+    if: github.repository == 'ruhaimis1-dotcom/Glam' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_glam_r01_synthetic_only
+      DO_NOT_TRACK: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
-      - name: Install
-        run: npm ci
-      - name: Production dependency security audit
-        run: npm audit --omit=dev --audit-level=high
-      - name: Generate routes and production build
+          node-version: '22'
+      - name: Verify base, disable deployment, apply exact audited bundle
+        id: prepare
+        shell: bash
         run: |
-          set +e
-          npm run build 2>&1 | tee build.log
-          code=${PIPESTATUS[0]}
-          if [ "$code" -ne 0 ] && grep -q "Crawling result not available" build.log; then
-            echo "TanStack route crawler returned its known transient empty result; retrying build once."
-            npm run build 2>&1 | tee build-retry.log
-            code=${PIPESTATUS[0]}
-            cat build-retry.log >> build.log
-          fi
-          exit "$code"
-      - name: Upload build diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-diagnostics
-          path: build.log
-      - name: Typecheck generated route tree
+          set -euo pipefail
+          test "${GITHUB_REF}" = 'refs/heads/agent-os/glam-r01-validation-2026-10-14'
+          node -e 'if(JSON.parse(require("fs").readFileSync("vercel.json")).git.deploymentEnabled!==false)throw Error("STOP: deployment is not disabled")'
+          git diff --exit-code 7f170d211d7ef95556df343a4dd462b2b6e2b0db -- src tests scripts supabase package.json package-lock.json
+          python3 - <<'PY'
+          import base64,gzip,hashlib,pathlib,subprocess,tempfile
+          data=''.join(pathlib.Path('validation/repair.part'+str(i)).read_text().strip() for i in (1,2,3))
+          patch=gzip.decompress(base64.b64decode(data,validate=True))
+          assert len(patch)==50923
+          assert hashlib.sha256(patch).hexdigest()=='45f12b58b990589bda5433bbbe8c06eef4884dfb4d49c299b46ef54cae0e1851'
+          p=pathlib.Path(tempfile.gettempdir())/'glam-r01-reviewed.patch'
+          p.write_bytes(patch)
+          subprocess.run(['git','apply','--check',str(p)],check=True)
+          subprocess.run(['git','apply',str(p)],check=True)
+          print('AUDITED_BUNDLE_APPLIED_TO_DISPOSABLE_RUNNER_ONLY')
+          PY
+      - name: Install exact locked dependencies (no cache or artifacts)
+        id: install
+        run: npm ci --no-audit --no-fund
+      - name: Enforce loopback-only Node application traffic
+        if: steps.prepare.outcome == 'success'
+        shell: bash
         run: |
-          npx tsc --noEmit 2>&1 | tee typecheck.log
-          test ${PIPESTATUS[0]} -eq 0
-      - name: Upload typecheck diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: typecheck-diagnostics
-          path: typecheck.log
-      - name: Regression tests
+          cat > "$RUNNER_TEMP/glam-r01-network.cjs" <<'JS'
+          const net = require('node:net');
+          const original = net.Socket.prototype.connect;
+          function target(args) {
+            if (Array.isArray(args[0])) return target(args[0]);
+            if (args[0] && typeof args[0] === 'object') return args[0];
+            if (typeof args[0] === 'number' || /^\d+$/.test(String(args[0])))
+              return {host: typeof args[1] === 'string' ? args[1] : 'localhost'};
+            if (typeof args[0] === 'string') return {path: args[0]};
+            return {};
+          }
+          net.Socket.prototype.connect = function (...args) {
+            const options = target(args);
+            const host = String(options.host || options.hostname || 'localhost');
+            if (!options.path && !['localhost','127.0.0.1','::1','[::1]'].includes(host))
+              throw Error('R01_BLOCKED_EXTERNAL_CONNECTION: '+host);
+            return original.apply(this,args);
+          };
+          const originalFetch = globalThis.fetch;
+          if (originalFetch) globalThis.fetch = function(input,...args) {
+            const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url);
+            if (!['localhost','127.0.0.1','::1','[::1]'].includes(url.hostname))
+              throw Error('R01_BLOCKED_EXTERNAL_FETCH: '+url.hostname);
+            return originalFetch.call(this,input,...args);
+          };
+          JS
+          echo "NODE_OPTIONS=--require $RUNNER_TEMP/glam-r01-network.cjs" >> "$GITHUB_ENV"
+      - name: Full regression and R01 unit tests
+        if: always() && steps.install.outcome == 'success'
         run: npm test
-      - name: Lint
+      - name: Full production build with synthetic loopback configuration
+        id: build
+        if: always() && steps.install.outcome == 'success'
+        run: npm run build
+      - name: Full TypeScript check
+        if: always() && steps.install.outcome == 'success' && steps.build.outcome == 'success'
+        run: npm run typecheck
+      - name: Full lint
+        if: always() && steps.install.outcome == 'success'
         run: npm run lint
+      - name: Real PostgreSQL isolated-cluster rehearsal
+        if: always() && steps.prepare.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg_bin=''
+          for candidate in /usr/lib/postgresql/*/bin; do
+            if test -x "$candidate/initdb" && test -x "$candidate/pg_ctl" && test -x "$candidate/psql"; then pg_bin="$candidate"; fi
+          done
+          test -n "$pg_bin" || { echo 'BLOCKED: no preinstalled PostgreSQL; no package installation attempted'; exit 1; }
+          "$pg_bin/psql" --version
+          node scripts/test-glam-admin-r01-postgres.mjs --pg-bin "$pg_bin"
+      - name: Record scope (logs only; no artifact upload)
+        if: always()
+        run: |
+          echo 'SCOPE: exact R01 bundle; public standard runner; synthetic local SQL only.'
+          echo 'NOT TESTED: real browser, hosted Auth/PostgREST, production or SCCC.'
+          echo 'NO MERGE, NO DEPLOY, NO PRODUCTION DATABASE ACCESS, NO CACHES, NO ARTIFACT UPLOAD.'
