@@ -54,3 +54,13 @@ js = browser.split("node --input-type=module - <<'JS'\n", 1)[1]
 assert js.rstrip().endswith('\nJS')
 Path('tests/e2e/r02-validation-browser.mjs').write_text(js.rstrip()[:-3] + '\n')
 print('PASS: exact R02 source plus nine W03 inputs and three date replacements; no hosted environment touched')
+
+# Auth-js reads modern error `code` only when the API version header is visible.
+# Mirror the provider HTTP contract; keep the replay rejection assertion unchanged.
+fixture = Path('tests/e2e/recovery-w03.mjs')
+text = fixture.read_text()
+old = '"Access-Control-Allow-Headers": "*"'
+assert text.count(old) == 1
+text = text.replace(old, '"Access-Control-Allow-Headers": "*", "X-Supabase-Api-Version": "2024-01-01", "Access-Control-Expose-Headers": "X-Supabase-Api-Version"')
+fixture.write_text(text)
+print('PASS: synthetic Auth response uses visible provider API-version header; assertions unchanged')
