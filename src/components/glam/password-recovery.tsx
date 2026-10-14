@@ -29,38 +29,67 @@ export function PasswordRecovery({ confirmLink = false }: { confirmLink?: boolea
   const account = useRef<string | null>(null);
   const alive = useRef(false);
   const lock = useRef(false);
+  const generation = useRef(0);
   const actions = useRef<ReturnType<typeof createRecoveryActions> | null>(null);
 
   useEffect(() => {
     alive.current = true;
     let active = true;
     actions.current ??= createRecoveryActions(getRecoveryClient().auth);
-    if (!initial.current) {
-      initial.current = parseRecoveryLink(window.location.search, window.location.hash);
-      if (initial.current.kind === "confirm") token.current = initial.current.tokenHash;
-      // Remove secrets and untrusted redirects from history; no tokens in UI, storage or logs here.
+
+    function applyLink(link: RecoveryLink) {
+      const revision = ++generation.current;
+      token.current = link.kind === "confirm" ? link.tokenHash : null;
+      account.current = null;
+      setPassword("");
+      setConfirmation("");
+      setError("");
+      setMessage("");
+      // replaceState does not emit hashchange; retain the parsed link for StrictMode.
       if (window.location.search || window.location.hash)
         window.history.replaceState(window.history.state, "", window.location.pathname);
+      if (link.kind === "confirm") {
+        setPhase("confirm");
+      } else if (link.kind === "error" || confirmLink) {
+        setError(recoveryMessage(link.kind === "error" ? link.code : "invalid_link"));
+        setPhase("request");
+      } else {
+        setPhase("loading");
+        void actions.current!.resume().then((result) => {
+          if (!active || revision !== generation.current) return;
+          if (result.kind === "ready") {
+            account.current = result.userId;
+            setPhase("ready");
+          } else {
+            if (result.kind === "error" && result.code !== "busy")
+              setError(recoveryMessage(result.code));
+            setPhase("request");
+          }
+        });
+      }
     }
-    const link = initial.current;
-    if (link.kind === "confirm") {
-      setPhase("confirm");
-    } else if (link.kind === "error" || confirmLink) {
-      setError(recoveryMessage(link.kind === "error" ? link.code : "invalid_link"));
-      setPhase("request");
-    } else {
-      void actions.current.resume().then((result) => {
-        if (!active) return;
-        if (result.kind === "ready") {
-          account.current = result.userId;
-          setPhase("ready");
-        } else {
-          if (result.kind === "error" && result.code !== "busy") setError(recoveryMessage(result.code));
-          setPhase("request");
-        }
-      });
+
+    function incomingLink() {
+      // A second email link can arrive as same-document fragment navigation.
+      // It must invalidate the old form/result, not reuse a previously parsed link.
+      const path = window.location.pathname.replace(/\/+$/, "");
+      if (path !== "/auth/confirm" && path !== "/reset-password") return;
+      if (!window.location.search && !window.location.hash) return;
+      initial.current = parseRecoveryLink(window.location.search, window.location.hash);
+      applyLink(initial.current);
     }
-    return () => { active = false; alive.current = false; };
+
+    initial.current ??= parseRecoveryLink(window.location.search, window.location.hash);
+    window.addEventListener("hashchange", incomingLink);
+    window.addEventListener("popstate", incomingLink);
+    applyLink(initial.current);
+    return () => {
+      active = false;
+      alive.current = false;
+      generation.current++;
+      window.removeEventListener("hashchange", incomingLink);
+      window.removeEventListener("popstate", incomingLink);
+    };
   }, [confirmLink]);
 
   useEffect(() => {
@@ -72,14 +101,15 @@ export function PasswordRecovery({ confirmLink = false }: { confirmLink?: boolea
   async function run(action: () => Promise<RecoveryResult>, complete: (result: RecoveryResult) => void) {
     if (lock.current) return;
     lock.current = true;
+    const revision = generation.current;
     setBusy(true);
     setError("");
     setMessage("");
     try {
       const result = await action();
-      if (alive.current) complete(result);
+      if (alive.current && revision === generation.current) complete(result);
     } catch {
-      if (alive.current) setError(recoveryMessage("unavailable"));
+      if (alive.current && revision === generation.current) setError(recoveryMessage("unavailable"));
     } finally {
       lock.current = false;
       if (alive.current) setBusy(false);
